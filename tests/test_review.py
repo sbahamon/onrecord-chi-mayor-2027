@@ -75,6 +75,28 @@ def test_auto_merge_off_when_enabled_but_low_confidence_or_flagged():
     assert review.should_auto_merge([{"verdict": "flagged", "confidence": 0.99}], cfg) is False
 
 
+def test_review_evidence_reingests_source_and_verifies_each_statement():
+    # Transcripts aren't stored; the reviewer re-ingests the source to verify.
+    evidence = {
+        "id": "e1", "url": "https://x/y", "outlet": "Outlet",
+        "media_type": "article", "title": "T", "published_date": "2026-07-06",
+        "statements": [STMT, dict(STMT, quote="A quote never spoken.")],
+    }
+    calls = {}
+
+    def fake_ingest(source):
+        calls["source"] = source
+        return {"transcript": TRANSCRIPT}
+
+    verdicts = review.review_evidence(
+        evidence, llm=good_model(), model="m", ingest_fn=fake_ingest
+    )
+    assert calls["source"]["url"] == "https://x/y"
+    assert calls["source"]["media_type"] == "article"
+    assert verdicts[0]["verdict"] == "confirmed"       # quote present
+    assert verdicts[1]["quote_verified"] is False       # fabricated quote caught
+
+
 def test_review_comment_lists_each_verdict():
     verdicts = [
         {"candidate": "example-candidate-a", "topic": "zoning-reform",

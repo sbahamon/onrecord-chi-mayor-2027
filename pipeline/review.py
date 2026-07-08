@@ -52,6 +52,27 @@ def verify_statement(statement: dict, transcript: str, *, llm, model: str) -> di
     }
 
 
+def review_evidence(evidence: dict, *, llm, model: str, ingest_fn) -> list[dict]:
+    """Re-ingest the evidence's source and verify each statement against it.
+
+    Transcripts aren't stored in the repo (copyright), so the reviewer rebuilds
+    the transcript from the original source at review time. ``ingest_fn`` is the
+    ingestion callable (injected for tests).
+    """
+    source = {
+        "url": evidence["url"],
+        "outlet": evidence["outlet"],
+        "media_type": evidence["media_type"],
+        "title": evidence["title"],
+        "published_date": evidence["published_date"],
+    }
+    transcript = ingest_fn(source).get("transcript", "")
+    return [
+        verify_statement(stmt, transcript, llm=llm, model=model)
+        for stmt in evidence["statements"]
+    ]
+
+
 def decide_label(verdicts: list[dict]) -> str:
     if verdicts and all(v["verdict"] == "confirmed" for v in verdicts):
         return "ai-verified"

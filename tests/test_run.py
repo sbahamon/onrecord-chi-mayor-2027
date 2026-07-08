@@ -63,9 +63,10 @@ def test_process_source_writes_evidence_stance_and_other(tmp_path):
     ev = json.loads(result.evidence_path.read_text())
     assert len(ev["statements"]) == 1  # only the housing statement
 
-    # Transcript persisted and referenced so the reviewer can re-check quotes.
-    assert result.transcript_path.exists()
-    assert ev["transcript_ref"] == "data/transcripts/" + ev["id"] + ".md"
+    # Transcripts are NOT stored (copyright); the reviewer re-ingests instead.
+    assert result.transcript_path is None
+    assert ev["transcript_ref"] is None
+    assert not (tmp_path / "transcripts").exists()
 
     assert len(result.stance_paths) == 1
     assert result.stance_paths[0].exists()
@@ -76,13 +77,6 @@ def test_process_source_writes_evidence_stance_and_other(tmp_path):
 
     assert "Example Chicago News" in result.pr_body
     assert result.housing_count == 1
-
-
-def test_transcript_path_for_is_derived_from_data_dir_not_ref_prefix(tmp_path):
-    # Robust regardless of the data dir's name (the review CLI relies on this).
-    ev = {"id": "2026-05-29-x", "transcript_ref": "data/transcripts/2026-05-29-x.md"}
-    path = run.transcript_path_for(tmp_path, ev)
-    assert path == tmp_path / "transcripts" / "2026-05-29-x.md"
 
 
 def test_process_source_with_no_housing_writes_no_evidence(tmp_path):

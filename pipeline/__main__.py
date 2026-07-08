@@ -126,10 +126,10 @@ def cmd_review(args) -> int:
     verdicts = []
     for ev_path in args.evidence:
         evidence = json.loads(Path(ev_path).read_text())
-        tpath = run.transcript_path_for(data_dir, evidence)
-        transcript = tpath.read_text() if tpath.exists() else ""
-        for stmt in evidence["statements"]:
-            verdicts.append(review.verify_statement(stmt, transcript, llm=llm, model=model))
+        # Re-ingest the source to rebuild the transcript (not stored in-repo).
+        verdicts.extend(review.review_evidence(
+            evidence, llm=llm, model=model, ingest_fn=ingest_mod.ingest
+        ))
 
     comment = review.render_review_comment(verdicts)
     label = review.decide_label(verdicts)

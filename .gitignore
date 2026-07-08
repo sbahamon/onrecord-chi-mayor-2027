@@ -30,3 +30,6 @@ site/.astro/
 # Playwright / screenshots
 .playwright-mcp/
 *.png
+
+# Transcripts are never committed (copyright); reviewer re-ingests to verify.
+data/transcripts/

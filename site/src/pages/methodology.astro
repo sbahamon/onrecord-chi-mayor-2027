@@ -17,7 +17,8 @@ const base = import.meta.env.BASE_URL;
       <li><strong>Discovery.</strong> On a schedule, the system scans news feeds,
         candidate websites, and outlet pages for new appearances.</li>
       <li><strong>Ingestion.</strong> Articles are read as text; videos use their
-        captions; audio is transcribed. Original media files are not stored.</li>
+        captions; audio is transcribed. We store only the extracted quotes and a
+        link to the source — not full transcripts or media files.</li>
       <li><strong>Extraction.</strong> An AI model reads the transcript and drafts
         each housing position with the exact supporting quote.</li>
       <li><strong>Review.</strong> A second, independent AI model checks that each

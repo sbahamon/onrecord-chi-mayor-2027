@@ -29,28 +29,6 @@ class ProcessResult:
     other_count: int = 0
 
 
-def transcript_path_for(data_dir, evidence: dict) -> Path:
-    """Where an evidence record's transcript lives, derived from the data dir.
-
-    Robust to the data dir's name — the transcript is always
-    ``<data_dir>/transcripts/<id>.md`` regardless of the (repo-relative)
-    ``transcript_ref`` string stored in the record.
-    """
-    return Path(data_dir) / "transcripts" / f"{evidence['id']}.md"
-
-
-def _write_transcript(ingest_doc: dict, data_dir) -> Path:
-    path = Path(data_dir) / "transcripts" / f"{ingest_doc['id']}.md"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    header = (
-        f"# {ingest_doc['title']}\n\n"
-        f"Source: {ingest_doc['url']}\n"
-        f"Outlet: {ingest_doc['outlet']}  ·  {ingest_doc['published_date']}\n\n---\n\n"
-    )
-    path.write_text(header + ingest_doc["transcript"] + "\n")
-    return path
-
-
 def _write_other(ingest_doc: dict, other_statements: list[dict], data_dir) -> Path:
     path = Path(data_dir) / "positions" / "other" / f"{ingest_doc['id']}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -93,10 +71,9 @@ def process_source(source: dict, *, data_dir, llm, extractor_model: str, today: 
         )
         return result
 
-    # Persist the transcript so the reviewer can re-verify quotes against it.
-    # transcript_ref is the canonical repo-relative path the site/reviewer expect.
-    result.transcript_path = _write_transcript(ingest_doc, data_dir)
-    ingest_doc["transcript_ref"] = f"data/transcripts/{ingest_doc['id']}.md"
+    # Transcripts are not stored (copyright); the reviewer re-ingests the source
+    # to verify quotes. Only the extracted quotes + source link are published.
+    ingest_doc["transcript_ref"] = None
 
     evidence = propose.build_evidence_record(
         ingest_doc, extraction.housing, discovered_date=today

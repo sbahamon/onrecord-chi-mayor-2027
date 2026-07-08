@@ -16,8 +16,9 @@ on merge:             the static site rebuilds and deploys to GitHub Pages
 
 - **Discovery** polls Google News RSS, candidate sites, and outlet pages.
 - **Ingestion** fetches article text, pulls YouTube captions, or downloads audio
-  (podcasts/TikTok/etc.) to a temp runner and transcribes it with Whisper. Media
-  files are never committed to the repo.
+  (podcasts/TikTok/etc.) to a temp runner and transcribes it with Whisper.
+  Neither media files nor full transcripts are committed — only extracted quotes
+  and a source link. The reviewer re-ingests the source to verify quotes.
 - **Extraction** reads the transcript with a cheap near-frontier model
   (DeepSeek via OpenRouter) and proposes structured positions. It captures *all*
   policy topics but only **housing** enters the review queue and the public site.
@@ -32,8 +33,7 @@ on merge:             the static site rebuilds and deploys to GitHub Pages
 | `pipeline/` | Python: discover, ingest, extract, propose, review |
 | `schemas/` | JSON Schemas for every data file |
 | `data/registry/` | candidates, sources, topics, config (hand-maintained) |
-| `data/media-hits/` | evidence records (one per media hit) |
-| `data/transcripts/` | transcript text |
+| `data/media-hits/` | evidence records (one per media hit): quotes + source link |
 | `data/stances/` | curated matrix cells (candidate × topic) |
 | `data/positions/other/` | non-housing captures, unreviewed, unpublished |
 | `site/` | Astro static site (the public tracker) |
