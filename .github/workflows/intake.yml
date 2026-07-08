@@ -1,0 +1,91 @@
+name: manual intake
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Media URL to ingest"
+        required: true
+      type:
+        description: "Media type"
+        required: false
+        default: article
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  intake:
+    # Only the 'add-media' label triggers processing; other labels are ignored.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' && github.event.label.name == 'add-media')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[live]"
+
+      - name: Resolve URL and type (untrusted input handled in Python, not shell)
+        id: resolve
+        env:
+          # Untrusted values arrive ONLY as env vars; never interpolated into run:.
+          DISPATCH_URL: ${{ github.event.inputs.url }}
+          DISPATCH_TYPE: ${{ github.event.inputs.type }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import os, re
+          url = (os.environ.get("DISPATCH_URL") or "").strip()
+          mtype = (os.environ.get("DISPATCH_TYPE") or "article").strip()
+          if not url:
+              m = re.search(r"https?://\S+", os.environ.get("ISSUE_BODY", ""))
+              url = m.group(0) if m else ""
+          # Whitelist media type; anything else falls back to a safe default.
+          if mtype not in {"article", "website", "youtube", "podcast", "social", "manual"}:
+              mtype = "article"
+          # Strip characters that have no business in a URL (defensive).
+          url = re.sub(r"[\s`$;|&<>()]", "", url)
+          print(f"url={url}")
+          print(f"type={mtype}")
+          PY
+
+      - name: Fail if no URL found
+        if: steps.resolve.outputs.url == ''
+        run: |
+          echo "No URL found in the request." >&2
+          exit 1
+
+      - name: Ingest
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          URL: ${{ steps.resolve.outputs.url }}
+          MTYPE: ${{ steps.resolve.outputs.type }}
+        run: |
+          python -m pipeline ingest-url --url "$URL" --type "$MTYPE" \
+            --title "Manual intake" --pr-body-out pr_body.md
+
+      - name: Open PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.PIPELINE_PAT }}
+          branch: intake/manual-${{ github.run_id }}
+          delete-branch: true
+          title: "Manual intake: new media hit"
+          body-path: pr_body.md
+          labels: pipeline, needs-review
+          add-paths: |
+            data/media-hits/**
+            data/stances/**
+            data/transcripts/**
+            data/positions/**

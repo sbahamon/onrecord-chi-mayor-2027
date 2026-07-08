@@ -1,0 +1,31 @@
+name: Add a media hit
+description: Submit a URL (podcast, video, article, TikTok, etc.) for the tracker to process.
+title: "[media] "
+labels: ["add-media"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Paste a link to a candidate's media appearance. The pipeline will
+        transcribe/read it, extract any housing positions, and open a pull
+        request for review. For X posts or anything that can't be fetched,
+        paste the text instead and note that below.
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      description: Direct link to the article, episode, or video.
+      placeholder: https://...
+    validations:
+      required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: Media type
+      options: [article, youtube, podcast, social, website, manual]
+      default: 0
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes (optional)
+      description: Anything the pipeline should know — e.g. which candidate, or pasted text if the link can't be fetched.

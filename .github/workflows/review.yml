@@ -1,0 +1,58 @@
+name: ai-review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  verify:
+    # Only pipeline-generated PRs (labelled 'pipeline') get auto-reviewed.
+    if: contains(github.event.pull_request.labels.*.name, 'pipeline')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: List changed evidence files
+        id: changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          FILES=$(gh pr diff "$PR_NUMBER" --name-only | grep '^data/media-hits/.*\.json$' || true)
+          # Persist the (repo-controlled) file list for the next step.
+          printf '%s\n' "$FILES" > changed_files.txt
+          echo "count=$(grep -c . changed_files.txt || true)" >> "$GITHUB_OUTPUT"
+
+      - name: Verify statements
+        if: steps.changed.outputs.count != '0'
+        id: review
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          mapfile -t FILES < changed_files.txt
+          OUT=$(python -m pipeline review "${FILES[@]}" --comment-out review_comment.md)
+          echo "$OUT"
+          echo "label=$(echo "$OUT" | sed -n 's/^label=//p')" >> "$GITHUB_OUTPUT"
+
+      - name: Post review comment and label
+        if: steps.changed.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          LABEL: ${{ steps.review.outputs.label }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body-file review_comment.md
+          if [ -n "$LABEL" ]; then
+            gh pr edit "$PR_NUMBER" --add-label "$LABEL"
+          fi
