@@ -1,8 +1,8 @@
 {
   "models": {
-    "triage": "deepseek/deepseek-chat-v3.2",
-    "extractor": "deepseek/deepseek-chat-v3.2",
-    "reviewer": "moonshotai/kimi-k2"
+    "triage": "deepseek/deepseek-v3.2",
+    "extractor": "deepseek/deepseek-v3.2",
+    "reviewer": "moonshotai/kimi-k2-0905"
   },
   "auto_merge_enabled": false,
   "auto_merge_min_confidence": 0.85,

@@ -110,7 +110,6 @@ def cmd_review(args) -> int:
     from pipeline import review
 
     data_dir = Path(args.data_dir)
-    repo_root = data_dir.parent
     cfg = config.load_config(data_dir)
     llm = OpenRouterLLM()
     model = cfg["models"]["reviewer"]
@@ -118,8 +117,8 @@ def cmd_review(args) -> int:
     verdicts = []
     for ev_path in args.evidence:
         evidence = json.loads(Path(ev_path).read_text())
-        ref = evidence.get("transcript_ref")
-        transcript = (repo_root / ref).read_text() if ref and (repo_root / ref).exists() else ""
+        tpath = run.transcript_path_for(data_dir, evidence)
+        transcript = tpath.read_text() if tpath.exists() else ""
         for stmt in evidence["statements"]:
             verdicts.append(review.verify_statement(stmt, transcript, llm=llm, model=model))
 

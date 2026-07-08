@@ -18,7 +18,7 @@ def test_openrouter_returns_json():
     from pipeline.llm import OpenRouterLLM
 
     llm = OpenRouterLLM()
-    model = os.environ.get("EXTRACTOR_MODEL", "deepseek/deepseek-chat-v3.2")
+    model = os.environ.get("EXTRACTOR_MODEL", "deepseek/deepseek-v3.2")
     out = llm.complete_json(
         model=model,
         system='Reply with JSON only: {"ok": true}.',
@@ -37,7 +37,7 @@ def test_openrouter_extract_end_to_end():
         "Jane Doe: I want to legalize apartments in every neighborhood in Chicago."
     )
     llm = OpenRouterLLM()
-    model = os.environ.get("EXTRACTOR_MODEL", "deepseek/deepseek-chat-v3.2")
+    model = os.environ.get("EXTRACTOR_MODEL", "deepseek/deepseek-v3.2")
     result = extract(transcript, candidates=["jane-doe"],
                      topics=["zoning-reform"], llm=llm, model=model)
     # We don't assert exact content (model may vary), only that the invariants hold:

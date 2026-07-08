@@ -78,6 +78,13 @@ def test_process_source_writes_evidence_stance_and_other(tmp_path):
     assert result.housing_count == 1
 
 
+def test_transcript_path_for_is_derived_from_data_dir_not_ref_prefix(tmp_path):
+    # Robust regardless of the data dir's name (the review CLI relies on this).
+    ev = {"id": "2026-05-29-x", "transcript_ref": "data/transcripts/2026-05-29-x.md"}
+    path = run.transcript_path_for(tmp_path, ev)
+    assert path == tmp_path / "transcripts" / "2026-05-29-x.md"
+
+
 def test_process_source_with_no_housing_writes_no_evidence(tmp_path):
     llm = FakeLLM([{
         "candidate": "example-candidate-a", "topic": "schools",

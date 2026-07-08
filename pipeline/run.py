@@ -29,6 +29,16 @@ class ProcessResult:
     other_count: int = 0
 
 
+def transcript_path_for(data_dir, evidence: dict) -> Path:
+    """Where an evidence record's transcript lives, derived from the data dir.
+
+    Robust to the data dir's name — the transcript is always
+    ``<data_dir>/transcripts/<id>.md`` regardless of the (repo-relative)
+    ``transcript_ref`` string stored in the record.
+    """
+    return Path(data_dir) / "transcripts" / f"{evidence['id']}.md"
+
+
 def _write_transcript(ingest_doc: dict, data_dir) -> Path:
     path = Path(data_dir) / "transcripts" / f"{ingest_doc['id']}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
