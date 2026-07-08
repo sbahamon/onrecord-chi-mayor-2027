@@ -17,6 +17,11 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.6",
 ]
+# Only needed to actually download + transcribe media (the live pipeline).
+# Unit tests and the site build do not require these.
+live = [
+    "yt-dlp>=2024.1",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

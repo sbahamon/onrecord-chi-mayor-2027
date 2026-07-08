@@ -100,3 +100,14 @@ def test_stance_requires_at_least_one_citation():
 def test_unknown_schema_name_raises():
     with pytest.raises(KeyError):
         schemas.validate({}, "not-a-real-schema")
+
+
+def test_statement_schema_matches_evidence_inline_definition():
+    """The standalone statement schema and evidence's inline copy must not drift."""
+    import json
+
+    standalone = json.loads((schemas.SCHEMA_DIR / "statement.schema.json").read_text())
+    evidence = json.loads((schemas.SCHEMA_DIR / "evidence.schema.json").read_text())
+    inline = evidence["$defs"]["statement"]
+    assert standalone["required"] == inline["required"]
+    assert standalone["properties"] == inline["properties"]

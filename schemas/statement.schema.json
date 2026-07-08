@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "statement",
+  "title": "A single extracted candidate statement",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidate", "topic", "stance", "summary",
+    "quote", "confidence", "is_housing", "attribution_flag"
+  ],
+  "properties": {
+    "candidate": { "type": "string", "minLength": 1 },
+    "topic": { "type": "string", "minLength": 1 },
+    "stance": {
+      "type": "string",
+      "enum": ["supports", "supports-with-conditions", "opposes", "mixed", "no-position"]
+    },
+    "summary": { "type": "string", "minLength": 1 },
+    "quote": { "type": "string", "minLength": 1 },
+    "locator": { "type": ["string", "null"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "is_housing": { "type": "boolean" },
+    "attribution_flag": { "type": "boolean" }
+  }
+}

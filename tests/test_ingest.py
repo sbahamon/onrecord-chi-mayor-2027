@@ -1,0 +1,91 @@
+"""Ingestion normalizes raw media into clean transcript text + metadata.
+
+Pure, breakable pieces are tested directly (caption parsing, article-body
+extraction, id/slug generation). The orchestrator is tested with injected fakes
+for the network/transcription so no keys or downloads are needed.
+"""
+from pathlib import Path
+
+from pipeline import ingest
+
+FIXTURES = Path(__file__).parent / "fixtures"
+
+
+# --- slug / id --------------------------------------------------------------
+
+def test_slugify_basic():
+    assert ingest.slugify("The Ben Joravsky Show!") == "the-ben-joravsky-show"
+
+
+def test_slugify_collapses_and_trims():
+    assert ingest.slugify("  Doe &  Roe:  Housing  ") == "doe-roe-housing"
+
+
+def test_make_evidence_id_is_date_prefixed_and_slugged():
+    got = ingest.make_evidence_id("2026-07-06", "The Ben Joravsky Show", "Johnson interview")
+    assert got.startswith("2026-07-06-")
+    assert got == "2026-07-06-the-ben-joravsky-show-johnson-interview"
+
+
+# --- caption normalization --------------------------------------------------
+
+def test_normalize_vtt_strips_cues_and_dedupes_rolling_lines():
+    text = ingest.normalize_vtt((FIXTURES / "captions.vtt").read_text())
+    # No timestamps or WEBVTT header survive.
+    assert "-->" not in text
+    assert "WEBVTT" not in text
+    # Rolling YouTube-style duplicate lines collapse to one each.
+    assert text.count("We should legalize apartments") == 1
+    assert text.count("in every neighborhood.") == 1
+    assert "That's the whole point." in text
+
+
+# --- article extraction -----------------------------------------------------
+
+def test_extract_article_text_keeps_body_drops_boilerplate():
+    html = (FIXTURES / "article.html").read_text()
+    text = ingest.extract_article_text(html)
+    assert "legalize apartment buildings in every Chicago neighborhood" in text
+    assert "ADVERTISEMENT" not in text
+    assert "Subscribe now!" not in text
+
+
+# --- orchestration with injected fakes --------------------------------------
+
+def test_ingest_article_uses_fetcher_and_returns_transcript_and_meta():
+    html = (FIXTURES / "article.html").read_text()
+    source = {
+        "url": "https://news.example.com/doe-apartments",
+        "outlet": "Example Chicago News",
+        "media_type": "article",
+        "title": "Doe pitches citywide apartment legalization",
+        "published_date": "2026-07-06",
+    }
+    doc = ingest.ingest(source, fetcher=lambda url: html)
+    assert "legalize apartment buildings" in doc["transcript"]
+    assert doc["id"].startswith("2026-07-06-")
+    assert doc["media_type"] == "article"
+
+
+def test_ingest_audio_downloads_then_transcribes():
+    calls = {}
+
+    def fake_downloader(url):
+        calls["downloaded"] = url
+        return "/tmp/fake-audio.m4a"
+
+    def fake_transcriber(path):
+        calls["transcribed"] = path
+        return "We should legalize apartments in every neighborhood."
+
+    source = {
+        "url": "https://podcast.example.com/ep1.mp3",
+        "outlet": "Example Podcast",
+        "media_type": "podcast",
+        "title": "Doe on housing",
+        "published_date": "2026-07-06",
+    }
+    doc = ingest.ingest(source, downloader=fake_downloader, transcriber=fake_transcriber)
+    assert calls["downloaded"] == source["url"]
+    assert calls["transcribed"] == "/tmp/fake-audio.m4a"
+    assert "legalize apartments" in doc["transcript"]
