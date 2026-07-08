@@ -73,7 +73,7 @@ jobs:
           MTYPE: ${{ steps.resolve.outputs.type }}
         run: |
           python -m pipeline ingest-url --url "$URL" --type "$MTYPE" \
-            --title "Manual intake" --pr-body-out pr_body.md
+            --pr-body-out pr_body.md
 
       - name: Open PR
         uses: peter-evans/create-pull-request@v6
@@ -84,8 +84,5 @@ jobs:
           title: "Manual intake: new media hit"
           body-path: pr_body.md
           labels: pipeline, needs-review
-          add-paths: |
-            data/media-hits/**
-            data/stances/**
-            data/transcripts/**
-            data/positions/**
+          # Whole data/ dir: robust when a run produces no positions/ or other subdir.
+          add-paths: data

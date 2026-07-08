@@ -17,7 +17,7 @@ import json
 import sys
 from pathlib import Path
 
-from pipeline import config, discover, run
+from pipeline import config, discover, ingest as ingest_mod, run
 from pipeline.llm import OpenRouterLLM
 
 
@@ -36,9 +36,9 @@ def cmd_ingest_url(args) -> int:
     cfg = config.load_config(data_dir)
     source = {
         "url": args.url,
-        "outlet": args.outlet or args.url,
+        "outlet": args.outlet or ingest_mod.domain_of(args.url),
         "media_type": args.type,
-        "title": args.title or args.url,
+        "title": args.title,  # None -> ingest fills from the page for articles
         "published_date": args.date or _today(),
     }
     result = run.process_source(

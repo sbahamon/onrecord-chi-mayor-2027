@@ -36,9 +36,5 @@ jobs:
           title: "Discovery: new candidate housing statements"
           body-path: pr_body.md
           labels: pipeline, needs-review
-          add-paths: |
-            data/media-hits/**
-            data/stances/**
-            data/transcripts/**
-            data/positions/**
-            data/ledger.json
+          # Whole data/ dir: robust when a run produces no positions/ or other subdir.
+          add-paths: data

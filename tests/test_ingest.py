@@ -27,6 +27,33 @@ def test_make_evidence_id_is_date_prefixed_and_slugged():
     assert got == "2026-07-06-the-ben-joravsky-show-johnson-interview"
 
 
+# --- domain + title helpers -------------------------------------------------
+
+def test_domain_of_strips_scheme_and_www():
+    assert ingest.domain_of("https://www.wbez.org/housing/2026/x") == "wbez.org"
+    assert ingest.domain_of("http://blockclubchicago.org/a/b") == "blockclubchicago.org"
+
+
+def test_extract_article_returns_text_and_title():
+    html = (FIXTURES / "article.html").read_text()
+    text, title = ingest.extract_article(html)
+    assert "legalize apartment buildings" in text
+    assert "apartment legalization" in title.lower()
+
+
+def test_ingest_article_uses_page_title_when_source_title_missing():
+    html = (FIXTURES / "article.html").read_text()
+    source = {
+        "url": "https://news.example.com/doe",
+        "outlet": "Example Chicago News",
+        "media_type": "article",
+        "title": None,  # not supplied — should fall back to the page's title
+        "published_date": "2026-07-06",
+    }
+    doc = ingest.ingest(source, fetcher=lambda url: html)
+    assert "apartment legalization" in doc["title"].lower()
+
+
 # --- caption normalization --------------------------------------------------
 
 def test_normalize_vtt_strips_cues_and_dedupes_rolling_lines():

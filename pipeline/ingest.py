@@ -58,11 +58,43 @@ def normalize_vtt(vtt: str) -> str:
     return "\n".join(deduped)
 
 
-def extract_article_text(html: str) -> str:
+def domain_of(url: str) -> str:
+    from urllib.parse import urlparse
+
+    host = urlparse(url).netloc.lower()
+    return host[4:] if host.startswith("www.") else host
+
+
+def extract_article(html: str) -> tuple[str, str]:
+    """Return (main_text, title) for an article page."""
     import trafilatura
 
-    text = trafilatura.extract(html, include_comments=False, include_tables=False)
-    return text or ""
+    data = trafilatura.bare_extraction(
+        html, include_comments=False, include_tables=False
+    )
+
+    def field(name):
+        if data is None:
+            return None
+        if isinstance(data, dict):
+            return data.get(name)
+        return getattr(data, name, None)  # trafilatura Document object
+
+    text = field("text") or trafilatura.extract(html) or ""
+    title = field("title") or _title_from_html(html)
+    return text, title
+
+
+def _title_from_html(html: str) -> str:
+    for pattern in (r"<h1[^>]*>(.*?)</h1>", r"<title[^>]*>(.*?)</title>"):
+        m = re.search(pattern, html, re.IGNORECASE | re.DOTALL)
+        if m:
+            return re.sub(r"<[^>]+>", "", m.group(1)).strip()
+    return ""
+
+
+def extract_article_text(html: str) -> str:
+    return extract_article(html)[0]
 
 
 def _default_fetcher(url: str) -> str:
@@ -76,9 +108,12 @@ def _default_fetcher(url: str) -> str:
 def ingest(source: dict, *, fetcher=None, downloader=None, transcriber=None) -> dict:
     media_type = source["media_type"]
     fetcher = fetcher or _default_fetcher
+    title = source.get("title")
 
     if media_type in TEXT_TYPES:
-        transcript = extract_article_text(fetcher(source["url"]))
+        transcript, page_title = extract_article(fetcher(source["url"]))
+        if not title:
+            title = page_title or source["url"]
     elif media_type in CAPTION_TYPES:
         transcript = normalize_vtt(fetcher(source["url"]))
     elif media_type in AUDIO_TYPES:
@@ -91,12 +126,15 @@ def ingest(source: dict, *, fetcher=None, downloader=None, transcriber=None) -> 
     else:
         raise ValueError(f"unknown media_type: {media_type!r}")
 
+    if not title:
+        title = source["url"]
+
     return {
-        "id": make_evidence_id(source["published_date"], source["outlet"], source["title"]),
+        "id": make_evidence_id(source["published_date"], source["outlet"], title),
         "url": source["url"],
         "outlet": source["outlet"],
         "media_type": media_type,
-        "title": source["title"],
+        "title": title,
         "published_date": source["published_date"],
         "transcript": transcript,
     }
