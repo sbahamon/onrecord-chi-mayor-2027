@@ -1,0 +1,43 @@
+---
+import Base from "../layouts/Base.astro";
+const base = import.meta.env.BASE_URL;
+---
+<Base title="Methodology" description="How the Chicago Housing Tracker finds, extracts, and reviews candidate positions.">
+  <section class="hero"><h1>Methodology</h1></section>
+  <div class="prose">
+    <p>
+      This tracker records where 2027 Chicago mayoral candidates stand on housing,
+      based on what they say in public media — podcasts, interviews, candidate
+      forums, and news coverage. It is an accountability tool: every position
+      links back to the source it came from.
+    </p>
+
+    <h2>How positions get here</h2>
+    <ol>
+      <li><strong>Discovery.</strong> On a schedule, the system scans news feeds,
+        candidate websites, and outlet pages for new appearances.</li>
+      <li><strong>Ingestion.</strong> Articles are read as text; videos use their
+        captions; audio is transcribed. Original media files are not stored.</li>
+      <li><strong>Extraction.</strong> An AI model reads the transcript and drafts
+        each housing position with the exact supporting quote.</li>
+      <li><strong>Review.</strong> A second, independent AI model checks that each
+        quote is real and correctly attributed. Then a <em>human</em> reviews and
+        approves every position before it appears here.</li>
+    </ol>
+
+    <h2>What we do and don't claim</h2>
+    <p>
+      Summaries are our paraphrase; the linked quote and source are the record.
+      A blank cell means a candidate has not addressed that issue on the record
+      that we've found — not that they have no view. We track housing closely;
+      other issues a candidate raises are noted internally but not published here.
+    </p>
+
+    <h2>Corrections</h2>
+    <p>
+      Found a misquote, a wrong attribution, or a missed appearance? Corrections
+      are welcome and taken seriously. <em>(Add your contact / issue link here
+      before launch.)</em>
+    </p>
+  </div>
+</Base>

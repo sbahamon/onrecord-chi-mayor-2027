@@ -1,0 +1,87 @@
+---
+import Base from "../layouts/Base.astro";
+import { buildMatrix, STANCE_META } from "../lib/data.js";
+
+const { candidates, rows } = buildMatrix();
+const base = import.meta.env.BASE_URL;
+const hasExample = candidates.some((c) => c.status === "example");
+
+const legend = [
+  ["support", "Supports"],
+  ["conditional", "Supports w/ conditions"],
+  ["mixed", "Mixed / unclear"],
+  ["oppose", "Opposes"],
+  ["none", "No stated position"],
+];
+---
+<Base
+  title="Where Chicago mayoral candidates stand on housing"
+  description="A sourced, side-by-side comparison of 2027 Chicago mayoral candidates' housing positions, drawn from their media appearances."
+>
+  <section class="hero">
+    <h1>Where the candidates stand on housing</h1>
+    <p>
+      Every position below is drawn from a candidate's own public words — a
+      podcast, interview, forum, or article — and links to the source. Blank
+      cells mean the candidate hasn't addressed that issue on the record yet.
+    </p>
+  </section>
+
+  {hasExample && (
+    <div class="banner">
+      This page currently includes <strong>example placeholder candidates</strong>
+      to demonstrate the layout. They will be replaced with the real declared
+      slate before launch.
+    </div>
+  )}
+
+  <div class="legend">
+    {legend.map(([tone, label]) => (
+      <span><i class={"swatch tone-" + tone} style={"background:var(--" + tone + "-bar)"}></i>{label}</span>
+    ))}
+  </div>
+
+  <div class="matrix-scroll">
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Housing issue</th>
+          {candidates.map((c) => (
+            <th>
+              <span class="cand-head">
+                <a href={base + "candidates/" + c.slug}>{c.name}</a>
+                <span class={"status " + c.status}>{c.status}</span>
+              </span>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr>
+            <th class="row-head">
+              {row.topic.label}
+              {row.topic.description && <small>{row.topic.description}</small>}
+            </th>
+            {row.cells.map((cell) => {
+              const meta = cell.stance
+                ? STANCE_META[cell.stance.stance]
+                : STANCE_META["no-position"];
+              return (
+                <td>
+                  <a
+                    class={"cell tone-" + meta.tone}
+                    href={base + "candidates/" + cell.candidate.slug + "#" + row.topic.slug}
+                  >
+                    <span class="lbl">{meta.label}</span>
+                    {cell.stance && <span class="sum">{cell.stance.summary}</span>}
+                  </a>
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</Base>

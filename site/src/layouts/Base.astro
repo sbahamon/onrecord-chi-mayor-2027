@@ -1,0 +1,40 @@
+---
+import "../styles/global.css";
+const { title, description } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const nav = [
+  { href: base, label: "Where they stand" },
+  { href: base + "feed", label: "Recent hits" },
+  { href: base + "methodology", label: "Methodology" },
+];
+---
+<!-- Base layout: header, nav, footer. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href={base + "favicon.svg"} />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+  </head>
+  <body>
+    <header class="site">
+      <div class="wrap">
+        <a class="brand" href={base}>Chicago Housing Tracker</a>
+        <nav>
+          {nav.map((n) => <a href={n.href}>{n.label}</a>)}
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      <slot />
+    </main>
+    <footer class="site">
+      <div class="wrap">
+        Positions are drawn from candidates' public media appearances and
+        reviewed by a human before publishing. Every claim links to its source.
+        See <a href={base + "methodology"}>Methodology</a>.
+      </div>
+    </footer>
+  </body>
+</html>

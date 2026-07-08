@@ -1,0 +1,30 @@
+---
+import Base from "../layouts/Base.astro";
+import { buildFeed, loadCandidates, loadTopics } from "../lib/data.js";
+
+const feed = buildFeed();
+const base = import.meta.env.BASE_URL;
+const candName = Object.fromEntries(loadCandidates().map((c) => [c.slug, c.name]));
+const topicLabel = Object.fromEntries(loadTopics().map((t) => [t.slug, t.label]));
+---
+<Base title="Recent media hits" description="The latest media appearances feeding the tracker.">
+  <section class="hero">
+    <h1>Recent media hits</h1>
+    <p>Every appearance the tracker has processed, newest first.</p>
+  </section>
+
+  {feed.length === 0 && <p class="src">Nothing processed yet.</p>}
+  {feed.map((e) => {
+    const housing = e.statements.filter((s) => s.is_housing);
+    const cands = [...new Set(housing.map((s) => candName[s.candidate] || s.candidate))];
+    const topics = [...new Set(housing.map((s) => topicLabel[s.topic] || s.topic))];
+    return (
+      <div class="hit">
+        <div class="meta">{e.published_date} · {e.outlet} · {e.media_type}</div>
+        <h3><a href={e.url}>{e.title}</a></h3>
+        {cands.length > 0 && <p class="src">Featuring: {cands.join(", ")}</p>}
+        <p>{topics.map((t) => <span class="tag">{t}</span>)}</p>
+      </div>
+    );
+  })}
+</Base>

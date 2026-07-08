@@ -1,0 +1,58 @@
+---
+import Base from "../../layouts/Base.astro";
+import { loadCandidates, buildCandidateProfile, STANCE_META } from "../../lib/data.js";
+
+export function getStaticPaths() {
+  return loadCandidates().map((c) => ({ params: { slug: c.slug } }));
+}
+
+const { slug } = Astro.params;
+const profile = buildCandidateProfile(slug);
+const base = import.meta.env.BASE_URL;
+const { candidate, positions, timeline } = profile;
+---
+<Base title={candidate.name + " on housing"} description={candidate.bio}>
+  <section class="hero">
+    <h1>{candidate.name}</h1>
+    <p>
+      <span class={"status " + candidate.status}>{candidate.status}</span>
+      {candidate.party ? " · " + candidate.party : ""}
+      {candidate.website && <> · <a href={candidate.website}>Campaign / office</a></>}
+    </p>
+    {candidate.bio && <p>{candidate.bio}</p>}
+  </section>
+
+  <h2 style="font-family:var(--serif)">Positions</h2>
+  {positions.length === 0 && (
+    <p class="src">No housing positions on the record yet.</p>
+  )}
+  {positions.map((p) => {
+    const meta = STANCE_META[p.stance.stance];
+    return (
+      <article class="position" id={p.topic.slug}>
+        <h3>{p.topic.label}</h3>
+        <span class={"pill tone-" + meta.tone}>
+          <span class="lbl">{meta.label}</span>
+        </span>
+        <p>{p.stance.summary}</p>
+        {p.sources.map(({ statement, evidence }) => (
+          <div>
+            <blockquote class="quote">“{statement.quote}”</blockquote>
+            <p class="src">
+              — <a href={evidence.url}>{evidence.outlet}</a>, {evidence.published_date}
+              {statement.locator ? " (" + statement.locator + ")" : ""}
+            </p>
+          </div>
+        ))}
+      </article>
+    );
+  })}
+
+  <h2 style="font-family:var(--serif)">Media timeline</h2>
+  {timeline.map((e) => (
+    <div class="hit">
+      <div class="meta">{e.published_date} · {e.outlet} · {e.media_type}</div>
+      <h3><a href={e.url}>{e.title}</a></h3>
+    </div>
+  ))}
+</Base>

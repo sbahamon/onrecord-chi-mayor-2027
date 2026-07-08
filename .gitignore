@@ -26,3 +26,7 @@ site/.astro/
 
 # OS
 .DS_Store
+
+# Playwright / screenshots
+.playwright-mcp/
+*.png
