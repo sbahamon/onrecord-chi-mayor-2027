@@ -1,0 +1,22 @@
+{
+  "topics": [
+    { "slug": "zoning-reform", "label": "Zoning reform", "order": 1,
+      "description": "Ending single-family-only zoning, upzoning near transit, reducing minimum lot sizes." },
+    { "slug": "affordable-housing-funding", "label": "Affordable housing funding", "order": 2,
+      "description": "Bonds, the housing trust fund, Bring Chicago Home / transfer-tax revenue, subsidies." },
+    { "slug": "public-housing-cha", "label": "Public housing / CHA", "order": 3,
+      "description": "Chicago Housing Authority redevelopment, vouchers, replacement units." },
+    { "slug": "homelessness", "label": "Homelessness", "order": 4,
+      "description": "Encampments, shelter capacity, permanent supportive housing, migrant housing." },
+    { "slug": "tenant-protections", "label": "Tenant protections", "order": 5,
+      "description": "Rent stabilization, eviction protections, just-cause, lifting the state rent-control ban." },
+    { "slug": "adus", "label": "ADUs / coach houses", "order": 6,
+      "description": "Legalizing accessory dwelling units citywide beyond the pilot zones." },
+    { "slug": "permitting-reform", "label": "Permitting & approvals", "order": 7,
+      "description": "Speeding permits, reducing parking minimums, aldermanic prerogative over developments." },
+    { "slug": "property-taxes-tif", "label": "Property taxes & TIF", "order": 8,
+      "description": "Property-tax burden as it affects housing costs; TIF reform and redirection." },
+    { "slug": "social-housing", "label": "Social / municipal housing", "order": 9,
+      "description": "City-owned or mixed-income social housing developers and green social housing." }
+  ]
+}

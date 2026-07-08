@@ -1,0 +1,44 @@
+{
+  "feeds": [
+    {
+      "id": "google-news-chicago-mayor-housing",
+      "name": "Google News — Chicago mayor + housing",
+      "type": "google-news",
+      "url": "https://news.google.com/rss/search?q=Chicago+mayor+housing+OR+zoning+OR+affordable&hl=en-US&gl=US&ceid=US:en",
+      "enabled": true,
+      "notes": "Backbone discovery feed. Google News RSS is a stable public endpoint; per-candidate queries live on each candidate's google_news_rss field."
+    },
+    {
+      "id": "google-news-chicago-mayoral-race",
+      "name": "Google News — 2027 Chicago mayoral race",
+      "type": "google-news",
+      "url": "https://news.google.com/rss/search?q=%22Chicago+mayoral%22+2027&hl=en-US&gl=US&ceid=US:en",
+      "enabled": true,
+      "notes": "Catches candidacy declarations and forum/debate announcements."
+    },
+    {
+      "id": "block-club-chicago",
+      "name": "Block Club Chicago",
+      "type": "website",
+      "url": "https://blockclubchicago.org/category/citywide/",
+      "enabled": true,
+      "notes": "Monitored by website-diff. Verify/replace with the outlet's RSS feed if one is confirmed."
+    },
+    {
+      "id": "wttw-news",
+      "name": "WTTW News — Chicago politics",
+      "type": "website",
+      "url": "https://news.wttw.com/politics",
+      "enabled": true,
+      "notes": "Monitored by website-diff. Frequent candidate-forum coverage and video."
+    },
+    {
+      "id": "chicago-reader-politics",
+      "name": "Chicago Reader — Politics",
+      "type": "website",
+      "url": "https://chicagoreader.com/category/news-politics/",
+      "enabled": true,
+      "notes": "Home of the Ben Joravsky Show; monitor for episode posts and columns."
+    }
+  ]
+}

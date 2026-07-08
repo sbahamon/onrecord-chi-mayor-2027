@@ -1,0 +1,15 @@
+{
+  "models": {
+    "triage": "deepseek/deepseek-chat-v3.2",
+    "extractor": "deepseek/deepseek-chat-v3.2",
+    "reviewer": "moonshotai/kimi-k2"
+  },
+  "auto_merge_enabled": false,
+  "auto_merge_min_confidence": 0.85,
+  "discovery": {
+    "days_lookback": 7
+  },
+  "transcription": {
+    "model": "whisper-large-v3-turbo"
+  }
+}

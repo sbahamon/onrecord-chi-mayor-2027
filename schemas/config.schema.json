@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "config",
+  "title": "Pipeline configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["models", "auto_merge_enabled"],
+  "properties": {
+    "models": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["triage", "extractor", "reviewer"],
+      "properties": {
+        "triage": { "type": "string", "minLength": 1 },
+        "extractor": { "type": "string", "minLength": 1 },
+        "reviewer": { "type": "string", "minLength": 1 }
+      }
+    },
+    "auto_merge_enabled": { "type": "boolean" },
+    "auto_merge_min_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "discovery": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "days_lookback": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "transcription": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "model": { "type": "string" }
+      }
+    }
+  }
+}

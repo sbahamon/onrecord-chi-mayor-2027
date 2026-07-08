@@ -1,0 +1,28 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Secrets
+.env
+
+# Node / Astro
+node_modules/
+site/dist/
+site/.astro/
+
+# Media files must NEVER be committed (large; git keeps history forever).
+# The pipeline downloads media to a temp dir, transcribes, then discards it.
+*.mp3
+*.mp4
+*.m4a
+*.wav
+*.webm
+*.mkv
+*.opus
+
+# OS
+.DS_Store

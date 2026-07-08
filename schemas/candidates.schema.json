@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "candidates",
+  "title": "Candidate registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["candidates"],
+  "properties": {
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["slug", "name", "status"],
+        "properties": {
+          "slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "name": { "type": "string", "minLength": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["incumbent", "declared", "rumored", "withdrawn", "example"]
+          },
+          "party": { "type": ["string", "null"] },
+          "website": { "type": ["string", "null"] },
+          "bluesky": { "type": ["string", "null"] },
+          "youtube_channel": { "type": ["string", "null"] },
+          "google_news_rss": { "type": ["string", "null"] },
+          "photo": { "type": ["string", "null"] },
+          "bio": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

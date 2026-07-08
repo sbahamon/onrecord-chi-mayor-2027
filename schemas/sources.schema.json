@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sources",
+  "title": "Discovery source registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feeds"],
+  "properties": {
+    "feeds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "type", "url"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "name": { "type": "string", "minLength": 1 },
+          "type": {
+            "type": "string",
+            "enum": ["rss", "youtube", "google-news", "website", "bluesky"]
+          },
+          "url": { "type": "string", "pattern": "^https?://|^at://|^[a-z0-9.-]+\\.bsky\\.social$" },
+          "enabled": { "type": "boolean" },
+          "notes": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

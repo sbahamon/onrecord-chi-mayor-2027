@@ -1,0 +1,40 @@
+{
+  "candidates": [
+    {
+      "slug": "brandon-johnson",
+      "name": "Brandon Johnson",
+      "status": "incumbent",
+      "party": "Democratic",
+      "website": "https://www.chicago.gov/city/en/depts/mayor.html",
+      "bluesky": null,
+      "youtube_channel": null,
+      "google_news_rss": "https://news.google.com/rss/search?q=%22Brandon+Johnson%22+Chicago+housing&hl=en-US&gl=US&ceid=US:en",
+      "photo": null,
+      "bio": "Mayor of Chicago since May 2023. Incumbent for the 2027 municipal election."
+    },
+    {
+      "slug": "example-candidate-a",
+      "name": "Example Candidate A",
+      "status": "example",
+      "party": null,
+      "website": null,
+      "bluesky": null,
+      "youtube_channel": null,
+      "google_news_rss": null,
+      "photo": null,
+      "bio": "PLACEHOLDER — remove before launch. Demonstrates the matrix layout with sample stances. Replace with a real declared candidate."
+    },
+    {
+      "slug": "example-candidate-b",
+      "name": "Example Candidate B",
+      "status": "example",
+      "party": null,
+      "website": null,
+      "bluesky": null,
+      "youtube_channel": null,
+      "google_news_rss": null,
+      "photo": null,
+      "bio": "PLACEHOLDER — remove before launch. Replace with a real declared candidate."
+    }
+  ]
+}
