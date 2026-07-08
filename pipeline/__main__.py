@@ -64,13 +64,15 @@ def cmd_discover(args) -> int:
     ledger = discover.Ledger(data_dir / "ledger.json")
     candidates = config.candidate_slugs(data_dir, active_only=True)
     topics = config.topic_slugs(data_dir)
+    # Bound cost + PR size: cap how many fresh items are ingested per run.
+    max_items = args.max_items or cfg.get("discovery", {}).get("max_items_per_run", 25)
 
     def fetch(url):
         r = requests.get(url, timeout=30, headers={"User-Agent": "housing-tracker/0.1"})
         r.raise_for_status()
         return r.text
 
-    bodies, processed = [], 0
+    bodies, processed, ingested = [], 0, 0
     for feed in config.load_sources(data_dir):
         if not feed.get("enabled", True) or feed["type"] not in {"rss", "google-news", "youtube"}:
             continue
@@ -80,6 +82,10 @@ def cmd_discover(args) -> int:
             print(f"skip feed {feed['id']}: {e}", file=sys.stderr)
             continue
         for item in ledger.filter_new(items):
+            if ingested >= max_items:
+                print(f"reached max_items={max_items}; remaining items deferred to next run",
+                      file=sys.stderr)
+                break
             ledger.mark(item["url"])
             if not discover.triage(item["title"], llm=llm, model=cfg["models"]["triage"]):
                 continue
@@ -96,9 +102,12 @@ def cmd_discover(args) -> int:
             except Exception as e:  # noqa: BLE001
                 print(f"skip item {item['url']}: {e}", file=sys.stderr)
                 continue
+            ingested += 1
             if result.housing_count:
                 bodies.append(result.pr_body)
                 processed += 1
+        if ingested >= max_items:
+            break
 
     ledger.save()
     _write(args.pr_body_out, "\n\n---\n\n".join(bodies) if bodies else "No new housing statements found.")
@@ -148,6 +157,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     dc = sub.add_parser("discover", help="poll feeds and process new items")
     dc.add_argument("--pr-body-out", default="pr_body.md")
+    dc.add_argument("--max-items", type=int, default=None,
+                    help="cap fresh items ingested this run (default: config value)")
     dc.set_defaults(func=cmd_discover)
 
     rv = sub.add_parser("review", help="verify evidence files changed in a PR")

@@ -7,7 +7,8 @@
   "auto_merge_enabled": false,
   "auto_merge_min_confidence": 0.85,
   "discovery": {
-    "days_lookback": 7
+    "days_lookback": 7,
+    "max_items_per_run": 25
   },
   "transcription": {
     "model": "whisper-large-v3-turbo"
