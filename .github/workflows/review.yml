@@ -54,5 +54,7 @@ jobs:
         run: |
           gh pr comment "$PR_NUMBER" --body-file review_comment.md
           if [ -n "$LABEL" ]; then
+            # Create the label on first use so add-label can't fail.
+            gh label create "$LABEL" --color BFD4F2 2>/dev/null || true
             gh pr edit "$PR_NUMBER" --add-label "$LABEL"
           fi
