@@ -5,8 +5,11 @@ and tested directly. Triage (is this item actually about a tracked candidate's
 policy?) uses an injected fake LLM.
 """
 import json
+from pathlib import Path
 
 from pipeline import discover
+
+FIXTURES = Path(__file__).parent / "fixtures"
 
 RSS = """<?xml version="1.0"?>
 <rss version="2.0"><channel>
@@ -30,6 +33,25 @@ def test_parse_feed_extracts_items():
     assert items[0]["url"] == "https://example.com/a"
     assert items[0]["title"] == "Doe talks housing on WBEZ"
     assert items[0]["source_id"] == "example"
+
+
+def test_parse_feed_uses_enclosure_url_for_podcasts():
+    # For a podcast feed the item url must be the audio ENCLOSURE (what yt-dlp/Groq
+    # ingest), not the episode webpage. Guarded by prefer_enclosure so only podcasts
+    # get this treatment.
+    xml = (FIXTURES / "podcast.xml").read_text()
+    items = discover.parse_feed(xml, source_id="pod", prefer_enclosure=True)
+    assert items[0]["url"] == "https://cdn.example.com/audio/doe-housing.mp3"
+    assert items[0]["title"] == "Mayoral candidate Doe on housing"
+    assert items[1]["url"] == "https://cdn.example.com/audio/budget-recap.mp3"
+
+
+def test_parse_feed_default_keeps_link_not_enclosure():
+    # Backward compatibility: without prefer_enclosure (article/news/youtube feeds),
+    # the item url stays the <link>, even if an enclosure is present.
+    xml = (FIXTURES / "podcast.xml").read_text()
+    items = discover.parse_feed(xml, source_id="pod")
+    assert items[0]["url"] == "https://example.com/episodes/doe-housing"
 
 
 def test_media_type_for_feed_maps_by_feed_type():

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>The Example Politics Show</title>
+    <item>
+      <title>Mayoral candidate Doe on housing</title>
+      <link>https://example.com/episodes/doe-housing</link>
+      <enclosure url="https://cdn.example.com/audio/doe-housing.mp3" length="42007040" type="audio/mpeg"/>
+      <pubDate>Wed, 08 Jul 2026 10:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Budget week recap</title>
+      <link>https://example.com/episodes/budget-recap</link>
+      <enclosure url="https://cdn.example.com/audio/budget-recap.mp3" length="38102528" type="audio/mpeg"/>
+      <pubDate>Tue, 07 Jul 2026 10:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

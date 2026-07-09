@@ -20,6 +20,8 @@ jobs:
           python-version: "3.12"
       - name: Install
         run: |
+          # ffmpeg: the reviewer re-ingests audio, which downsamples before upload.
+          ffmpeg -version >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y ffmpeg)
           python -m pip install --upgrade pip
           # .[live] so the reviewer can re-ingest audio sources (transcripts
           # aren't stored in-repo; the reviewer rebuilds them to verify quotes).

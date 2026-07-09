@@ -85,7 +85,10 @@ def cmd_discover(args) -> int:
         # forcing "article" (which sent youtube/podcast items down the text path).
         media_type = discover.media_type_for_feed(feed)
         try:
-            items = discover.parse_feed(fetch(feed["url"]), source_id=feed["id"])
+            items = discover.parse_feed(
+                fetch(feed["url"]), source_id=feed["id"],
+                prefer_enclosure=(media_type == "podcast"),
+            )
         except Exception as e:  # noqa: BLE001
             print(f"skip feed {feed['id']}: {e}", file=sys.stderr)
             continue
