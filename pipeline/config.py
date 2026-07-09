@@ -61,4 +61,12 @@ def discovery_feeds(data_dir) -> list[dict]:
                 "type": "google-news",
                 "url": rss,
             })
+        channel_id = c.get("youtube_channel")
+        if channel_id:
+            feeds.append({
+                "id": f"candidate-{c['slug']}-youtube",
+                "name": f"YouTube — {c['name']}",
+                "type": "youtube",
+                "url": f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}",
+            })
     return feeds

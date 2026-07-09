@@ -42,6 +42,26 @@ def test_discovery_feeds_skip_candidates_without_rss_and_disabled_sources():
     assert all(f["url"] for f in feeds)
 
 
+def test_discovery_feeds_emits_per_candidate_youtube_feed():
+    # A tracked candidate with a youtube_channel gets a per-candidate YouTube feed
+    # (channel RSS), routed to the audio path by the media-type mapper.
+    feeds = config.discovery_feeds(REPO / "data")
+    yt = [f for f in feeds
+          if f["type"] == "youtube" and f["id"] == "candidate-brandon-johnson-youtube"]
+    assert len(yt) == 1
+    assert "www.youtube.com/feeds/videos.xml?channel_id=" in yt[0]["url"]
+    assert yt[0]["url"].endswith("UCjGcYJCcXiC0epFgVKSv-mQ")
+
+
+def test_discovery_feeds_skip_youtube_for_candidates_without_channel():
+    feeds = config.discovery_feeds(REPO / "data")
+    yt_ids = [f["id"] for f in feeds if f["type"] == "youtube"]
+    # toni-brooks has no confirmed youtube_channel -> no per-candidate youtube feed.
+    assert "candidate-toni-brooks-youtube" not in yt_ids
+    # A dropped (tracked:false) candidate is never emitted.
+    assert "candidate-danielle-carter-walters-youtube" not in yt_ids
+
+
 def test_dropped_candidate_is_excluded_everywhere():
     # A `tracked: false` candidate (danielle-carter-walters) is not processed:
     # not in the extractor's slug list, not polled by discovery.
