@@ -1,0 +1,34 @@
+{
+  "id": "2026-07-09-toni-brooks-for-mayor-platforms",
+  "url": "https://www.brooksforchicago.com/platforms",
+  "outlet": "Toni Brooks for Mayor",
+  "media_type": "website",
+  "title": "Platforms",
+  "published_date": "2026-07-09",
+  "discovered_date": "2026-07-09",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "toni-brooks",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Proposes using funds from eliminating 'ghost vacancies' to provide property tax credits for homeowners and housing credits for renters.",
+      "quote": "For homeowners, that\u2019s a direct property tax credit. For renters, we are structuring it as a matching housing credit passed directly through to lower your rent.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "toni-brooks",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Proposes reallocating funds from 'ghost vacancies' to provide housing credits for renters.",
+      "quote": "For renters, we are structuring it as a matching housing credit passed directly through to lower your rent.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}
