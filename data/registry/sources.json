@@ -69,24 +69,24 @@
       "name": "The Ben Joravsky Show",
       "type": "podcast",
       "url": "https://rss.art19.com/the-ben-joravsky-show",
-      "enabled": false,
-      "notes": "RSS hand-verified 2026-07-09 (live, mp3 enclosures). Chicago-politics interview show. enabled:false until one on-demand run confirms the enclosure->audio->extract path; each episode is a full transcription (Groq cost)."
+      "enabled": true,
+      "notes": "RSS hand-verified 2026-07-09 (live, mp3 enclosures). Chicago-politics interview show. Enabled after the enclosure->downsample->transcribe->extract->review path was verified live 2026-07-09; each candidate episode is a full transcription (Groq cost)."
     },
     {
       "id": "fran-spielman-show-podcast",
       "name": "The Fran Spielman Show",
       "type": "podcast",
       "url": "https://rss.art19.com/the-fran-spielman-show",
-      "enabled": false,
-      "notes": "RSS hand-verified 2026-07-09 (live, mp3 enclosures; PRX/dovetail 12963). Sun-Times weekly City Hall interview show — strong candidate coverage. enabled:false until an on-demand verification run."
+      "enabled": true,
+      "notes": "RSS hand-verified 2026-07-09 (live, mp3 enclosures; PRX/dovetail 12963). Sun-Times weekly City Hall interview show — strong candidate coverage. Verified end-to-end live 2026-07-09 on the Matthew Brewer episode (7 statements, reviewer confirmed 5/7)."
     },
     {
       "id": "city-cast-chicago-podcast",
       "name": "City Cast Chicago",
       "type": "podcast",
       "url": "https://feeds.megaphone.fm/citycastchicago",
-      "enabled": false,
-      "notes": "RSS hand-verified 2026-07-09 (live, mp3 enclosures). Daily Chicago local-news/politics show. enabled:false until an on-demand verification run; higher episode volume than the interview shows."
+      "enabled": true,
+      "notes": "RSS hand-verified 2026-07-09 (live, mp3 enclosures). Daily Chicago local-news/politics show — higher episode volume than the interview shows, so watch its share of daily transcriptions. Enabled 2026-07-09 after the podcast path was verified live."
     }
   ]
 }
