@@ -51,16 +51,17 @@ implementations; tests pass fakes.
 | `schemas.py` | Load JSON Schemas (`schemas/*.schema.json`), `validate(record, name)` |
 | `data_integrity.py` | Walk `data/`, map each file to its schema |
 | `citations.py` | Resolve `"<evidence-id>#<index>"` → statement |
-| `discover.py` | RSS parse, `Ledger` dedup, website-diff, LLM triage |
-| `ingest.py` | Article text (trafilatura), captions, audio→transcript; `domain_of`, title extraction |
-| `transcribe.py` | yt-dlp download + Groq Whisper (the only heavy external step) |
+| `discover.py` | RSS parse (`parse_feed`, `prefer_enclosure` for podcasts), `media_type_for_feed`, `Ledger` dedup, website-diff, LLM triage |
+| `ingest.py` | Article text (trafilatura, browser-UA + injected `headless_fetcher` seam), audio→transcript, pre-supplied `text` passthrough (social); `domain_of`, title |
+| `transcribe.py` | yt-dlp download → **ffmpeg 16 kHz-mono downsample** → Groq Whisper (the only heavy external step; downsample keeps long audio under Groq's size cap) |
+| `bluesky.py` | `fetch_author_feed` — public `getAuthorFeed` (injected HTTP); a candidate's original text posts as items (skips reposts + media-only) |
 | `llm.py` | `OpenRouterLLM.complete_json` — OpenAI-compatible, injectable `post`, retries |
-| `extract.py` | LLM → validated statements; **enforces quote-in-transcript**, housing/other routing |
+| `extract.py` | LLM → statements; **quote-in-transcript**, housing/other routing; **drops** individual schema-invalid statements (keeps valid siblings) |
 | `propose.py` | Build evidence record + stance cells + PR body; write files |
 | `review.py` | Deterministic quote check + model judgment; label + auto-merge gate |
-| `config.py` | Load registries; `candidate_slugs`, `topic_slugs`, `discovery_feeds` |
-| `run.py` | `process_source`: orchestrates ingest→extract→propose for one source |
-| `__main__.py` | CLI: `ingest-url`, `discover`, `review` |
+| `config.py` | Load registries; `candidate_slugs`, `topic_slugs`, `discovery_feeds` (per-candidate Google News + YouTube + Bluesky) |
+| `run.py` | `process_source`: ingest→extract→propose; **retries extract** (`extract_attempts`) reusing the transcript |
+| `__main__.py` | CLI: `ingest-url`, `discover` (routes by feed media-type; Bluesky via `bluesky.py`), `review`, `backfill` |
 
 ## Data model (two layers)
 
@@ -165,40 +166,37 @@ stance) in the proposed PR. This matters more as discovery-expansion widens the 
 
 ## Known gaps / planned work
 
-Two sequenced plans in `docs/` — **backfill is done; discovery expansion is next.**
+Sequenced plans in `docs/` — **backfill and discovery expansion are both done.**
 
 - **Backfill** — [`docs/backfill-plan.md`](./docs/backfill-plan.md). One-time
   historical seed (candidate platform pages + prior press). The `backfill` CLI mode
-  (`pipeline/backfill.py` + `backfill.yml`, **one PR per candidate**) is **built**, and
-  **effectively complete (merged) — 8/11 candidates seeded** (incl. george-cardenas from
-  his platform housing pillar). danielle-carter-walters is dropped (`tracked: false`);
-  lisa-nee and maria-pappas have no position yet (a property-tax-only quote does NOT count
-  as housing). See the plan's status line.
+  (`pipeline/backfill.py` + `backfill.yml`, **one PR per candidate**) is **built + merged
+  — 8/11 candidates seeded** (incl. george-cardenas from his platform housing pillar).
+  danielle-carter-walters is dropped (`tracked: false`); lisa-nee and maria-pappas have no
+  position yet (a property-tax-only quote does NOT count as housing).
 - **Discovery expansion** — [`docs/discovery-expansion-plan.md`](./docs/discovery-expansion-plan.md).
-  **← the next session.** The scheduled `discover` cron is confirmed live (2026-07-09: fired,
-  found no housing, opened a ledger-only PR). Expansion adds media/social source types.
-  Teach the daily cron to ingest media + social, not just name-matched articles:
-  media-type routing (cron currently hardcodes `article`), YouTube-channel + podcast
-  feeds, Bluesky, optional website-diff. Ongoing (raises daily review volume) — roll
-  out one source type at a time.
+  **Done (2026-07-09).** The daily cron now discovers **articles, YouTube** (per-candidate
+  campaign channels + standing WTTW/WGN/City Club), **podcasts** (Ben Joravsky / Fran Spielman /
+  City Cast via RSS enclosures), and **Bluesky** (per-candidate text posts). Feed→media-type
+  routing (`discover.media_type_for_feed`) replaced the old hardcoded `article`; the media path
+  (yt-dlp → ffmpeg 16 kHz-mono downsample → Groq) and the Bluesky text path are live and
+  verified. Each source type was rolled out one at a time with an on-demand `workflow_dispatch`
+  check (see "verify on demand" below). Candidate `youtube_channel`/`bluesky` are populated for
+  those with confirmed accounts; X/IG/TikTok stay manual-intake only.
 
-Current wiring gaps these address: candidate `bluesky`/`youtube_channel` fields are
-all `null` (`website` is now populated for 10/11 after backfill Phase 1); no Bluesky
-feed in discovery; `discover.website_changed()` and the `website` source type exist
-but aren't polled (`cmd_discover` handles only `rss`/`google-news`/`youtube`);
-`cmd_discover` hardcodes `media_type: "article"`. X/IG/TikTok stay manual-intake only.
-**Fetcher gap (found in Phase 1):** the trafilatura fetcher gets a 403 from some
-campaign sites (e.g. Carter-Walters' `dannicformayor.com`); ingesting those needs a
-browser user-agent / headless render — a discovery-expansion item.
-- **Audio/video extraction works** (verified live on a WGN YouTube interview):
-  `ingest-url --type podcast|youtube|social` → yt-dlp downloads audio → Groq
-  transcribes → extractor pulls statements. `youtube` is folded into the audio path
-  (yt-dlp resolves YouTube URLs). `normalize_vtt` still exists for a future real
-  caption-fetch path but isn't wired in. Remaining gap: **discovery forces every
-  found item to `media_type: "article"`**, so the daily cron never triggers the media
-  path — only manual intake does. Making the cron auto-ingest podcasts/videos is part
-  of the planned discovery-expansion work. Audio transcripts are noisier than articles
-  (no speaker labels, ASR errors), so expect more reviewer flags.
+Two follow-ups remain (tracked, not blocking — see `docs/discovery-expansion-plan.md` status):
+- **Live headless fetcher.** The injected `headless_fetcher` seam exists and is offline-tested
+  (`ingest` retries via it when a plain fetch yields `< MIN_ARTICLE_CHARS` of text — a JS shell).
+  The *real* Playwright fetcher + browser install in `cron`/`review`/`intake` CI isn't wired yet.
+  Unblocks JS-rendered campaign pages (e.g. `cardenas4chicago` platform grid) and 403 sites.
+- **Long-audio chunking.** The downsample keeps episodes under Groq's ~25 MB cap up to ~106 min
+  at 32 kbps; longer audio still 413s. Add ffmpeg segment-based chunking + transcript stitching.
+
+`discover.website_changed()` and the `website` source type still exist but aren't polled
+(website-diff was descoped). `normalize_vtt` exists for a future caption-fetch path but isn't
+wired in. Audio transcripts are noisier than articles (no speaker labels, ASR errors) — expect
+more reviewer flags; enable each podcast/YouTube feed deliberately (every candidate episode is a
+full Groq transcription).
 
 ## Non-obvious lessons (paid for in real runs)
 
@@ -218,6 +216,32 @@ browser user-agent / headless render — a discovery-expansion item.
   structural/LLM failures; `cmd_discover`/`cmd_ingest_url`/`run_backfill` all delegate to it
   (no per-caller retry loop, so audio isn't re-transcribed on a hiccup). Keep the per-statement
   schema check — it's also the candidate/topic path-injection guard (see the Security note).
+- **Verify each new source type on demand — don't wait for the daily cron.** `cron.yml`
+  (discover) and `intake.yml` both have `workflow_dispatch`, and `review.yml` fires on any
+  `pipeline`-labelled PR (not a schedule). So validate end-to-end in minutes:
+  `gh workflow run cron.yml` / `gh workflow run intake.yml -f url=… -f type=…` → a PR opens →
+  the reviewer comments. Locally, copy `data/registry` into a scratch dir and run
+  `python -m pipeline --data-dir <scratch> discover` (routing) or `ingest-url` (media path).
+  Live runs catch what fixtures can't: the podcast 413, the intake-retry gap, and the Bluesky
+  mis-attribution below were all found this way, never by the offline suite.
+- **Audio transcription requires ffmpeg + a downsample.** Groq's transcription endpoint caps
+  upload size (~25 MB); a full podcast episode 413s. `transcribe.download_media` re-encodes to
+  16 kHz mono ~32 kbps via ffmpeg (`_downsample_for_whisper`) before upload — CI installs
+  ffmpeg (guard in `cron`/`review`/`intake`), locally `brew install ffmpeg`. Never upload raw
+  yt-dlp output. Downsample covers ~106 min; longer needs chunking (a tracked follow-up).
+- **First-person social posts have no name — scope extraction to the account owner.** A
+  Bluesky post ("As Mayor, I'll cut the red tape…") gives the extractor no attribution signal,
+  so unscoped it mis-attributes (it tagged a Mendoza post to Johnson, live). Per-candidate feeds
+  carry a `candidate`; `cmd_discover` passes `candidates=[that_slug]` for them — the same
+  scoping backfill uses for a candidate's own platform page.
+- **Use `gh`, not raw `git`, for remote operations in this environment.** `git fetch`/`pull`/
+  `checkout` reliably hang/time out here (and leave a stale `.git/index.lock`); `git push`
+  usually works, `gh` (the API) always does. To branch+commit+PR a file with no local fetch/push:
+  `gh api repos/OWNER/REPO/commits/main --jq .sha` → `gh api --method POST …/git/refs -f
+  ref=refs/heads/BRANCH -f sha=SHA` → `gh api --method PUT …/contents/PATH --input payload.json`
+  (payload = base64 `content` + the file's blob `sha` + `branch`) → `gh pr create`. Delete a
+  branch with `gh api --method DELETE …/git/refs/heads/BRANCH`. Don't chain many `git` ops in
+  one shell line — a single hang kills the whole command.
 - When the extractor persistently can't parse a page you can read, the sanctioned
   fallback is a **manual extraction**: pull a *verbatim* quote from the fetched text
   and run it through `process_source` via a hand-authored statements payload — the
