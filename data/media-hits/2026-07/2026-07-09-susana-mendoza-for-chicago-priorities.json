@@ -1,0 +1,45 @@
+{
+  "id": "2026-07-09-susana-mendoza-for-chicago-priorities",
+  "url": "https://susanamendoza.com/priorities",
+  "outlet": "Susana Mendoza for Chicago",
+  "media_type": "website",
+  "title": "Priorities",
+  "published_date": "2026-07-09",
+  "discovered_date": "2026-07-09",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "susana-mendoza",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports using TIF funds for housing development as part of neighborhood economic development.",
+      "quote": "Residents and businesses in these neighborhoods dutifully paid into these TIF funds so that money could be used to bring economic development into these neighborhoods. These funds are to help build new: - Schools - Housing - Parks - Medical Districts - Retail",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "susana-mendoza",
+      "topic": "permitting-reform",
+      "stance": "supports",
+      "summary": "Supports streamlining the permitting process to get construction projects and businesses up and running faster.",
+      "quote": "We\u2019re going to get businesses and construction projects up and running faster. - White Glove Service: streamline the permitting process.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "susana-mendoza",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports increasing the supply of housing across the city, including transit-oriented, workforce, and adaptive reuse housing.",
+      "quote": "We\u2019re going to increase our supply of housing across the city. Build transit-oriented housing. Build workforce housing. Build adaptive reuse housing. Reinvest in our neighborhoods and our downtown.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}
