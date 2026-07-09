@@ -17,8 +17,9 @@ from __future__ import annotations
 import re
 
 TEXT_TYPES = {"article", "website"}
-CAPTION_TYPES = {"youtube"}
-AUDIO_TYPES = {"podcast", "social", "manual"}
+# YouTube goes through the audio path (yt-dlp downloads the audio, then Whisper).
+# yt-dlp resolves YouTube URLs directly; a prior caption-fetch path was broken.
+AUDIO_TYPES = {"podcast", "social", "manual", "youtube"}
 
 
 def slugify(text: str) -> str:
@@ -114,8 +115,6 @@ def ingest(source: dict, *, fetcher=None, downloader=None, transcriber=None) -> 
         transcript, page_title = extract_article(fetcher(source["url"]))
         if not title:
             title = page_title or source["url"]
-    elif media_type in CAPTION_TYPES:
-        transcript = normalize_vtt(fetcher(source["url"]))
     elif media_type in AUDIO_TYPES:
         if downloader is None or transcriber is None:
             from pipeline.transcribe import download_media, transcribe_audio

@@ -116,3 +116,32 @@ def test_ingest_audio_downloads_then_transcribes():
     assert calls["downloaded"] == source["url"]
     assert calls["transcribed"] == "/tmp/fake-audio.m4a"
     assert "legalize apartments" in doc["transcript"]
+
+
+def test_ingest_youtube_routes_through_audio_download_not_html_fetch():
+    # yt-dlp handles YouTube URLs; the old caption path fed page HTML to the
+    # caption parser and produced garbage. YouTube must use the audio path.
+    calls = {}
+
+    def fake_downloader(url):
+        calls["downloaded"] = url
+        return "/tmp/yt-audio.m4a"
+
+    def fake_transcriber(path):
+        return "We should legalize apartments in every neighborhood."
+
+    def boom_fetcher(url):
+        raise AssertionError("YouTube must not use the HTML fetcher")
+
+    source = {
+        "url": "https://www.youtube.com/watch?v=abc123",
+        "outlet": "WGN News",
+        "media_type": "youtube",
+        "title": "Candidate on housing",
+        "published_date": "2026-07-06",
+    }
+    doc = ingest.ingest(source, fetcher=boom_fetcher,
+                        downloader=fake_downloader, transcriber=fake_transcriber)
+    assert calls["downloaded"] == source["url"]
+    assert "legalize apartments" in doc["transcript"]
+    assert doc["media_type"] == "youtube"  # still recorded accurately
