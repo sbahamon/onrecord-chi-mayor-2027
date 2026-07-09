@@ -28,3 +28,22 @@ def test_review_takes_multiple_evidence_paths():
 def test_discover_has_default_output():
     args = build_parser().parse_args(["discover"])
     assert args.pr_body_out.endswith(".md")
+
+
+def test_backfill_requires_input():
+    parser = build_parser()
+    with pytest.raises(SystemExit):
+        parser.parse_args(["backfill"])  # missing --input
+
+
+def test_backfill_parses_options():
+    args = build_parser().parse_args(
+        ["backfill", "--input", "rows.json", "--only", "cand-a",
+         "--out-dir", "bodies", "--skip-ledger"]
+    )
+    assert args.cmd == "backfill"
+    assert args.input == "rows.json"
+    assert args.only == "cand-a"
+    assert args.out_dir == "bodies"
+    assert args.skip_ledger is True
+    assert callable(args.func)
