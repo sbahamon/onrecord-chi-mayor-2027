@@ -1,0 +1,34 @@
+{
+  "id": "2026-07-09-joe-holberg-for-mayor-our-vision-for-chicago",
+  "url": "https://www.joeforchicago.com/priorities",
+  "outlet": "Joe Holberg for Mayor",
+  "media_type": "website",
+  "title": "Our Vision for Chicago",
+  "published_date": "2026-07-09",
+  "discovered_date": "2026-07-09",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "joe-holberg",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports building significantly more housing to address the affordability crisis.",
+      "quote": "We must build significantly more housing in Chicago to address the widening housing affordability crisis.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "joe-holberg",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Aims to ensure residents are not displaced from their neighborhoods.",
+      "quote": "Every Chicagoan deserves a safe, affordable place to call home while working to ensure residents are not displaced from their neighborhood.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}
