@@ -1,0 +1,100 @@
+{
+  "id": "2026-07-08-wbez-org-mayor-johnson-to-introduce-measure-to-protect-chicago-renters",
+  "url": "https://www.wbez.org/housing/2026/05/29/mayor-brandon-johnson-ordinance-protects-chicago-renters-housing",
+  "outlet": "wbez.org",
+  "media_type": "article",
+  "title": "Mayor Johnson to introduce measure to protect Chicago renters",
+  "published_date": "2026-07-08",
+  "discovered_date": "2026-07-08",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Introducing ordinance to update landlord-tenant rules, ban junk fees, require cost transparency, and create Tenant Bill of Rights.",
+      "quote": "Mayor Brandon Johnson plans to introduce a sweeping ordinance that aims to protect the city\u2019s renters from eviction and predatory practices.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Ordinance would establish a rental registry and a new administrative body to resolve disputes.",
+      "quote": "The ordinance would also establish a rental registry, and create a new administrative body that works with renters and landlords to resolve disputes, among other measures.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Ordinance includes ban on hidden junk fees and requires charges to reflect actual costs.",
+      "quote": "According to a draft of the ordinance, updates to the current landlord/tenant ordinance include a ban on hidden junk fees, such as application and processing fees charged on top of rent, and a requirement that any amounts charged to renters reflect actual, documented costs.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Ordinance establishes a Tenant Bill of Rights and requires disclosure of algorithmic pricing tools.",
+      "quote": "It also establishes a Tenant Bill of Rights and requires landlords to disclose if they\u2019re using algorithmic pricing tools.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Creating a rental registry to track ownership and compliance, addressing issues with LLCs shielding landlords.",
+      "quote": "The ordinance would also create a rental registry, which housing advocates have sought for years. The city now has no comprehensive record of its more than 500,000 rental units, nor does it keep a record of who owns the properties and whether they are complying with the law. In addition, more property owners are using limited liability companies, or LLCs, which can shield problem landlords from city enforcement and make it difficult for renters to address their living conditions, as WBEZ reported last year.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Rental registry would require annual fees from landlords, with exemptions for small owner-occupied buildings and nonprofits.",
+      "quote": "The rental registry, Yoon said, would require landlords to pay an annual fee, and the amount would be determined by building size and owner occupancy. Owner-occupied, two- to six-unit buildings and nonprofit affordable housing would be exempt from the fee. Larger building owners would be charged anywhere from $20 to $60 a unit.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Annual fees from rental registry, expected to total around $20 million, would fund initiatives like inspections and enforcement.",
+      "quote": "The annual fees, which the city expects could total around $20 million, would help fund the initiatives laid out in the bill, Yoon said. The funds would go toward improving inspections and enforcement.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Establishing Bureau of Rental Housing Services to administer registry, provide emergency help, and enforce protections.",
+      "quote": "The money would also establish the Bureau of Rental Housing Services, designed to be the city\u2019s first coordinated hub for rental housing. The bureau would administer the rental registry, provide emergency rental and eviction help, provide compliance guidance for landlords and enforce tenant protections.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}
