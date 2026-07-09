@@ -243,3 +243,23 @@ def test_ingest_youtube_routes_through_audio_download_not_html_fetch():
     assert calls["downloaded"] == source["url"]
     assert "legalize apartments" in doc["transcript"]
     assert doc["media_type"] == "youtube"  # still recorded accurately
+
+
+def test_ingest_social_uses_supplied_text_without_fetch_or_download():
+    # A text social post (Bluesky) carries its text on the source; ingest uses it
+    # directly as the transcript — no fetch, no download/transcribe.
+    def boom(*args, **kwargs):
+        raise AssertionError("a text social post must not fetch/download")
+
+    source = {
+        "url": "https://bsky.app/profile/cand.bsky.social/post/3lstextpost",
+        "outlet": "Bluesky — Candidate A",
+        "media_type": "social",
+        "title": "We must legalize apartments citywide to end the housing shortage.",
+        "published_date": "2026-07-08",
+        "text": "We must legalize apartments citywide to end the housing shortage.",
+    }
+    doc = ingest.ingest(source, fetcher=boom, downloader=boom, transcriber=boom)
+    assert doc["transcript"] == source["text"]
+    assert doc["media_type"] == "social"
+    assert doc["title"] == source["title"]

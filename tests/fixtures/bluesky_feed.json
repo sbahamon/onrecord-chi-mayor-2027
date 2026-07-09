@@ -1,0 +1,42 @@
+{
+  "feed": [
+    {
+      "post": {
+        "uri": "at://did:plc:abc123/app.bsky.feed.post/3lstextpost",
+        "cid": "bafyreiexample1",
+        "author": { "handle": "cand.bsky.social", "displayName": "Candidate A" },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "text": "We must legalize apartments citywide to end the housing shortage.",
+          "createdAt": "2026-07-08T14:00:00.000Z"
+        }
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:abc123/app.bsky.feed.post/3lsmediapost",
+        "cid": "bafyreiexample2",
+        "author": { "handle": "cand.bsky.social", "displayName": "Candidate A" },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "text": "",
+          "createdAt": "2026-07-07T14:00:00.000Z",
+          "embed": { "$type": "app.bsky.embed.video" }
+        }
+      }
+    },
+    {
+      "reason": { "$type": "app.bsky.feed.defs#reasonRepost" },
+      "post": {
+        "uri": "at://did:plc:xyz789/app.bsky.feed.post/3lsrepost",
+        "cid": "bafyreiexample3",
+        "author": { "handle": "someone-else.bsky.social", "displayName": "Someone Else" },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "text": "Someone else's post that the candidate merely reposted.",
+          "createdAt": "2026-07-06T14:00:00.000Z"
+        }
+      }
+    }
+  ]
+}
