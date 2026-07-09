@@ -42,6 +42,79 @@ def test_preferred_encoding_falls_back_when_header_missing():
     assert ingest._preferred_encoding("", "utf-8") == "utf-8"
 
 
+# --- default fetcher (browser UA) -------------------------------------------
+
+def test_default_fetcher_sends_a_browser_user_agent():
+    # Some campaign/outlet sites 403 non-browser agents (e.g. dannicformayor.com).
+    # The default fetcher must present a real browser UA. The reviewer re-ingests
+    # the same URL to verify quotes, so whatever fetch ingest uses, review uses too.
+    captured = {}
+
+    class FakeResp:
+        encoding = "utf-8"
+        apparent_encoding = "utf-8"
+        text = "<html>ok</html>"
+
+        def raise_for_status(self):
+            pass
+
+    def fake_get(url, **kwargs):
+        captured["url"] = url
+        captured["headers"] = kwargs.get("headers", {})
+        return FakeResp()
+
+    html = ingest._default_fetcher("https://example.com/x", getter=fake_get)
+    assert html == "<html>ok</html>"
+    ua = captured["headers"].get("User-Agent", "")
+    assert "Mozilla" in ua
+    assert "housing-tracker" not in ua
+
+
+# --- headless fallback for JS-rendered pages --------------------------------
+
+_ARTICLE_SOURCE = {
+    "url": "https://news.example.com/doe-apartments",
+    "outlet": "Example Chicago News",
+    "media_type": "article",
+    "title": None,
+    "published_date": "2026-07-06",
+}
+
+
+def test_ingest_falls_back_to_headless_when_plain_fetch_yields_no_text():
+    # A JS-rendered shell (client-side render) yields no article text to
+    # trafilatura; a headless render that executes JS produces the real HTML.
+    shell = (FIXTURES / "js_rendered.html").read_text()
+    rendered = (FIXTURES / "article.html").read_text()
+    calls = []
+
+    def plain(url):
+        calls.append("plain")
+        return shell
+
+    def headless(url):
+        calls.append("headless")
+        return rendered
+
+    doc = ingest.ingest(dict(_ARTICLE_SOURCE), fetcher=plain, headless_fetcher=headless)
+    assert calls == ["plain", "headless"]  # headless used only after plain came up empty
+    assert "legalize apartment buildings" in doc["transcript"]
+    assert doc["title"] == "Doe pitches citywide apartment legalization"
+
+
+def test_ingest_skips_headless_when_plain_fetch_has_text():
+    rendered = (FIXTURES / "article.html").read_text()
+
+    def plain(url):
+        return rendered
+
+    def headless(url):
+        raise AssertionError("headless must not run when the plain fetch has text")
+
+    doc = ingest.ingest(dict(_ARTICLE_SOURCE), fetcher=plain, headless_fetcher=headless)
+    assert "legalize apartment buildings" in doc["transcript"]
+
+
 def test_make_evidence_id_is_length_capped_for_junk_titles():
     # Some pages (e.g. a CBS browser-notice) yield a monster "title"; the id must
     # stay a safe filename (well under the 255-char FS limit) and not crash writes.

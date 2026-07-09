@@ -19,6 +19,21 @@ TRIAGE_SYSTEM = (
 )
 
 
+# A feed declares its media type via its `type`; discovery routes ingestion on
+# this instead of hardcoding "article" (which sent YouTube/podcast items down the
+# text path). Types not listed here (google-news, rss) are plain articles.
+_FEED_TYPE_TO_MEDIA_TYPE = {
+    "youtube": "youtube",
+    "podcast": "podcast",
+    "bluesky": "social",
+    "website": "website",
+}
+
+
+def media_type_for_feed(feed: dict) -> str:
+    return _FEED_TYPE_TO_MEDIA_TYPE.get(feed.get("type"), "article")
+
+
 def parse_feed(feed_text: str, *, source_id: str) -> list[dict]:
     import feedparser
 

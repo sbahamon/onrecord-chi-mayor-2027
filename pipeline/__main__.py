@@ -24,6 +24,9 @@ from pipeline.llm import OpenRouterLLM
 
 
 _BACKFILL_DIVIDER = "\n\n---\n\n"
+# Retry an item this many times: extract() raises on a lone schema-invalid
+# statement the model sometimes emits, and a retry usually recovers it.
+_DISCOVER_MAX_ATTEMPTS = 3
 
 
 def _today() -> str:
@@ -61,8 +64,6 @@ def cmd_ingest_url(args) -> int:
 
 
 def cmd_discover(args) -> int:
-    import requests
-
     data_dir = Path(args.data_dir)
     cfg = config.load_config(data_dir)
     llm = OpenRouterLLM()
@@ -72,15 +73,17 @@ def cmd_discover(args) -> int:
     # Bound cost + PR size: cap how many fresh items are ingested per run.
     max_items = args.max_items or cfg.get("discovery", {}).get("max_items_per_run", 25)
 
-    def fetch(url):
-        r = requests.get(url, timeout=30, headers={"User-Agent": "housing-tracker/0.1"})
-        r.raise_for_status()
-        return r.text
+    # Fetch feed XML with the same browser-UA fetcher ingest/review use, so a site
+    # that 403s a non-browser agent behaves the same for feed and article fetches.
+    fetch = ingest_mod._default_fetcher
 
     bodies, processed, ingested = [], 0, 0
     for feed in config.discovery_feeds(data_dir):
-        if feed["type"] not in {"rss", "google-news", "youtube"}:
+        if feed["type"] not in {"rss", "google-news", "youtube", "podcast"}:
             continue
+        # The feed declares its media type; route ingestion on it instead of
+        # forcing "article" (which sent youtube/podcast items down the text path).
+        media_type = discover.media_type_for_feed(feed)
         try:
             items = discover.parse_feed(fetch(feed["url"]), source_id=feed["id"])
         except Exception as e:  # noqa: BLE001
@@ -95,17 +98,25 @@ def cmd_discover(args) -> int:
             if not discover.triage(item["title"], llm=llm, model=cfg["models"]["triage"]):
                 continue
             source = {
-                "url": item["url"], "outlet": feed["name"], "media_type": "article",
+                "url": item["url"], "outlet": feed["name"], "media_type": media_type,
                 "title": item["title"], "published_date": _today(),
             }
-            try:
-                result = run.process_source(
-                    source, data_dir=data_dir, llm=llm,
-                    extractor_model=cfg["models"]["extractor"], today=_today(),
-                    candidates=candidates, topics=topics,
-                )
-            except Exception as e:  # noqa: BLE001
-                print(f"skip item {item['url']}: {e}", file=sys.stderr)
+            # extract() deliberately raises on a schema-invalid statement, and a
+            # model occasionally emits one bad field on an otherwise-good page, so
+            # retry (like run_backfill) instead of losing the whole item to one.
+            result, last_error = None, None
+            for _ in range(_DISCOVER_MAX_ATTEMPTS):
+                try:
+                    result = run.process_source(
+                        source, data_dir=data_dir, llm=llm,
+                        extractor_model=cfg["models"]["extractor"], today=_today(),
+                        candidates=candidates, topics=topics,
+                    )
+                    break
+                except Exception as e:  # noqa: BLE001 — transient model/fetch failure; retry
+                    last_error = e
+            if result is None:
+                print(f"skip item {item['url']}: {last_error}", file=sys.stderr)
                 continue
             ingested += 1
             if result.housing_count:
