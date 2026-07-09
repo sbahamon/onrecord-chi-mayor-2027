@@ -27,6 +27,21 @@ def test_make_evidence_id_is_date_prefixed_and_slugged():
     assert got == "2026-07-06-the-ben-joravsky-show-johnson-interview"
 
 
+def test_preferred_encoding_trusts_sniffed_when_header_is_latin1_default():
+    # requests falls back to ISO-8859-1 for charset-less text/html, which turns a
+    # UTF-8 page into mojibake (e.g. cardenas4chicago.com). Trust the sniffed value.
+    assert ingest._preferred_encoding("ISO-8859-1", "utf-8") == "utf-8"
+
+
+def test_preferred_encoding_keeps_an_explicit_header_charset():
+    assert ingest._preferred_encoding("utf-8", "ascii") == "utf-8"
+
+
+def test_preferred_encoding_falls_back_when_header_missing():
+    assert ingest._preferred_encoding(None, "utf-8") == "utf-8"
+    assert ingest._preferred_encoding("", "utf-8") == "utf-8"
+
+
 def test_make_evidence_id_is_length_capped_for_junk_titles():
     # Some pages (e.g. a CBS browser-notice) yield a monster "title"; the id must
     # stay a safe filename (well under the 255-char FS limit) and not crash writes.
