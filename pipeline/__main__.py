@@ -24,9 +24,6 @@ from pipeline.llm import OpenRouterLLM
 
 
 _BACKFILL_DIVIDER = "\n\n---\n\n"
-# Retry an item this many times: extract() raises on a lone schema-invalid
-# statement the model sometimes emits, and a retry usually recovers it.
-_DISCOVER_MAX_ATTEMPTS = 3
 
 
 def _today() -> str:
@@ -104,22 +101,16 @@ def cmd_discover(args) -> int:
                 "url": item["url"], "outlet": feed["name"], "media_type": media_type,
                 "title": item["title"], "published_date": _today(),
             }
-            # extract() deliberately raises on a schema-invalid statement, and a
-            # model occasionally emits one bad field on an otherwise-good page, so
-            # retry (like run_backfill) instead of losing the whole item to one.
-            result, last_error = None, None
-            for _ in range(_DISCOVER_MAX_ATTEMPTS):
-                try:
-                    result = run.process_source(
-                        source, data_dir=data_dir, llm=llm,
-                        extractor_model=cfg["models"]["extractor"], today=_today(),
-                        candidates=candidates, topics=topics,
-                    )
-                    break
-                except Exception as e:  # noqa: BLE001 — transient model/fetch failure; retry
-                    last_error = e
-            if result is None:
-                print(f"skip item {item['url']}: {last_error}", file=sys.stderr)
+            # process_source retries the extraction internally (a lone bad field no
+            # longer loses the item); skip only on a hard ingest/extract failure.
+            try:
+                result = run.process_source(
+                    source, data_dir=data_dir, llm=llm,
+                    extractor_model=cfg["models"]["extractor"], today=_today(),
+                    candidates=candidates, topics=topics,
+                )
+            except Exception as e:  # noqa: BLE001
+                print(f"skip item {item['url']}: {e}", file=sys.stderr)
                 continue
             ingested += 1
             if result.housing_count:
