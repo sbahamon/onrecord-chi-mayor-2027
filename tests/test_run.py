@@ -95,3 +95,17 @@ def test_process_source_with_no_housing_writes_no_evidence(tmp_path):
     assert result.evidence_path is None
     assert result.stance_paths == []
     assert result.housing_count == 0
+
+
+def test_write_other_refuses_path_traversal(tmp_path):
+    # Consistency with write_stance/write_evidence: the other-capture writer must
+    # also refuse an id that escapes data/positions/other/.
+    import pytest
+
+    doc = {
+        "id": "../../ledger", "url": "https://x.example/a", "outlet": "X",
+        "published_date": "2026-07-07",
+    }
+    with pytest.raises(ValueError):
+        run._write_other(doc, [], tmp_path)
+    assert not (tmp_path / "ledger.json").exists()

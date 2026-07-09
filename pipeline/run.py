@@ -30,7 +30,9 @@ class ProcessResult:
 
 
 def _write_other(ingest_doc: dict, other_statements: list[dict], data_dir) -> Path:
-    path = Path(data_dir) / "positions" / "other" / f"{ingest_doc['id']}.json"
+    path = propose._safe_join(
+        Path(data_dir) / "positions" / "other", f"{ingest_doc['id']}.json"
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps({
         "id": ingest_doc["id"],
