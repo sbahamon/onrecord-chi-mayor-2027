@@ -32,6 +32,7 @@ class CandidateBackfill:
     pr_body: str = ""                             # combined, one per candidate
     paths: list = field(default_factory=list)     # evidence + stance Paths to stage
     housing_count: int = 0
+    errors: list = field(default_factory=list)    # (url, message) per row that never succeeded
 
 
 def _source_from_row(row: dict, *, today: str) -> dict:
@@ -46,13 +47,19 @@ def _source_from_row(row: dict, *, today: str) -> dict:
 
 
 def run_backfill(rows, *, data_dir, llm, extractor_model: str, today: str, topics,
-                 ledger=None, fetcher=None, downloader=None,
+                 ledger=None, max_attempts: int = 3, fetcher=None, downloader=None,
                  transcriber=None) -> list[CandidateBackfill]:
     """Process ``rows`` grouped into one :class:`CandidateBackfill` per candidate.
 
     ``rows`` are dicts ``{candidate_slug, url, type?, outlet?, date?, title?}``.
     First-seen candidate order is preserved. No ``max_items`` cap applies — the
     daily trickle limit is for the cron, not a one-time backfill.
+
+    Each row is attempted up to ``max_attempts`` times: ``extract`` deliberately
+    raises on a schema-invalid statement, and a model occasionally emits one bad
+    field on an otherwise-good page, so a retry usually recovers it. A row that
+    never succeeds is recorded in the candidate's ``errors`` (its URL left
+    un-marked in the ledger so it can be re-run) instead of aborting the batch.
     """
     buckets: dict[str, CandidateBackfill] = {}
 
@@ -62,18 +69,30 @@ def run_backfill(rows, *, data_dir, llm, extractor_model: str, today: str, topic
         if bucket is None:
             bucket = buckets[slug] = CandidateBackfill(candidate_slug=slug)
 
-        result = run.process_source(
-            _source_from_row(row, today=today),
-            data_dir=data_dir,
-            llm=llm,
-            extractor_model=extractor_model,
-            today=today,
-            candidates=[slug],   # scope: a candidate's page speaks only for them
-            topics=topics,
-            fetcher=fetcher,
-            downloader=downloader,
-            transcriber=transcriber,
-        )
+        result = None
+        last_error = None
+        for _ in range(max_attempts):
+            try:
+                result = run.process_source(
+                    _source_from_row(row, today=today),
+                    data_dir=data_dir,
+                    llm=llm,
+                    extractor_model=extractor_model,
+                    today=today,
+                    candidates=[slug],   # scope: a candidate's page speaks only for them
+                    topics=topics,
+                    fetcher=fetcher,
+                    downloader=downloader,
+                    transcriber=transcriber,
+                )
+                break
+            except Exception as e:  # noqa: BLE001 — transient model/fetch failure; retry
+                last_error = e
+
+        if result is None:
+            bucket.errors.append((row["url"], str(last_error)))
+            continue
+
         bucket.results.append(result)
         bucket.housing_count += result.housing_count
 
@@ -82,7 +101,7 @@ def run_backfill(rows, *, data_dir, llm, extractor_model: str, today: str, topic
                 bucket.paths.append(p)
 
         if ledger is not None:
-            ledger.mark(row["url"])
+            ledger.mark(row["url"])  # only successful rows are marked seen
 
     if ledger is not None:
         ledger.save()
