@@ -47,6 +47,52 @@ def housing_and_other_llm():
     ])
 
 
+class FlakyLLM:
+    """Returns a structurally-broken payload (no 'statements' key) on the first
+    call, then a valid one — mimicking a transient malformed-JSON response that
+    extract raises on and process_source retries.
+    """
+    def __init__(self, payloads):
+        self._payloads = payloads
+        self.calls = 0
+
+    def complete_json(self, *, model, system, user):
+        idx = min(self.calls, len(self._payloads) - 1)
+        self.calls += 1
+        return self._payloads[idx]
+
+
+def test_process_source_retries_extract_on_structural_failure(tmp_path):
+    # extract.py raises on a structurally-broken response (missing 'statements');
+    # process_source should retry the extraction (reusing the transcript, so no
+    # re-download/re-transcribe) rather than aborting the whole source. (A lone
+    # malformed *statement* is dropped, not retried — see test_extract.py.)
+    good_stmt = {
+        "candidate": "example-candidate-a", "topic": "zoning-reform",
+        "stance": "supports",
+        "summary": "Would legalize apartment buildings in every neighborhood.",
+        "quote": "We can't say we want affordability and then ban apartments in half the\n    city,",
+        "locator": None, "confidence": 0.9, "is_housing": True,
+        "attribution_flag": False,
+    }
+
+    llm = FlakyLLM([{"oops": "malformed"}, {"statements": [good_stmt]}])
+    result = run.process_source(
+        SOURCE,
+        data_dir=tmp_path,
+        llm=llm,
+        extractor_model="fake",
+        today="2026-07-07",
+        candidates=["example-candidate-a"],
+        topics=["zoning-reform"],
+        fetcher=lambda url: ARTICLE_HTML,
+    )
+
+    assert llm.calls == 2  # retried once after the transient structural failure
+    assert result.evidence_path.exists()
+    assert result.housing_count == 1
+
+
 def test_process_source_writes_evidence_stance_and_other(tmp_path):
     result = run.process_source(
         SOURCE,

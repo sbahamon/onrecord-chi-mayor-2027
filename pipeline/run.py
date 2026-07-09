@@ -44,18 +44,38 @@ def _write_other(ingest_doc: dict, other_statements: list[dict], data_dir) -> Pa
     return path
 
 
+def _extract_with_retry(transcript, *, candidates, topics, llm, model, attempts):
+    """Extract statements, retrying on failure.
+
+    ``extract`` deliberately raises on a lone schema-invalid statement (e.g. the
+    model occasionally emits an empty ``quote``); a retry with a fresh model call
+    usually recovers it. Retrying here — not by re-running ``process_source`` —
+    reuses the transcript, so audio sources are not re-downloaded/re-transcribed.
+    """
+    last_error = None
+    for _ in range(max(1, attempts)):
+        try:
+            return extract_mod.extract(
+                transcript, candidates=candidates, topics=topics, llm=llm, model=model
+            )
+        except Exception as e:  # noqa: BLE001 — transient bad field / model error; retry
+            last_error = e
+    raise last_error
+
+
 def process_source(source: dict, *, data_dir, llm, extractor_model: str, today: str,
                    candidates, topics, fetcher=None, downloader=None,
-                   transcriber=None) -> ProcessResult:
+                   transcriber=None, extract_attempts: int = 3) -> ProcessResult:
     ingest_doc = ingest_mod.ingest(
         source, fetcher=fetcher, downloader=downloader, transcriber=transcriber
     )
-    extraction = extract_mod.extract(
+    extraction = _extract_with_retry(
         ingest_doc["transcript"],
         candidates=candidates,
         topics=topics,
         llm=llm,
         model=extractor_model,
+        attempts=extract_attempts,
     )
 
     result = ProcessResult(

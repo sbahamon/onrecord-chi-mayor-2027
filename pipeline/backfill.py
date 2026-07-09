@@ -70,27 +70,25 @@ def run_backfill(rows, *, data_dir, llm, extractor_model: str, today: str, topic
             bucket = buckets[slug] = CandidateBackfill(candidate_slug=slug)
 
         result = None
-        last_error = None
-        for _ in range(max_attempts):
-            try:
-                result = run.process_source(
-                    _source_from_row(row, today=today),
-                    data_dir=data_dir,
-                    llm=llm,
-                    extractor_model=extractor_model,
-                    today=today,
-                    candidates=[slug],   # scope: a candidate's page speaks only for them
-                    topics=topics,
-                    fetcher=fetcher,
-                    downloader=downloader,
-                    transcriber=transcriber,
-                )
-                break
-            except Exception as e:  # noqa: BLE001 — transient model/fetch failure; retry
-                last_error = e
-
-        if result is None:
-            bucket.errors.append((row["url"], str(last_error)))
+        try:
+            # process_source retries the extraction up to max_attempts internally,
+            # reusing the transcript (no re-download/re-transcribe on the model's
+            # occasional bad-field hiccup); record the row on a hard failure.
+            result = run.process_source(
+                _source_from_row(row, today=today),
+                data_dir=data_dir,
+                llm=llm,
+                extractor_model=extractor_model,
+                today=today,
+                candidates=[slug],   # scope: a candidate's page speaks only for them
+                topics=topics,
+                fetcher=fetcher,
+                downloader=downloader,
+                transcriber=transcriber,
+                extract_attempts=max_attempts,
+            )
+        except Exception as e:  # noqa: BLE001
+            bucket.errors.append((row["url"], str(e)))
             continue
 
         bucket.results.append(result)

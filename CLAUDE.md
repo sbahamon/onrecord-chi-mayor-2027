@@ -145,8 +145,9 @@ originate from *untrusted* extractor output driven by a fetched (attacker-influe
 Defense is layered, so keep all three when touching this path: (1) `extract.py` drops any
 statement whose `candidate`/`topic` isn't in the registry set; (2) all three schemas pin
 `candidate`/`topic` to `^[a-z0-9-]+$`, so a traversal value (`../../ledger`) is schema-invalid
-and extraction rejects the source (orchestration retries, by design); (3) `propose._safe_join`
-refuses any resolved write path that escapes its base dir. Don't relax any layer — a crafted
+and `extract.py` **drops that statement** (it never reaches the path builder — the source's
+valid statements still proceed); (3) `propose._safe_join` refuses any resolved write path that
+escapes its base dir. Don't relax any layer — a crafted
 page could otherwise overwrite an arbitrary `data/**.json` (ledger, config, another candidate's
 stance) in the proposed PR. This matters more as discovery-expansion widens the intake surface.
 
@@ -207,9 +208,16 @@ browser user-agent / headless render — a discovery-expansion item.
   to the candidate). The reviewer catches this from the quote text — that's the whole point
   of the two-model, human-approved design. Don't "fix" it by trusting the extractor more.
 - The extractor occasionally emits one schema-invalid statement (confidence -1, empty
-  quote) on an otherwise-good page; `extract.py` *raises* on it by design, so a single
-  bad field aborts the whole source. Handle it where you orchestrate (retry, like
-  `run_backfill` and `cmd_discover`), not by weakening `extract.py`.
+  quote) on an otherwise-good page — sometimes *deterministically* for a given transcript,
+  so a retry can't recover it (found live on a Fran Spielman podcast episode). `extract.py`
+  therefore **drops the individual invalid statement** (logs it, increments `dropped`) and
+  keeps the valid siblings, rather than aborting the whole source. It still *raises* on a
+  structurally broken response (missing `statements` key, not a list) — a whole-response
+  failure with no per-statement recovery — which the orchestrator retries. `run.process_source`
+  wraps the extraction in a retry (`extract_attempts`, default 3) for those transient
+  structural/LLM failures; `cmd_discover`/`cmd_ingest_url`/`run_backfill` all delegate to it
+  (no per-caller retry loop, so audio isn't re-transcribed on a hiccup). Keep the per-statement
+  schema check — it's also the candidate/topic path-injection guard (see the Security note).
 - When the extractor persistently can't parse a page you can read, the sanctioned
   fallback is a **manual extraction**: pull a *verbatim* quote from the fetched text
   and run it through `process_source` via a hand-authored statements payload — the

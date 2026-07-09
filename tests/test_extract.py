@@ -91,14 +91,27 @@ def test_attribution_flag_is_preserved():
     assert result.housing[0]["attribution_flag"] is True
 
 
-def test_malformed_model_output_raises():
+def test_malformed_statement_is_dropped_not_raised():
+    # The model occasionally emits one schema-invalid statement (missing fields,
+    # empty quote, confidence -1) among good ones. Drop just that statement rather
+    # than discarding the whole source.
     llm = FakeLLM({"statements": [{"candidate": "jane-doe"}]})  # missing required fields
-    with pytest.raises(ExtractionError):
-        extract(TRANSCRIPT, candidates=["jane-doe"], topics=["zoning-reform"],
-                llm=llm, model="fake-model")
+    result = extract(TRANSCRIPT, candidates=["jane-doe"], topics=["zoning-reform"],
+                     llm=llm, model="fake-model")
+    assert result.housing == [] and result.other == []
+    assert result.dropped == 1
+
+
+def test_valid_statements_survive_a_malformed_sibling():
+    # A single bad statement must not take down its valid siblings.
+    result = run([base_stmt(), base_stmt(confidence=-1)])  # confidence -1 is schema-invalid
+    assert len(result.housing) == 1
+    assert result.dropped == 1
 
 
 def test_missing_statements_key_raises():
+    # A structurally broken response (no per-statement recovery possible) still
+    # raises — the orchestrator retries the whole extraction.
     llm = FakeLLM({"nope": []})
     with pytest.raises(ExtractionError):
         extract(TRANSCRIPT, candidates=["jane-doe"], topics=["zoning-reform"],
@@ -119,9 +132,12 @@ def test_unknown_topic_is_dropped():
     assert result.dropped == 1
 
 
-def test_topic_with_path_traversal_is_rejected():
-    # A crafted topic must never reach the file-path builder in propose.write_stance
-    # (data_dir/stances/<candidate>/<topic>.json). A non-slug topic fails the schema
-    # pattern, so extraction rejects it outright (orchestration retries, per design).
-    with pytest.raises(ExtractionError):
-        run([base_stmt(topic="../../ledger")])
+def test_topic_with_path_traversal_is_dropped():
+    # SECURITY: a crafted topic must never reach the file-path builder in
+    # propose.write_stance (data_dir/stances/<candidate>/<topic>.json). A non-slug
+    # topic fails the schema pattern (^[a-z0-9-]+$), so the statement is dropped and
+    # never written — the defense holds whether we drop or abort; dropping just
+    # keeps the source's valid statements.
+    result = run([base_stmt(topic="../../ledger")])
+    assert result.housing == [] and result.other == []
+    assert result.dropped == 1

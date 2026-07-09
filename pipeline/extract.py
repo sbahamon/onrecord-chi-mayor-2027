@@ -13,6 +13,7 @@ The LLM is any object with ``complete_json(*, model, system, user) -> dict``.
 from __future__ import annotations
 
 import re
+import sys
 from dataclasses import dataclass, field
 
 from jsonschema.exceptions import ValidationError
@@ -82,7 +83,16 @@ def extract(transcript: str, *, candidates, topics, llm, model: str) -> ExtractR
         try:
             schemas.validate(stmt, "statement")
         except ValidationError as e:
-            raise ExtractionError(f"statement failed schema: {e.message}") from e
+            # The model occasionally emits one malformed statement (empty quote,
+            # confidence -1, missing field) among good ones. Drop just that
+            # statement rather than discarding the whole source. SECURITY: this
+            # keeps the candidate/topic path-injection defense intact — schema
+            # validation still gates every KEPT statement, so a traversal value
+            # (e.g. "../../ledger") is schema-invalid and dropped here, never
+            # reaching propose.write_stance's path builder.
+            print(f"drop schema-invalid statement: {e.message}", file=sys.stderr)
+            result.dropped += 1
+            continue
 
         if stmt["candidate"] not in known:
             result.dropped += 1
