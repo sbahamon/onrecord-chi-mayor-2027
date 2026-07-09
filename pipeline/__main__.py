@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 from pipeline import backfill as backfill_mod
-from pipeline import config, discover, ingest as ingest_mod, run
+from pipeline import bluesky, config, discover, ingest as ingest_mod, run
 from pipeline.llm import OpenRouterLLM
 
 
@@ -76,16 +76,25 @@ def cmd_discover(args) -> int:
 
     bodies, processed, ingested = [], 0, 0
     for feed in config.discovery_feeds(data_dir):
-        if feed["type"] not in {"rss", "google-news", "youtube", "podcast"}:
+        if feed["type"] not in {"rss", "google-news", "youtube", "podcast", "bluesky"}:
             continue
         # The feed declares its media type; route ingestion on it instead of
         # forcing "article" (which sent youtube/podcast items down the text path).
         media_type = discover.media_type_for_feed(feed)
+        # A candidate's own Bluesky feed is first-person with no name in the text,
+        # so scope extraction to that candidate; the extractor would otherwise
+        # mis-attribute the post. Other feeds keep the full candidate set.
+        feed_candidates = [feed["candidate"]] if feed.get("candidate") else candidates
         try:
-            items = discover.parse_feed(
-                fetch(feed["url"]), source_id=feed["id"],
-                prefer_enclosure=(media_type == "podcast"),
-            )
+            if feed["type"] == "bluesky":
+                # Bluesky is a JSON API, not RSS; the client returns the post text
+                # on each item, which ingest uses directly (no fetch/transcribe).
+                items = bluesky.fetch_author_feed(feed["url"])
+            else:
+                items = discover.parse_feed(
+                    fetch(feed["url"]), source_id=feed["id"],
+                    prefer_enclosure=(media_type == "podcast"),
+                )
         except Exception as e:  # noqa: BLE001
             print(f"skip feed {feed['id']}: {e}", file=sys.stderr)
             continue
@@ -100,6 +109,7 @@ def cmd_discover(args) -> int:
             source = {
                 "url": item["url"], "outlet": feed["name"], "media_type": media_type,
                 "title": item["title"], "published_date": _today(),
+                "text": item.get("text"),  # set for Bluesky; None (ignored) otherwise
             }
             # process_source retries the extraction internally (a lone bad field no
             # longer loses the item); skip only on a hard ingest/extract failure.
@@ -107,7 +117,7 @@ def cmd_discover(args) -> int:
                 result = run.process_source(
                     source, data_dir=data_dir, llm=llm,
                     extractor_model=cfg["models"]["extractor"], today=_today(),
-                    candidates=candidates, topics=topics,
+                    candidates=feed_candidates, topics=topics,
                 )
             except Exception as e:  # noqa: BLE001
                 print(f"skip item {item['url']}: {e}", file=sys.stderr)

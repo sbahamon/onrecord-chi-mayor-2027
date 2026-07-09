@@ -69,4 +69,15 @@ def discovery_feeds(data_dir) -> list[dict]:
                 "type": "youtube",
                 "url": f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}",
             })
+        bluesky_handle = c.get("bluesky")
+        if bluesky_handle:
+            feeds.append({
+                "id": f"candidate-{c['slug']}-bluesky",
+                "name": f"Bluesky — {c['name']}",
+                "type": "bluesky",
+                "url": bluesky_handle,  # the bluesky client resolves the handle
+                # A candidate's own posts are first-person with no name; scope
+                # extraction to them so the extractor can't mis-attribute.
+                "candidate": c["slug"],
+            })
     return feeds

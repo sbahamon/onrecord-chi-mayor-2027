@@ -143,7 +143,12 @@ def ingest(source: dict, *, fetcher=None, downloader=None, transcriber=None,
     fetcher = fetcher or _default_fetcher
     title = source.get("title")
 
-    if media_type in TEXT_TYPES:
+    supplied_text = source.get("text")
+    if supplied_text is not None:
+        # Transcript supplied by the caller (a text social post, e.g. Bluesky) —
+        # the post text IS the content, so no fetch or download/transcribe.
+        transcript = supplied_text
+    elif media_type in TEXT_TYPES:
         transcript, page_title = extract_article(fetcher(source["url"]))
         if headless_fetcher is not None and len(transcript.strip()) < MIN_ARTICLE_CHARS:
             # Plain fetch yielded little/no text — likely JS-rendered. Re-fetch
