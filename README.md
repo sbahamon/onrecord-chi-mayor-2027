@@ -1,9 +1,15 @@
-# Chicago Mayoral Candidate Housing Tracker
+# Chicago '27 Mayoral Housing Tracker
 
 A public-facing tracker of where 2027 Chicago mayoral candidates stand on housing
 policy, sourced entirely from their media hits (podcasts, interviews, forums,
 articles). New media is discovered proactively on a schedule; every published
 position links to the media hit it came from.
+
+**Live site:** https://sbahamon.github.io/onrecord-chi-mayor-2027/
+
+> Working on the code? Read [`CLAUDE.md`](./CLAUDE.md) first — it's the practical
+> guide to the architecture, conventions, and the gotchas that only show up in
+> real runs.
 
 ## How it works
 
@@ -55,14 +61,32 @@ Test-driven. Every pipeline change starts with a failing test.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
-.venv/bin/pytest            # fixture tests, no network
-.venv/bin/pytest -m live    # tests that hit real APIs (needs keys)
+.venv/bin/pytest            # backend fixture tests, no network
+cd site && npm ci && node --test   # site data-layer smoke tests
+
+# Live tests + real runs need keys in .env (see .env.example):
+set -a && . ./.env && set +a
+.venv/bin/pytest -m live
 ```
 
-## ⚠️ Before launch
+## Common changes
 
-- Replace the `example-candidate-*` placeholders in
-  `data/registry/candidates.json` with the real declared slate.
-- Verify the source feed URLs in `data/registry/sources.json`.
-- API keys (`OPENROUTER_API_KEY`, `GROQ_API_KEY`) are only needed once live
-  ingest/extract runs; unit tests and the site build need none.
+Most updates are data edits, not code — see [`CLAUDE.md`](./CLAUDE.md) for details.
+
+- **Candidates / topics / models:** edit files in `data/registry/`. Data-integrity
+  tests enforce that everything validates and cross-references resolve.
+- **Submit a media link by hand:** open an *Add a media hit* issue (the `add-media`
+  form) or run the **manual intake** workflow with a URL. Works for TikTok/IG/X too
+  (paste the link, or the text if it can't be fetched).
+- **What the models look for:** prompts live in `pipeline/extract.py` and
+  `pipeline/review.py`.
+
+## Operating notes
+
+- **Secrets** (repo → Settings → Secrets → Actions): `OPENROUTER_API_KEY`,
+  `GROQ_API_KEY`, and `PIPELINE_PAT` (a PAT is required so pipeline PRs trigger the
+  review workflow — `GITHUB_TOKEN` PRs don't).
+- **Human review first:** every position is a PR you approve. Auto-publish is a
+  config switch (`data/registry/config.json`) that ships **off**.
+- **Nothing copyrighted is stored:** only extracted quotes + a source link; the
+  reviewer re-ingests the source to verify.
