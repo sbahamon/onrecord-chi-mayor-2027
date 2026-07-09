@@ -36,6 +36,23 @@ new field into a path or shell without the same treatment.
 
 ## Pieces (roughly in rollout order)
 
+### 0. Source research (one-time parallel scout — do first)
+Pieces #2–#4 need registry data we don't have yet: each candidate's YouTube
+`channel_id` and `bluesky` handle (both are all-`null` today), plus a list of
+Chicago-politics podcast RSS feeds and standing channel IDs (WTTW, WGN, City Club).
+Gathering these is the one genuinely **breadth-shaped, parallelizable** task in this
+plan — independent per-candidate / per-source lookups with no shared state — so it's
+the one place a small fan-out helps (a handful of parallel research subagents, *not*
+a workflow; the implementation pieces below stay sequential and TDD-gated).
+
+Fan out one research task per candidate (+ a couple for standing channels/podcasts),
+each returning a structured row: `slug → {youtube_channel_id, bluesky_handle,
+podcast_feeds[]}` with the source URL it found each from. Then **hand-verify every
+value before it lands in `candidates.json`/`sources.json`** — subagent output is
+untrusted data (see CLAUDE.md's subagent-injection note), and a wrong `channel_id`
+silently pulls the wrong person's videos. This is a ~10-minute scouting step, not a
+build step; its output is the registry edits that unblock #2–#4.
+
 ### 1. Media-type routing in discovery (foundation)
 `cmd_discover` currently sets `media_type: "article"` for every item. Change it to
 derive the media type from the feed, then route accordingly (the audio path already
