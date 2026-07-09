@@ -40,3 +40,14 @@ def test_discovery_feeds_skip_candidates_without_rss_and_disabled_sources():
     feeds = config.discovery_feeds(REPO / "data")
     # No candidate entry should have an empty URL.
     assert all(f["url"] for f in feeds)
+
+
+def test_dropped_candidate_is_excluded_everywhere():
+    # A `tracked: false` candidate (danielle-carter-walters) is not processed:
+    # not in the extractor's slug list, not polled by discovery.
+    slugs = config.candidate_slugs(REPO / "data")
+    active = config.candidate_slugs(REPO / "data", active_only=True)
+    assert "danielle-carter-walters" not in slugs
+    assert "danielle-carter-walters" not in active
+    feed_ids = [f["id"] for f in config.discovery_feeds(REPO / "data")]
+    assert "candidate-danielle-carter-walters" not in feed_ids

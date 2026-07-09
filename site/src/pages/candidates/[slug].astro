@@ -1,9 +1,9 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { loadCandidates, buildCandidateProfile, STANCE_META } from "../../lib/data.js";
+import { loadTrackedCandidates, buildCandidateProfile, STANCE_META } from "../../lib/data.js";
 
 export function getStaticPaths() {
-  return loadCandidates().map((c) => ({ params: { slug: c.slug } }));
+  return loadTrackedCandidates().map((c) => ({ params: { slug: c.slug } }));
 }
 
 const { slug } = Astro.params;

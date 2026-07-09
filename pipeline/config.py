@@ -11,6 +11,12 @@ def _read(data_dir, name):
     return json.loads((Path(data_dir) / "registry" / f"{name}.json").read_text())
 
 
+def _is_tracked(candidate: dict) -> bool:
+    # A candidate explicitly dropped from coverage (`tracked: false`) is not
+    # processed anywhere — no discovery, no extraction, not shown on the site.
+    return candidate.get("tracked", True) is not False
+
+
 def load_config(data_dir) -> dict:
     return _read(data_dir, "config")
 
@@ -31,7 +37,7 @@ def candidate_slugs(data_dir, *, active_only: bool = False) -> list[str]:
     return [
         c["slug"]
         for c in load_candidates(data_dir)
-        if not (active_only and c["status"] in EXCLUDED_STATUSES)
+        if _is_tracked(c) and not (active_only and c["status"] in EXCLUDED_STATUSES)
     ]
 
 
@@ -45,7 +51,7 @@ def discovery_feeds(data_dir) -> list[dict]:
     """
     feeds = [f for f in load_sources(data_dir) if f.get("enabled", True)]
     for c in load_candidates(data_dir):
-        if c["status"] in EXCLUDED_STATUSES:
+        if c["status"] in EXCLUDED_STATUSES or not _is_tracked(c):
             continue
         rss = c.get("google_news_rss")
         if rss:
