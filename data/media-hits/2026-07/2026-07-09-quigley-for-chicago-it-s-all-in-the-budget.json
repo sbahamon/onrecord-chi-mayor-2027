@@ -1,0 +1,23 @@
+{
+  "id": "2026-07-09-quigley-for-chicago-it-s-all-in-the-budget",
+  "url": "https://www.quigleyforchicago.com/",
+  "outlet": "Quigley for Chicago",
+  "media_type": "website",
+  "title": "It's all in the budget",
+  "published_date": "2026-07-09",
+  "discovered_date": "2026-07-09",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "mike-quigley",
+      "topic": "affordable-housing-funding",
+      "stance": "supports-with-conditions",
+      "summary": "Supports an abundant supply of housing as a minimum standard, but links it to first tackling the city's budget crisis.",
+      "quote": "Strong schools in every community, thriving neighborhoods, expanded mental health services, an abundant supply of housing: they aren\u2019t just campaign priorities. They\u2019re minimum standards that all Chicagoans deserve\u2014and we won\u2019t have them until we tackle our budget crisis head on.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}
