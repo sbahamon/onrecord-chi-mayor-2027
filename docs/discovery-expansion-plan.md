@@ -1,12 +1,28 @@
 # Discovery expansion plan — media + social sources
 
-**Status:** planned, not started. **Backfill is done** ([`backfill-plan.md`](./backfill-plan.md)) —
-this is the next session. **Read `CLAUDE.md` first.**
+**Status: COMPLETE (2026-07-09).** All source types shipped and merged to `main` — the daily
+`discover` cron now finds articles, **YouTube** (candidate + standing channels), **podcasts**,
+and **Bluesky**. **Backfill is done** ([`backfill-plan.md`](./backfill-plan.md)). **Read
+`CLAUDE.md` first.** The rest of this doc is the original plan, kept for historical context.
 
-The article path is already **live**: the scheduled `discover` cron fired 2026-07-09, found
-no housing, and opened a ledger-only PR (working as designed). This plan adds the *other*
-source types. Note `config.discovery_feeds()` now skips `tracked: false` candidates, so any
-per-candidate feeds you add here (YouTube/Bluesky) inherit that drop filter for free.
+**What shipped** (each TDD + live-verified, merged):
+- **Foundation** — browser-UA fetcher + injected headless seam + feed→media-type routing (#22)
+- **YouTube** channel feeds — per-candidate + standing (WTTW/WGN/City Club) (#23)
+- **Podcasts** — `<enclosure>` audio capture + long-audio transcription downsample (#24)
+- **Extraction robustness** — drop individual invalid statements / retry structural failures (#26)
+- **Bluesky** — text-only social, candidate-scoped attribution (#27)
+
+**Live verification caught three real bugs offline tests couldn't:** Groq's 413 on long
+podcast audio (→ 16 kHz mono ffmpeg downsample), the intake path aborting on an extractor
+hiccup (→ retry moved into `process_source` + drop-invalid), and first-person Bluesky posts
+mis-attributed (→ scope extraction to the feed's candidate).
+
+**Remaining (tracked follow-ups, not blocking):**
+- **Live Playwright headless fetcher** for JS-rendered pages — the injected `headless_fetcher`
+  seam exists and is offline-tested; wire a real browser into `cron`/`review`/`intake` CI.
+- **Chunk very-long (~2 h+) audio** — the downsample covers up to ~106 min at 32 kbps.
+
+X / Instagram / TikTok remain **manual-intake only** (no free feed / ToS).
 
 ## Why
 
