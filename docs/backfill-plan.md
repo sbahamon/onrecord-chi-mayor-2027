@@ -1,6 +1,8 @@
 # Backfill plan — historical data for announced candidates
 
-**Status:** planned, not started. Execute in a fresh session (see "How to run").
+**Status:** **Phase 1 done (2026-07-08)** — the `backfill` CLI mode is built and
+Phase 1 ran live (6 candidate PRs, all `ai-verified`, awaiting human merge).
+**Phase 2 is next** and needs no new code. See "Phase 1 outcome" below.
 **Read `CLAUDE.md` first.**
 
 ## Why
@@ -31,20 +33,69 @@ misattribution risk that press coverage carries. One high-value page per candida
 
 Expected: ~11 small PRs, matrix fills with defensible positions quickly.
 
+#### Phase 1 outcome (2026-07-08)
+
+Ran via the `backfill` mode + `.github/workflows/backfill.yml`. Not all 11
+candidates had a usable platform page, so Phase 1 covered **6**; the rest move to
+Phase 2 / later work:
+
+| Candidate | Phase 1 | Source used / why deferred |
+|-----------|---------|----------------------------|
+| brandon-johnson | ✅ PR | dedicated `/issues/afforable-housing` page (richest) |
+| joe-holberg | ✅ PR | dedicated `/priorities` page |
+| susana-mendoza | ✅ PR | `/priorities` ("Build, Build, Build") |
+| toni-brooks | ✅ PR | `/platforms` (tax-relief framing) |
+| mike-quigley | ✅ PR | homepage line only (thin) |
+| liam-stanton | ✅ PR | homepage plank; **hand-extracted** (see below) |
+| matthew-brewer | ⏭ Phase 2 | live site, no housing/issues page |
+| george-cardenas | ⏭ Phase 2 | mayoral site's platform page states no housing |
+| lisa-nee | ⏭ Phase 2 | bio-only site, no platform page |
+| maria-pappas | ⏭ later | no campaign site yet (launch deferred) |
+| danielle-carter-walters | ⏭ blocked | site 403s the fetcher — **needs browser UA in `ingest`** |
+
+`website` is now populated for 10/11 candidates (all but Pappas).
+
+**Two lessons from the live run:**
+- **Manual-extraction fallback.** The auto-extractor persistently failed on
+  Stanton's busy multi-plank homepage (emitted a schema-invalid empty-quote
+  statement; `extract.py` rightly rejects it). Fix: fetch the page through the same
+  `ingest`, take a **verbatim** quote from that text, and feed it to
+  `run.process_source` via a hand-authored statements payload (a fake `llm`). The
+  `quote_in_transcript` guard still runs and `review.yml` still re-verifies — so the
+  record is as trustworthy as a model-extracted one. Never write a quote from memory.
+- **Fetcher-blocked sites.** Carter-Walters' site returns 403 to the trafilatura
+  fetcher. Getting her (and similar) platform pages needs a browser user-agent /
+  headless render in `ingest.py` — tracked as a discovery-expansion item, not a
+  Phase 2 press item.
+
 ### Phase 2 — curated key press per candidate
 For each candidate, the 3–5 most substantive housing interviews/articles (find via
 dated web searches). Batch **one PR per candidate**. Adds specifics the platform
 boilerplate lacks. Expect more `ai-flagged` items here (press attribution is noisier)
 — that's the reviewer doing its job.
 
+**Ready to run — no new code.** Build a rows file (same shape as
+`data/backfill/phase1.json`) with `type: "article"` entries and run the same
+`backfill` mode / `backfill.yml` workflow (its `slugs` input can target a subset).
+Priorities for Phase 2:
+- **The 4 candidates Phase 1 couldn't seed from a platform page** —
+  matthew-brewer, george-cardenas, lisa-nee, and (once a browser-UA fetch exists)
+  danielle-carter-walters. These have *no* matrix data yet, so press is their only
+  route in.
+- Then depth for the 6 already seeded, where a platform page was thin (esp.
+  mike-quigley, whose only Phase 1 signal was a single homepage line).
+- maria-pappas stays out until she launches a campaign (press coverage of a
+  non-candidate isn't a stated position).
+
 ### Phase 3 — optional comprehensiveness
 A one-time date-ranged news sweep only if Phases 1–2 leave gaps. Noisiest, highest
 review burden, lowest signal per item. The daily cron already covers everything new.
 
-## Code to add: a `backfill` CLI mode
+## The `backfill` CLI mode — **built (2026-07-08)**
 
-`ingest-url` is one-URL→one-PR; the cron is one big daily PR. Backfill needs a middle
-mode. Add `python -m pipeline backfill`:
+`ingest-url` is one-URL→one-PR; the cron is one big daily PR. Backfill is the middle
+mode. Implemented in `pipeline/backfill.py` (`run_backfill`) + `cmd_backfill` in
+`pipeline/__main__.py`, driven by `.github/workflows/backfill.yml`. `python -m pipeline backfill`:
 
 - **Input:** a JSON/CSV list of `{candidate_slug, url, type, outlet?, date?}` rows
   (or, for Phase 1, just read each candidate's `website`/issues page).
@@ -56,9 +107,20 @@ mode. Add `python -m pipeline backfill`:
 - Build it TDD like everything else (fixtures + injected llm/fetcher). It's mostly
   orchestration over already-tested units (`ingest`, `extract`, `propose`).
 
-Prep alongside the code:
-- Populate `website` fields in `candidates.json`.
-- For Phase 1, collect the 11 issues-page URLs (web search each candidate).
+**As built, two behaviors beyond the original sketch (both from the live run):**
+- **Per-row retry + loud failure.** `extract.py` deliberately *raises* on a
+  schema-invalid statement (a trust decision — a model not following the contract
+  isn't half-trusted). Models occasionally emit one bad field on an otherwise-good
+  page, so `run_backfill` retries each row (`max_attempts=3`); a row that never
+  succeeds is recorded and its URL left un-marked in the ledger (so it can be re-run),
+  and `cmd_backfill` exits non-zero so the workflow job fails visibly instead of
+  opening an empty PR.
+- **PR fan-out is a workflow matrix, not Python.** PR creation lives in Actions.
+  `backfill.yml` runs one isolated `backfill --only <slug>` job per candidate (so
+  `add-paths: data` stages only that candidate's files), opens the PR via
+  `PIPELINE_PAT` (so `review.yml` fires), and a final `seed-ledger` job records all
+  URLs once — keeping the per-candidate PRs free of `ledger.json` merge conflicts. A
+  `slugs` dispatch input re-runs a subset.
 
 ## Related gaps worth folding in (optional, decide per scope)
 
