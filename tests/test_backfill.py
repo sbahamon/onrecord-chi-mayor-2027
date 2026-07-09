@@ -148,6 +148,58 @@ def test_marks_every_processed_url_in_the_ledger(tmp_path):
     assert not reloaded.is_new("https://b.example/issues")
 
 
+class FlakyLLM:
+    """Fails (returns an out-of-range statement) N times, then returns good output.
+
+    Models are nondeterministic; deepseek occasionally emits one malformed
+    statement (confidence -1, empty quote) that ``extract`` rightly rejects by
+    raising. For a one-time backfill of a page we know has content, retrying the
+    row usually yields a clean batch — that resilience is what these tests pin.
+    """
+
+    def __init__(self, fail_times, good):
+        self.remaining_fails = fail_times
+        self.good = good
+        self.calls = 0
+
+    def complete_json(self, *, model, system, user):
+        self.calls += 1
+        if self.remaining_fails > 0:
+            self.remaining_fails -= 1
+            bad = dict(self.good, confidence=-1)  # schema minimum is 0 -> extract raises
+            return {"statements": [bad]}
+        return {"statements": [self.good]}
+
+
+def test_retries_a_transient_extraction_failure(tmp_path):
+    llm = FlakyLLM(fail_times=1, good=housing_stmt("cand-a"))
+    buckets = backfill.run_backfill(
+        [row("cand-a", "https://a.example/issues", "A for Mayor")],
+        data_dir=tmp_path, llm=llm, extractor_model="fake",
+        today="2026-07-07", topics=["zoning-reform"], max_attempts=3,
+        fetcher=lambda url: ARTICLE_HTML,
+    )
+    assert llm.calls == 2  # failed once, then succeeded
+    assert buckets[0].housing_count == 1
+    assert buckets[0].errors == []
+
+
+def test_a_persistently_failing_row_is_recorded_not_raised(tmp_path):
+    llm = FlakyLLM(fail_times=99, good=housing_stmt("cand-a"))  # never recovers
+    ledger = discover.Ledger(tmp_path / "ledger.json")
+    buckets = backfill.run_backfill(
+        [row("cand-a", "https://a.example/issues", "A for Mayor")],
+        data_dir=tmp_path, llm=llm, extractor_model="fake",
+        today="2026-07-07", topics=["zoning-reform"], ledger=ledger,
+        max_attempts=3, fetcher=lambda url: ARTICLE_HTML,
+    )
+    assert llm.calls == 3  # tried max_attempts, gave up
+    assert buckets[0].housing_count == 0
+    assert len(buckets[0].errors) == 1
+    # a failed URL is NOT marked seen, so it can be re-run later
+    assert discover.Ledger(tmp_path / "ledger.json").is_new("https://a.example/issues")
+
+
 def test_without_a_ledger_no_ledger_file_is_written(tmp_path):
     rows = [row("cand-a", "https://a.example/issues", "A for Mayor")]
     llm = FakeLLM({"cand-a": [housing_stmt("cand-a")]})

@@ -163,7 +163,13 @@ def cmd_backfill(args) -> int:
     if args.manifest_out:
         _write(args.manifest_out, json.dumps(manifest, indent=2))
     print(f"candidates={len(buckets)} housing={total_housing}")
-    return 0
+
+    # Surface rows that never succeeded (even after retries) loudly, and exit
+    # non-zero so the workflow marks the job failed instead of opening an empty PR.
+    errors = [(b.candidate_slug, url, msg) for b in buckets for (url, msg) in b.errors]
+    for slug, url, msg in errors:
+        print(f"ERROR backfill {slug} {url}: {msg}", file=sys.stderr)
+    return 1 if errors else 0
 
 
 def cmd_review(args) -> int:

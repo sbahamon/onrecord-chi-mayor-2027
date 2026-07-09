@@ -8,7 +8,12 @@ name: backfill
 # Input is in-repo (not untrusted issue/PR text), so no sanitization dance is needed.
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      slugs:
+        description: "Comma-separated candidate slugs to run (blank = all rows in phase1.json)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -26,13 +31,19 @@ jobs:
           python-version: "3.12"
       - name: Compute candidate matrix from the row list
         id: slugs
+        env:
+          # Untrusted dispatch input arrives only as an env var, parsed in Python.
+          ONLY_SLUGS: ${{ github.event.inputs.slugs }}
         run: |
           python - <<'PY' >> "$GITHUB_OUTPUT"
-          import json
+          import json, os, re
           from pathlib import Path
           raw = json.loads(Path("data/backfill/phase1.json").read_text())
           rows = raw["rows"] if isinstance(raw, dict) else raw
           slugs = sorted({r["candidate_slug"] for r in rows})
+          only = [s for s in re.split(r"[,\s]+", os.environ.get("ONLY_SLUGS", "")) if s]
+          if only:
+              slugs = [s for s in slugs if s in only]
           print("slugs=" + json.dumps(slugs))
           PY
 
