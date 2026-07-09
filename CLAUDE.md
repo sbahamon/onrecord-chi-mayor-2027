@@ -77,7 +77,10 @@ Stance enum: `supports | supports-with-conditions | opposes | mixed | no-positio
 ## Registries (`data/registry/`, hand-edited)
 
 - `candidates.json` — slug, name, status (`incumbent|declared|rumored|withdrawn|example`),
-  optional website/bluesky/youtube_channel, and a per-name `google_news_rss`.
+  optional website/bluesky/youtube_channel, and a per-name `google_news_rss`. Optional
+  `tracked` (default true) + `drop_reason`: `tracked: false` **drops a candidate everywhere**
+  — off the site matrix/profiles, excluded from discovery/extraction (`config._is_tracked`),
+  and listed on the methodology "Candidates we don't track" section instead.
 - `topics.json` — the matrix rows (housing taxonomy).
 - `sources.json` — shared discovery feeds (Google News, outlet pages).
 - `config.json` — model ids, `auto_merge_enabled`, discovery caps.
@@ -100,6 +103,9 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
 
 - **Add/remove a candidate:** edit `data/registry/candidates.json`. Give a lowercase-kebab
   `slug`, a `status`, and a `google_news_rss` (pattern: `https://news.google.com/rss/search?q=<url-encoded "Name" Chicago mayor>&hl=en-US&gl=US&ceid=US:en`). `discovery_feeds()` picks it up automatically. Active-only excludes `example`/`withdrawn`.
+- **Drop a candidate from the tracker (e.g. a long-shot):** set `"tracked": false` (+ a
+  `"drop_reason"`) on their `candidates.json` record. Removes them from the matrix/profiles
+  and from discovery; they show on the methodology "don't track" list. One-line flip to re-add.
 - **Add a housing topic (matrix row):** add to `data/registry/topics.json` (unique slug, `order`). The matrix and profiles pick it up on rebuild.
 - **Change a model or discovery cap:** `data/registry/config.json`.
 - **Change what the extractor/reviewer looks for:** the prompts are `SYSTEM_PROMPT` in
@@ -147,16 +153,18 @@ pattern for any new workflow that reads issue/PR/comment text.
 
 ## Known gaps / planned work
 
-Two sequenced plans in `docs/` (run **backfill first**, then discovery expansion):
+Two sequenced plans in `docs/` — **backfill is done; discovery expansion is next.**
 
 - **Backfill** — [`docs/backfill-plan.md`](./docs/backfill-plan.md). One-time
   historical seed (candidate platform pages + prior press). The `backfill` CLI mode
   (`pipeline/backfill.py` + `backfill.yml`, **one PR per candidate**) is **built**, and
-  **Phase 1 + Phase 2 batch 1 ran 2026-07-08, all merged** — 7/11 candidates seeded.
-  The other 4 have no verifiable media-sourced housing position yet (deferred/held; a
-  property-tax-only quote does NOT count as housing). Remaining backfill work is optional
-  depth. See the plan's outcome tables.
+  **effectively complete (merged) — 8/11 candidates seeded** (incl. george-cardenas from
+  his platform housing pillar). danielle-carter-walters is dropped (`tracked: false`);
+  lisa-nee and maria-pappas have no position yet (a property-tax-only quote does NOT count
+  as housing). See the plan's status line.
 - **Discovery expansion** — [`docs/discovery-expansion-plan.md`](./docs/discovery-expansion-plan.md).
+  **← the next session.** The scheduled `discover` cron is confirmed live (2026-07-09: fired,
+  found no housing, opened a ledger-only PR). Expansion adds media/social source types.
   Teach the daily cron to ingest media + social, not just name-matched articles:
   media-type routing (cron currently hardcodes `article`), YouTube-channel + podcast
   feeds, Bluesky, optional website-diff. Ongoing (raises daily review volume) — roll
