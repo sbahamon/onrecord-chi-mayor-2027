@@ -104,11 +104,21 @@ def extract_article_text(html: str) -> str:
     return extract_article(html)[0]
 
 
+def _preferred_encoding(header_encoding: str | None, apparent_encoding: str | None) -> str:
+    # requests defaults to ISO-8859-1 for charset-less text/html, which turns a
+    # UTF-8 page into mojibake. When the header charset is absent or that latin-1
+    # default, trust the sniffed (apparent) encoding instead.
+    if not header_encoding or header_encoding.lower() == "iso-8859-1":
+        return apparent_encoding or header_encoding or "utf-8"
+    return header_encoding
+
+
 def _default_fetcher(url: str) -> str:
     import requests
 
     resp = requests.get(url, timeout=30, headers={"User-Agent": "housing-tracker/0.1"})
     resp.raise_for_status()
+    resp.encoding = _preferred_encoding(resp.encoding, resp.apparent_encoding)
     return resp.text
 
 
