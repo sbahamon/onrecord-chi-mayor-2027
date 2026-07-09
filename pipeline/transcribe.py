@@ -9,6 +9,7 @@ discards its filesystem after each job).
 from __future__ import annotations
 
 import os
+import subprocess
 import tempfile
 from pathlib import Path
 
@@ -16,7 +17,15 @@ GROQ_ENDPOINT = "https://api.groq.com/openai/v1/audio/transcriptions"
 
 
 def download_media(url: str, *, dest_dir: str | None = None) -> str:
-    """Download best audio for ``url`` and return the local file path."""
+    """Download best audio for ``url``, downsample it, and return the local path.
+
+    Whisper only consumes 16 kHz mono, so we re-encode to a compact 16 kHz mono
+    low-bitrate MP3 before returning. This is lossless for transcription yet keeps
+    long-form audio (podcast episodes, long interviews) under Groq's upload-size
+    limit — a ~40-minute episode drops from ~65 MB to ~9 MB. Requires ffmpeg
+    (bundled on CI runners). Very long (~2 h+) audio may still exceed the cap;
+    chunking is a planned follow-up.
+    """
     import yt_dlp
 
     dest_dir = dest_dir or tempfile.mkdtemp(prefix="httrack-")
@@ -30,7 +39,25 @@ def download_media(url: str, *, dest_dir: str | None = None) -> str:
     }
     with yt_dlp.YoutubeDL(opts) as ydl:
         info = ydl.extract_info(url, download=True)
-        return ydl.prepare_filename(info)
+        raw_path = ydl.prepare_filename(info)
+
+    return _downsample_for_whisper(raw_path)
+
+
+def _downsample_for_whisper(raw_path: str) -> str:
+    """Re-encode audio to 16 kHz mono ~32 kbps MP3 (Whisper-friendly, compact)."""
+    compact_path = str(Path(raw_path).with_suffix(".16k.mp3"))
+    result = subprocess.run(
+        ["ffmpeg", "-y", "-i", raw_path,
+         "-ac", "1", "-ar", "16000", "-b:a", "32k", compact_path],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"ffmpeg downsample failed (exit {result.returncode}): "
+            f"{result.stderr[-500:]}"
+        )
+    return compact_path
 
 
 def transcribe_audio(path: str, *, model: str = "whisper-large-v3-turbo",

@@ -19,6 +19,8 @@ jobs:
           python-version: "3.12"
       - name: Install
         run: |
+          # Audio transcription downsamples with ffmpeg before upload; ensure it exists.
+          ffmpeg -version >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y ffmpeg)
           python -m pip install --upgrade pip
           pip install -e ".[live]"
       - name: Run discovery
