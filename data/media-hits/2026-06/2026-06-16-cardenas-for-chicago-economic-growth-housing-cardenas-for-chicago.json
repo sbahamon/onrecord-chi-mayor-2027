@@ -1,0 +1,89 @@
+{
+  "id": "2026-06-16-cardenas-for-chicago-economic-growth-housing-cardenas-for-chicago",
+  "url": "https://cardenas4chicago.com/pillar-economic-growth.html",
+  "outlet": "Cardenas for Chicago",
+  "media_type": "website",
+  "title": "Economic Growth & Housing \u2014 Cardenas for Chicago",
+  "published_date": "2026-06-16",
+  "discovered_date": "2026-07-09",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "george-cardenas",
+      "topic": "zoning-reform",
+      "stance": "supports",
+      "summary": "Supports expanding as-of-right housing near transit and commercial areas and using neighborhood typologies instead of one-size-fits-all zoning.",
+      "quote": "Expand as-of-right housing near CTA/Metra, bus corridors, and commercial districts",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "zoning-reform",
+      "stance": "supports",
+      "summary": "Supports using neighborhood typologies instead of one-size-fits-all zoning.",
+      "quote": "Use neighborhood typologies instead of one-size-fits-all zoning",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "permitting-reform",
+      "stance": "supports",
+      "summary": "Supports accelerating permitting with accountable timelines.",
+      "quote": "Accelerate permitting with accountable timelines",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports prioritizing deeply affordable housing pipeline delivery.",
+      "quote": "Prioritize deeply affordable housing pipeline delivery",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Supports expanding anti-displacement support including legal aid and rental help.",
+      "quote": "Expand anti-displacement support: legal aid, rental help, and preservation funds",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "homelessness",
+      "stance": "supports",
+      "summary": "Describes an integrated strategy that treats homelessness as part of the housing system.",
+      "quote": "Our strategy treats homelessness, affordability, preservation, and ownership as one integrated civic system \u2014 not separate silos.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports expanding starter-home production for working families and first-time buyers.",
+      "quote": "Expand starter-home production for working families and first-time buyers",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}
