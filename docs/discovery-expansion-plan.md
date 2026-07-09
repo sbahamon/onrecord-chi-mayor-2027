@@ -62,6 +62,23 @@ Wiring them means: fetch each `website` source, diff against a stored hash, and 
 changed, extract candidate-relevant article links to enqueue. This is closer to
 scraping and noisier — do it last, or skip if Google News coverage is enough.
 
+### 6. Fetcher robustness — browser-UA / headless for blocked + JS-rendered pages
+Found the hard way during the backfill (Phase 1–2): the default `ingest` fetcher
+(`_default_fetcher`, `User-Agent: housing-tracker/0.1` + trafilatura) can't handle
+some campaign/outlet sites, and **whatever fix we add must apply to the reviewer too**
+— `review.yml` re-ingests the same URL to verify quotes, so if our fetch can't read a
+page, the reviewer can't either.
+- **403 to non-browser agents** (seen intermittently on `dannicformayor.com`). Cheap
+  first step: send a real browser `User-Agent` from `_default_fetcher`.
+- **JS-rendered content** where the housing text lives in serialized JSON / client-
+  rendered components trafilatura never sees (`dannicformayor.com` platform grid,
+  `cardenas4chicago.com/platform.html`). These need a headless render (e.g. Playwright)
+  to produce HTML both ingest and the reviewer can read.
+Keep the fetcher injected so a headless fetcher can be swapped in and TDD'd offline.
+This unblocks the website-diff feature (#5) and any candidate platform page that a
+plain fetch can't reach (e.g. danielle-carter-walters, deferred in the backfill for
+exactly this reason).
+
 ## Review-volume controls to add
 - Keep `discovery.max_items_per_run`; consider a **per-source-type cap** so one noisy
   podcast feed can't dominate a run.

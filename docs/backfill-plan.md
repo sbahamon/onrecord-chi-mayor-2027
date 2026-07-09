@@ -1,9 +1,10 @@
 # Backfill plan — historical data for announced candidates
 
-**Status:** **Phase 1 done (2026-07-08)** — the `backfill` CLI mode is built and
-Phase 1 ran live (6 candidate PRs, all `ai-verified`, awaiting human merge).
-**Phase 2 is next** and needs no new code. See "Phase 1 outcome" below.
-**Read `CLAUDE.md` first.**
+**Status:** **Phase 1 + Phase 2 batch 1 done (2026-07-08), all merged.** `backfill`
+mode built; 7 of 11 candidates seeded (6 from platform pages, +1 from press). The
+other 4 have no verifiable media-sourced housing position yet (deferred/held — see
+the outcome tables). Remaining work is optional depth (thin cells, deferred-candidate
+revisits) and the separate discovery-expansion plan. **Read `CLAUDE.md` first.**
 
 ## Why
 
