@@ -1,7 +1,12 @@
 # Discovery expansion plan — media + social sources
 
-**Status:** planned, not started. **Run AFTER the backfill** ([`backfill-plan.md`](./backfill-plan.md)).
-**Read `CLAUDE.md` first.**
+**Status:** planned, not started. **Backfill is done** ([`backfill-plan.md`](./backfill-plan.md)) —
+this is the next session. **Read `CLAUDE.md` first.**
+
+The article path is already **live**: the scheduled `discover` cron fired 2026-07-09, found
+no housing, and opened a ledger-only PR (working as designed). This plan adds the *other*
+source types. Note `config.discovery_feeds()` now skips `tracked: false` candidates, so any
+per-candidate feeds you add here (YouTube/Bluesky) inherit that drop filter for free.
 
 ## Why
 

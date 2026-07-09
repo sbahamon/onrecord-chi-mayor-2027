@@ -1,10 +1,14 @@
 # Backfill plan — historical data for announced candidates
 
-**Status:** **Phase 1 + Phase 2 batch 1 done (2026-07-08), all merged.** `backfill`
-mode built; 7 of 11 candidates seeded (6 from platform pages, +1 from press). The
-other 4 have no verifiable media-sourced housing position yet (deferred/held — see
-the outcome tables). Remaining work is optional depth (thin cells, deferred-candidate
-revisits) and the separate discovery-expansion plan. **Read `CLAUDE.md` first.**
+**Status:** **Backfill effectively complete (2026-07-09), all merged.** `backfill`
+mode built; **8 of 11 candidates seeded** — johnson, mendoza, brooks, quigley, holberg,
+stanton, brewer, **and george-cardenas** (added 07-09 from his platform housing pillar
+`cardenas4chicago.com/pillar-economic-growth.html`, which the Phase-2 pass missed because
+the platform page's pillar links are JS-rendered — not the accent). **danielle-carter-walters
+was dropped** from the tracker (`tracked: false`; on the methodology "don't track" list).
+Still off the matrix: **lisa-nee** (just launched) and **maria-pappas** (no campaign) —
+both tracked, empty columns. The outcome tables below are historical; this line is the
+current truth. Remaining work is the separate discovery-expansion plan. **Read `CLAUDE.md` first.**
 
 ## Why
 
