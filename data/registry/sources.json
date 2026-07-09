@@ -39,6 +39,30 @@
       "url": "https://chicagoreader.com/category/news-politics/",
       "enabled": true,
       "notes": "Home of the Ben Joravsky Show; monitor for episode posts and columns."
+    },
+    {
+      "id": "city-club-chicago-youtube",
+      "name": "City Club of Chicago (YouTube)",
+      "type": "youtube",
+      "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCmmqVuFMva-PXvotPeLnqvw",
+      "enabled": true,
+      "notes": "Channel_id hand-verified 2026-07-09. Posts candidate/official forum speeches — low volume, high relevance, so enabled."
+    },
+    {
+      "id": "wttw-chicago-tonight-youtube",
+      "name": "WTTW / Chicago Tonight (YouTube)",
+      "type": "youtube",
+      "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC0H7JADShpxWDjGQ4WhXPtQ",
+      "enabled": false,
+      "notes": "Channel_id hand-verified 2026-07-09. High-volume general news; triage filters by title but every new video costs a triage call. Enable after a per-source-type cap exists."
+    },
+    {
+      "id": "wgn-news-youtube",
+      "name": "WGN News (YouTube)",
+      "type": "youtube",
+      "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCDrLGkZTcNCshOLiKi5NtEw",
+      "enabled": false,
+      "notes": "Channel_id hand-verified 2026-07-09. High-volume general news; enable after a per-source-type cap exists (see discovery-expansion-plan review-volume controls)."
     }
   ]
 }
