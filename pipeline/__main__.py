@@ -4,6 +4,7 @@ Subcommands (run as ``python -m pipeline <cmd>``):
 
   ingest-url   Manual intake of one URL -> reviewable files + PR body.
   discover     Poll feeds, triage, ingest+extract new items -> files + PR body.
+  backfill     Process a URL list -> files + one PR body per candidate.
   review       Verify the evidence files changed in a PR -> comment + label.
 
 Each command writes any PR/comment text to a file so the GitHub Actions layer
@@ -17,8 +18,12 @@ import json
 import sys
 from pathlib import Path
 
+from pipeline import backfill as backfill_mod
 from pipeline import config, discover, ingest as ingest_mod, run
 from pipeline.llm import OpenRouterLLM
+
+
+_BACKFILL_DIVIDER = "\n\n---\n\n"
 
 
 def _today() -> str:
@@ -115,6 +120,52 @@ def cmd_discover(args) -> int:
     return 0
 
 
+def cmd_backfill(args) -> int:
+    data_dir = Path(args.data_dir)
+    cfg = config.load_config(data_dir)
+    llm = OpenRouterLLM()
+    topics = config.topic_slugs(data_dir)
+
+    raw = json.loads(Path(args.input).read_text())
+    rows = raw["rows"] if isinstance(raw, dict) else raw
+    if args.only:
+        rows = [r for r in rows if r["candidate_slug"] == args.only]
+
+    # Per-candidate PRs each add their own URL; the ledger is seeded once by a
+    # dedicated run (without --skip-ledger) to keep those PRs conflict-free.
+    ledger = None if args.skip_ledger else discover.Ledger(data_dir / "ledger.json")
+
+    buckets = backfill_mod.run_backfill(
+        rows, data_dir=data_dir, llm=llm,
+        extractor_model=cfg["models"]["extractor"], today=_today(),
+        topics=topics, ledger=ledger,
+    )
+
+    out_dir = Path(args.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    manifest = []
+    total_housing = 0
+    for b in buckets:
+        body_path = out_dir / f"{b.candidate_slug}.md"
+        body_path.write_text(b.pr_body or f"No housing statements found for {b.candidate_slug}.")
+        total_housing += b.housing_count
+        manifest.append({
+            "candidate": b.candidate_slug,
+            "branch": f"backfill/{b.candidate_slug}",
+            "body_path": str(body_path),
+            "housing_count": b.housing_count,
+            "paths": [str(p) for p in b.paths],
+        })
+
+    # Combined body (for a single --only run this is just that candidate's body).
+    _write(args.pr_body_out, _BACKFILL_DIVIDER.join(b.pr_body for b in buckets if b.pr_body)
+           or "No housing statements found.")
+    if args.manifest_out:
+        _write(args.manifest_out, json.dumps(manifest, indent=2))
+    print(f"candidates={len(buckets)} housing={total_housing}")
+    return 0
+
+
 def cmd_review(args) -> int:
     from pipeline import review
 
@@ -160,6 +211,16 @@ def build_parser() -> argparse.ArgumentParser:
     dc.add_argument("--max-items", type=int, default=None,
                     help="cap fresh items ingested this run (default: config value)")
     dc.set_defaults(func=cmd_discover)
+
+    bf = sub.add_parser("backfill", help="process a URL list into one PR per candidate")
+    bf.add_argument("--input", required=True, help="JSON rows: [{candidate_slug, url, type?, outlet?, date?}]")
+    bf.add_argument("--only", help="process only this candidate slug (workflow matrix)")
+    bf.add_argument("--out-dir", default=".", help="dir for per-candidate <slug>.md PR bodies")
+    bf.add_argument("--pr-body-out", default="pr_body.md")
+    bf.add_argument("--manifest-out", help="write per-candidate {branch, body_path, ...} JSON")
+    bf.add_argument("--skip-ledger", action="store_true",
+                    help="do not touch data/ledger.json (matrix jobs; seed it once separately)")
+    bf.set_defaults(func=cmd_backfill)
 
     rv = sub.add_parser("review", help="verify evidence files changed in a PR")
     rv.add_argument("evidence", nargs="+", help="paths to evidence JSON files")
