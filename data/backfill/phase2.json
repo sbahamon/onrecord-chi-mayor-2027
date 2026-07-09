@@ -1,0 +1,14 @@
+{
+  "phase": 2,
+  "description": "Phase 2 = curated key press per candidate (media-sourced housing positions). URLs researched + verified 2026-07-08. Only candidates with a substantive, verifiable first-person housing quote in the press are included. Danielle Carter-Walters was researched and EXCLUDED: insufficient housing press (coverage is immigration/crime; housing appears only as grievance clauses in congressional testimony and as self-published site slogans \u2014 no media-sourced housing position). She stays off the matrix until she states one publicly.",
+  "rows": [
+    {
+      "candidate_slug": "matthew-brewer",
+      "url": "https://www.cbsnews.com/chicago/news/matt-brewer-chicago-housing-authority-chicago-mayor/",
+      "type": "article",
+      "outlet": "CBS News Chicago",
+      "date": "2026-06-25",
+      "title": "Matt Brewer, former chair of Chicago Housing Authority, running for Chicago mayor"
+    }
+  ]
+}

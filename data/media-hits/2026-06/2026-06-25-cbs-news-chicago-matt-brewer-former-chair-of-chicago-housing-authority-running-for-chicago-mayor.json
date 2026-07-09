@@ -1,0 +1,34 @@
+{
+  "id": "2026-06-25-cbs-news-chicago-matt-brewer-former-chair-of-chicago-housing-authority-running-for-chicago-mayor",
+  "url": "https://www.cbsnews.com/chicago/news/matt-brewer-chicago-housing-authority-chicago-mayor/",
+  "outlet": "CBS News Chicago",
+  "media_type": "article",
+  "title": "Matt Brewer, former chair of Chicago Housing Authority, running for Chicago mayor",
+  "published_date": "2026-06-25",
+  "discovered_date": "2026-07-08",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "matthew-brewer",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Brewer states he is 'all about affordable housing' and emphasizes ensuring people are not left behind.",
+      "quote": "I'm all about affordable housing. I'm all about making sure we don't leave people behind.",
+      "locator": null,
+      "confidence": 0.95,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Brewer highlights housing as central to many issues, referencing his experience running the CHA and conversations about housing.",
+      "quote": "And whether it's a conversation about housing, housing is at the hub of a lot of different things \u2014 the intersection of transportation and public safety, economic mobility, a lot of core issues circulate around housing.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}
