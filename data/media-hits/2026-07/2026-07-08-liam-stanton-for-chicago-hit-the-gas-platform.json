@@ -1,0 +1,23 @@
+{
+  "id": "2026-07-08-liam-stanton-for-chicago-hit-the-gas-platform",
+  "url": "https://www.stantonforchicago.com/",
+  "outlet": "Liam Stanton for Chicago",
+  "media_type": "website",
+  "title": "\u201cHit the Gas\u201d Platform",
+  "published_date": "2026-07-08",
+  "discovered_date": "2026-07-08",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "liam-stanton",
+      "topic": "zoning-reform",
+      "stance": "supports",
+      "summary": "Would legalize more housing and cut red tape to allow more townhomes, row homes, and missing-middle housing so families can afford to stay.",
+      "quote": "Legalize more housing and cut red tape so families can actually afford to stay here. Make it easier to build more townhomes, row homes, and missing-middle housing.",
+      "locator": "\u201cHit the Gas\u201d Platform \u2014 Family-Sized Housing",
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}
