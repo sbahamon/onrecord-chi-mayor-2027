@@ -27,6 +27,16 @@ def test_make_evidence_id_is_date_prefixed_and_slugged():
     assert got == "2026-07-06-the-ben-joravsky-show-johnson-interview"
 
 
+def test_make_evidence_id_is_length_capped_for_junk_titles():
+    # Some pages (e.g. a CBS browser-notice) yield a monster "title"; the id must
+    # stay a safe filename (well under the 255-char FS limit) and not crash writes.
+    junk = "Notice Your web browser is not fully supported " * 40  # ~1900 chars
+    got = ingest.make_evidence_id("2026-06-25", "CBS News Chicago", junk)
+    assert got.startswith("2026-06-25-cbs-news-chicago-")  # date + outlet preserved
+    assert len(got) <= 120
+    assert not got.endswith("-")  # clean slug boundary after truncation
+
+
 # --- domain + title helpers -------------------------------------------------
 
 def test_domain_of_strips_scheme_and_www():
