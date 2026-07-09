@@ -58,7 +58,9 @@
       "youtube_channel": null,
       "google_news_rss": "https://news.google.com/rss/search?q=%22Danielle%20Carter-Walters%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
       "photo": null,
-      "bio": "Small business owner and cofounder of Chicago Flips Red."
+      "bio": "Small business owner and cofounder of Chicago Flips Red.",
+      "tracked": false,
+      "drop_reason": "Not actively tracked — a long-shot candidate with no media-sourced housing position on the record. Will revisit if that changes."
     },
     {
       "slug": "joe-holberg",

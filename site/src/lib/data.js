@@ -28,6 +28,17 @@ export function loadCandidates() {
   return readJson(join(DATA_DIR, "registry", "candidates.json")).candidates;
 }
 
+// Candidates shown on the site. A candidate flagged `tracked: false` is dropped
+// from the matrix/profiles (e.g. a long-shot with no position on record); they
+// are surfaced separately on the methodology page via loadDroppedCandidates().
+export function loadTrackedCandidates() {
+  return loadCandidates().filter((c) => c.tracked !== false);
+}
+
+export function loadDroppedCandidates() {
+  return loadCandidates().filter((c) => c.tracked === false);
+}
+
 export function loadTopics() {
   const topics = readJson(join(DATA_DIR, "registry", "topics.json")).topics;
   return [...topics].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
@@ -62,7 +73,7 @@ export function resolveCitation(citation, index) {
 
 // The homepage matrix: topics (rows) x candidates (cols), each cell a stance.
 export function buildMatrix() {
-  const candidates = loadCandidates();
+  const candidates = loadTrackedCandidates();
   const topics = loadTopics();
   const stances = loadStances();
   const idx = evidenceIndex();
@@ -88,7 +99,7 @@ export function buildMatrix() {
 
 // Candidate profile: their stances grouped by topic + a chronological timeline.
 export function buildCandidateProfile(slug) {
-  const candidate = loadCandidates().find((c) => c.slug === slug);
+  const candidate = loadTrackedCandidates().find((c) => c.slug === slug);
   if (!candidate) return null;
   const topics = loadTopics();
   const stances = loadStances().filter((s) => s.candidate === slug);

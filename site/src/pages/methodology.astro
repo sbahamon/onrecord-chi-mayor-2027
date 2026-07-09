@@ -1,6 +1,8 @@
 ---
 import Base from "../layouts/Base.astro";
+import { loadDroppedCandidates } from "../lib/data.js";
 const base = import.meta.env.BASE_URL;
+const dropped = loadDroppedCandidates();
 ---
 <Base title="Methodology" description="How the Chicago Housing Tracker finds, extracts, and reviews candidate positions.">
   <section class="hero"><h1>Methodology</h1></section>
@@ -33,6 +35,25 @@ const base = import.meta.env.BASE_URL;
       that we've found — not that they have no view. We track housing closely;
       other issues a candidate raises are noted internally but not published here.
     </p>
+
+    {dropped.length > 0 && (
+      <>
+        <h2>Candidates we don't track</h2>
+        <p>
+          We focus on candidates with a realistic path in the race. These
+          declared candidates are not shown in the matrix; we'll add anyone here
+          if that changes or they put a housing position on the record.
+        </p>
+        <ul>
+          {dropped.map((c) => (
+            <li>
+              <strong>{c.name}</strong>
+              {c.drop_reason ? " — " + c.drop_reason : ""}
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
 
     <h2>Corrections</h2>
     <p>

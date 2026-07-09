@@ -25,7 +25,9 @@
           "youtube_channel": { "type": ["string", "null"] },
           "google_news_rss": { "type": ["string", "null"] },
           "photo": { "type": ["string", "null"] },
-          "bio": { "type": ["string", "null"] }
+          "bio": { "type": ["string", "null"] },
+          "tracked": { "type": "boolean" },
+          "drop_reason": { "type": ["string", "null"] }
         }
       }
     }

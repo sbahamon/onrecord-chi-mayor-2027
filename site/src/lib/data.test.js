@@ -6,6 +6,8 @@ import assert from "node:assert/strict";
 
 import {
   loadCandidates,
+  loadTrackedCandidates,
+  loadDroppedCandidates,
   loadTopics,
   buildMatrix,
   buildCandidateProfile,
@@ -46,10 +48,26 @@ test("every matrix cell with a stance resolves at least one source", () => {
 });
 
 test("candidate profile builds and unknown slug returns null", () => {
-  const slug = loadCandidates()[0].slug;
+  const slug = loadTrackedCandidates()[0].slug;
   const profile = buildCandidateProfile(slug);
   assert.equal(profile.candidate.slug, slug);
   assert.equal(buildCandidateProfile("nobody-here"), null);
+});
+
+test("dropped candidates are excluded from the matrix but listed separately", () => {
+  const tracked = loadTrackedCandidates();
+  const dropped = loadDroppedCandidates();
+  // tracked + dropped partition the full roster
+  assert.equal(tracked.length + dropped.length, loadCandidates().length);
+  // a dropped candidate has a reason and is not a matrix column
+  for (const c of dropped) {
+    assert.equal(c.tracked, false);
+    assert.ok(typeof c.drop_reason === "string" && c.drop_reason.length > 0);
+  }
+  const matrixSlugs = buildMatrix().candidates.map((c) => c.slug);
+  for (const c of dropped) assert.ok(!matrixSlugs.includes(c.slug));
+  // a dropped candidate builds no profile page
+  for (const c of dropped) assert.equal(buildCandidateProfile(c.slug), null);
 });
 
 test("feed is sorted newest first", () => {
