@@ -6,8 +6,8 @@
   "additionalProperties": false,
   "required": ["candidate", "topic", "stance", "summary", "citations", "updated_date"],
   "properties": {
-    "candidate": { "type": "string", "minLength": 1 },
-    "topic": { "type": "string", "minLength": 1 },
+    "candidate": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "topic": { "type": "string", "pattern": "^[a-z0-9-]+$" },
     "stance": {
       "type": "string",
       "enum": ["supports", "supports-with-conditions", "opposes", "mixed", "no-position"]

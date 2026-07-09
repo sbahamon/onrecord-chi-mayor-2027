@@ -88,16 +88,33 @@ def render_pr_body(evidence: dict, stances: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def _safe_join(base: Path, *parts: str) -> Path:
+    """Join path parts and refuse anything that escapes ``base``.
+
+    Path segments here derive from untrusted model output (candidate, topic,
+    evidence id, date). A crafted value like ``../../ledger`` would otherwise
+    let ``write_stance``/``write_evidence`` overwrite arbitrary files under
+    ``data/``. Resolve and confirm the result stays inside ``base``.
+    """
+    base = Path(base).resolve()
+    target = base.joinpath(*parts).resolve()
+    if base != target and base not in target.parents:
+        raise ValueError(f"refusing path escaping {base}: {'/'.join(parts)}")
+    return target
+
+
 def write_evidence(evidence: dict, data_dir) -> Path:
     month = evidence["published_date"][:7]  # YYYY-MM
-    path = Path(data_dir) / "media-hits" / month / f"{evidence['id']}.json"
+    path = _safe_join(Path(data_dir) / "media-hits", month, f"{evidence['id']}.json")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(evidence, indent=2) + "\n")
     return path
 
 
 def write_stance(stance: dict, data_dir) -> Path:
-    path = Path(data_dir) / "stances" / stance["candidate"] / f"{stance['topic']}.json"
+    path = _safe_join(
+        Path(data_dir) / "stances", stance["candidate"], f"{stance['topic']}.json"
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(stance, indent=2) + "\n")
     return path

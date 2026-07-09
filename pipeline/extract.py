@@ -76,6 +76,7 @@ def extract(transcript: str, *, candidates, topics, llm, model: str) -> ExtractR
         raise ExtractionError("'statements' is not a list")
 
     known = set(candidates)
+    known_topics = set(topics)
     result = ExtractResult()
     for stmt in raw:
         try:
@@ -84,6 +85,11 @@ def extract(transcript: str, *, candidates, topics, llm, model: str) -> ExtractR
             raise ExtractionError(f"statement failed schema: {e.message}") from e
 
         if stmt["candidate"] not in known:
+            result.dropped += 1
+            continue
+        # topic is untrusted model output that ends up in a file path
+        # (propose.write_stance); only known registry topics may pass.
+        if stmt["topic"] not in known_topics:
             result.dropped += 1
             continue
         if not quote_in_transcript(stmt["quote"], transcript):

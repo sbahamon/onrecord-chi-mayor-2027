@@ -27,6 +27,13 @@ ASR errors) so expect more `ai-flagged` items. Therefore: **roll out one source 
 at a time**, watch the daily PR size and flag rate after each, and keep per-run caps.
 Don't enable everything at once.
 
+**Security note:** every source type here feeds *attacker-influenceable* content through
+the extractor LLM, so this widens the untrusted-input surface. The `candidate`/`topic`
+→ file-path defense (registry-drop in `extract.py` + `^[a-z0-9-]+$` schema pattern +
+`propose._safe_join`) already guards the write sink — see CLAUDE.md "Security (LLM output
+→ file paths)". Keep those layers intact as you add media/social sources; don't route any
+new field into a path or shell without the same treatment.
+
 ## Pieces (roughly in rollout order)
 
 ### 1. Media-type routing in discovery (foundation)

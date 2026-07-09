@@ -80,3 +80,16 @@ def test_build_evidence_record_rejects_non_housing_statement():
     bad = [dict(HOUSING[0], is_housing=False)]
     with pytest.raises(ValueError):
         propose.build_evidence_record(INGEST_DOC, bad, discovered_date="2026-07-07")
+
+
+def test_write_stance_refuses_path_traversal(tmp_path):
+    # Last-line defense: even if a bad topic/candidate reaches write_stance, it
+    # must never escape data_dir/stances/. Guards the file-path sink directly.
+    bad = {
+        "candidate": "example-candidate-a", "topic": "../../ledger",
+        "stance": "supports", "summary": "x", "citations": ["e#0"],
+        "updated_date": "2026-07-07",
+    }
+    with pytest.raises(ValueError):
+        propose.write_stance(bad, tmp_path)
+    assert not (tmp_path / "ledger.json").exists()

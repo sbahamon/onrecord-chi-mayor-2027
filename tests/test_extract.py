@@ -109,3 +109,19 @@ def test_unknown_candidate_is_dropped():
     result = run([base_stmt(candidate="not-a-candidate")])
     assert result.housing == []
     assert result.dropped == 1
+
+
+def test_unknown_topic_is_dropped():
+    # topic is untrusted model output; only known registry topics may pass,
+    # symmetric to the candidate guard.
+    result = run([base_stmt(topic="not-a-topic")])
+    assert result.housing == []
+    assert result.dropped == 1
+
+
+def test_topic_with_path_traversal_is_rejected():
+    # A crafted topic must never reach the file-path builder in propose.write_stance
+    # (data_dir/stances/<candidate>/<topic>.json). A non-slug topic fails the schema
+    # pattern, so extraction rejects it outright (orchestration retries, per design).
+    with pytest.raises(ExtractionError):
+        run([base_stmt(topic="../../ledger")])
