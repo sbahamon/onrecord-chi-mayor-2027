@@ -139,6 +139,17 @@ pipeline PRs *trigger* the review workflow — `GITHUB_TOKEN`-created PRs don't 
 parsed/sanitized in a fixed Python heredoc, then passed as quoted shell vars. Keep that
 pattern for any new workflow that reads issue/PR/comment text.
 
+**Security (LLM output → file paths):** a statement's `candidate` and `topic` become
+path segments in `propose.write_stance` (`data/stances/<candidate>/<topic>.json`), and both
+originate from *untrusted* extractor output driven by a fetched (attacker-influenceable) page.
+Defense is layered, so keep all three when touching this path: (1) `extract.py` drops any
+statement whose `candidate`/`topic` isn't in the registry set; (2) all three schemas pin
+`candidate`/`topic` to `^[a-z0-9-]+$`, so a traversal value (`../../ledger`) is schema-invalid
+and extraction rejects the source (orchestration retries, by design); (3) `propose._safe_join`
+refuses any resolved write path that escapes its base dir. Don't relax any layer — a crafted
+page could otherwise overwrite an arbitrary `data/**.json` (ledger, config, another candidate's
+stance) in the proposed PR. This matters more as discovery-expansion widens the intake surface.
+
 **`create-pull-request` gotcha:** use `add-paths: data` (a whole dir). Listing globs like
 `data/positions/**` fails the git add when a run produces no such subdir, losing the commit.
 

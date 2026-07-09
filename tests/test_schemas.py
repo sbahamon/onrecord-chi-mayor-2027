@@ -102,6 +102,29 @@ def test_unknown_schema_name_raises():
         schemas.validate({}, "not-a-real-schema")
 
 
+def test_evidence_topic_with_slash_is_rejected():
+    # topic and candidate become file-path segments (propose.write_stance);
+    # a slug pattern blocks path-traversal values at the data-integrity layer.
+    record = valid_evidence()
+    record["statements"][0]["topic"] = "../../ledger"
+    with pytest.raises(ValidationError):
+        schemas.validate(record, "evidence")
+
+
+def test_stance_topic_with_slash_is_rejected():
+    record = valid_stance()
+    record["topic"] = "../../ledger"
+    with pytest.raises(ValidationError):
+        schemas.validate(record, "stance")
+
+
+def test_stance_candidate_with_slash_is_rejected():
+    record = valid_stance()
+    record["candidate"] = "../../../etc/x"
+    with pytest.raises(ValidationError):
+        schemas.validate(record, "stance")
+
+
 def test_statement_schema_matches_evidence_inline_definition():
     """The standalone statement schema and evidence's inline copy must not drift."""
     import json
