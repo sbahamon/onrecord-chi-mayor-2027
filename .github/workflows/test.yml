@@ -32,7 +32,15 @@ jobs:
         run: |
           if [ -f package.json ]; then
             npm ci
-            npm run build
+            npm test
+            # Build as a project site (base path with no trailing slash, like
+            # GitHub's configure-pages) and assert links join with a slash.
+            BASE_PATH="/ci-base" npm run build
+            if grep -rq 'href="/ci-basemethodology' dist; then
+              echo "::error::malformed base-path links (missing slash)"; exit 1
+            fi
+            grep -rq 'href="/ci-base/methodology' dist || {
+              echo "::error::expected base-prefixed link not found"; exit 1; }
           else
             echo "site/ not scaffolded yet — skipping"
           fi
