@@ -37,3 +37,22 @@ def candidate_slugs(data_dir, *, active_only: bool = False) -> list[str]:
 
 def topic_slugs(data_dir) -> list[str]:
     return [t["slug"] for t in load_topics(data_dir)]
+
+
+def discovery_feeds(data_dir) -> list[dict]:
+    """All feeds discovery should poll: the shared source feeds plus a
+    per-candidate Google News feed for each active candidate that has one.
+    """
+    feeds = [f for f in load_sources(data_dir) if f.get("enabled", True)]
+    for c in load_candidates(data_dir):
+        if c["status"] in EXCLUDED_STATUSES:
+            continue
+        rss = c.get("google_news_rss")
+        if rss:
+            feeds.append({
+                "id": f"candidate-{c['slug']}",
+                "name": f"Google News — {c['name']}",
+                "type": "google-news",
+                "url": rss,
+            })
+    return feeds

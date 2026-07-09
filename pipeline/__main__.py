@@ -73,8 +73,8 @@ def cmd_discover(args) -> int:
         return r.text
 
     bodies, processed, ingested = [], 0, 0
-    for feed in config.load_sources(data_dir):
-        if not feed.get("enabled", True) or feed["type"] not in {"rss", "google-news", "youtube"}:
+    for feed in config.discovery_feeds(data_dir):
+        if feed["type"] not in {"rss", "google-news", "youtube"}:
             continue
         try:
             items = discover.parse_feed(fetch(feed["url"]), source_id=feed["id"])
