@@ -39,6 +39,30 @@
       "url": "https://chicagoreader.com/category/news-politics/",
       "enabled": true,
       "notes": "Home of the Ben Joravsky Show; monitor for episode posts and columns."
+    },
+    {
+      "id": "ben-joravsky-show-podcast",
+      "name": "The Ben Joravsky Show",
+      "type": "podcast",
+      "url": "https://rss.art19.com/the-ben-joravsky-show",
+      "enabled": false,
+      "notes": "RSS hand-verified 2026-07-09 (live, mp3 enclosures). Chicago-politics interview show. enabled:false until one on-demand run confirms the enclosure->audio->extract path; each episode is a full transcription (Groq cost)."
+    },
+    {
+      "id": "fran-spielman-show-podcast",
+      "name": "The Fran Spielman Show",
+      "type": "podcast",
+      "url": "https://rss.art19.com/the-fran-spielman-show",
+      "enabled": false,
+      "notes": "RSS hand-verified 2026-07-09 (live, mp3 enclosures; PRX/dovetail 12963). Sun-Times weekly City Hall interview show — strong candidate coverage. enabled:false until an on-demand verification run."
+    },
+    {
+      "id": "city-cast-chicago-podcast",
+      "name": "City Cast Chicago",
+      "type": "podcast",
+      "url": "https://feeds.megaphone.fm/citycastchicago",
+      "enabled": false,
+      "notes": "RSS hand-verified 2026-07-09 (live, mp3 enclosures). Daily Chicago local-news/politics show. enabled:false until an on-demand verification run; higher episode volume than the interview shows."
     }
   ]
 }

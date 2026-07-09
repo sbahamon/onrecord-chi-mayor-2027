@@ -34,14 +34,21 @@ def media_type_for_feed(feed: dict) -> str:
     return _FEED_TYPE_TO_MEDIA_TYPE.get(feed.get("type"), "article")
 
 
-def parse_feed(feed_text: str, *, source_id: str) -> list[dict]:
+def parse_feed(feed_text: str, *, source_id: str, prefer_enclosure: bool = False) -> list[dict]:
     import feedparser
 
     parsed = feedparser.parse(feed_text)
     items = []
     for entry in parsed.entries:
+        url = entry.get("link", "")
+        if prefer_enclosure:
+            # Podcast items: the audio lives in <enclosure>, not the episode page —
+            # yt-dlp/Groq need the media file. Fall back to <link> if none.
+            enclosures = entry.get("enclosures") or []
+            if enclosures and enclosures[0].get("href"):
+                url = enclosures[0]["href"]
         items.append({
-            "url": entry.get("link", ""),
+            "url": url,
             "title": entry.get("title", ""),
             "published": entry.get("published", ""),
             "source_id": source_id,
