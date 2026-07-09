@@ -1,0 +1,42 @@
+{
+  "phase": 1,
+  "description": "One-time historical seed of the matrix from each candidate's own campaign platform/issues page. First-person, directly attributable. URLs researched + human-confirmed 2026-07-08. Only candidates with real housing content on a fetchable page are included; those with a live site but no published housing page (matthew-brewer, george-cardenas, lisa-nee) and those with no campaign site yet (maria-pappas) are deferred to later phases / media intake. danielle-carter-walters has a housing plank but her site 403s non-browser fetchers, so she is held back until ingest supports a browser user-agent.",
+  "rows": [
+    {
+      "candidate_slug": "brandon-johnson",
+      "url": "https://www.brandonforchicago.com/issues/afforable-housing",
+      "type": "website",
+      "outlet": "Brandon Johnson for Chicago"
+    },
+    {
+      "candidate_slug": "joe-holberg",
+      "url": "https://www.joeforchicago.com/priorities",
+      "type": "website",
+      "outlet": "Joe Holberg for Mayor"
+    },
+    {
+      "candidate_slug": "susana-mendoza",
+      "url": "https://susanamendoza.com/priorities",
+      "type": "website",
+      "outlet": "Susana Mendoza for Chicago"
+    },
+    {
+      "candidate_slug": "toni-brooks",
+      "url": "https://www.brooksforchicago.com/platforms",
+      "type": "website",
+      "outlet": "Toni Brooks for Mayor"
+    },
+    {
+      "candidate_slug": "liam-stanton",
+      "url": "https://www.stantonforchicago.com/",
+      "type": "website",
+      "outlet": "Liam Stanton for Chicago"
+    },
+    {
+      "candidate_slug": "mike-quigley",
+      "url": "https://www.quigleyforchicago.com/",
+      "type": "website",
+      "outlet": "Quigley for Chicago"
+    }
+  ]
+}
