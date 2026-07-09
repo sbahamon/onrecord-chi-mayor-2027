@@ -22,14 +22,20 @@ TEXT_TYPES = {"article", "website"}
 AUDIO_TYPES = {"podcast", "social", "manual", "youtube"}
 
 
-def slugify(text: str) -> str:
+def slugify(text: str, *, max_len: int | None = None) -> str:
     text = text.casefold()
-    text = re.sub(r"[^a-z0-9]+", "-", text)
-    return text.strip("-")
+    text = re.sub(r"[^a-z0-9]+", "-", text).strip("-")
+    if max_len is not None and len(text) > max_len:
+        text = text[:max_len].rstrip("-")  # bound length, keep a clean slug boundary
+    return text
 
 
 def make_evidence_id(published_date: str, outlet: str, title: str) -> str:
-    parts = [published_date, slugify(outlet), slugify(title)]
+    # Cap the variable parts: some pages yield a junk multi-hundred-char "title"
+    # (e.g. a browser-upgrade notice), which would otherwise produce an evidence id
+    # too long to use as a filename. Date + a bounded outlet + a bounded title keep
+    # the id readable, still unique enough, and safely under the FS name limit.
+    parts = [published_date, slugify(outlet, max_len=40), slugify(title, max_len=70)]
     return "-".join(p for p in parts if p)
 
 
