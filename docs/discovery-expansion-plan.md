@@ -108,6 +108,10 @@ This unblocks the website-diff feature (#5) and any candidate platform page that
 plain fetch can't reach (e.g. danielle-carter-walters, deferred in the backfill for
 exactly this reason).
 
+**Sequencing:** treat this as a soft prerequisite, not strictly last — if #0's
+research or #2–#4 turn up feeds/pages behind JS-rendering or 403s, pull #6 forward
+before them.
+
 ## Review-volume controls to add
 - Keep `discovery.max_items_per_run`; consider a **per-source-type cap** so one noisy
   podcast feed can't dominate a run.
