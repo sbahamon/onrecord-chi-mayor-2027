@@ -155,12 +155,17 @@ pattern for any new workflow that reads issue/PR/comment text.
   `null`; no Bluesky feed is in discovery. `discover.website_changed()` and the
   `website` source type exist but aren't polled by `cmd_discover` (it only handles
   `rss`/`google-news`/`youtube`). X/IG/TikTok are manual-intake only.
-- **Video/audio extraction is built but unverified end-to-end.** `transcribe.py`
-  (yt-dlp + Groq) and the caption path work in unit tests with fakes, but no real
-  video/podcast has been run through them, and the `-m live` Groq test only checks
-  auth, not a real transcription. Discovery also forces every found item to
-  `media_type: "article"`, so only manual `ingest-url --type youtube|podcast|social`
-  exercises the media path. Verify on one real URL before relying on it.
+- **Audio/video extraction: the download+transcribe path WORKS; the caption path is
+  broken.** Verified 2026-07 on a real WGN YouTube interview: `ingest-url --type
+  podcast` → yt-dlp downloads audio → Groq transcribes → extractor pulls statements.
+  So **use `--type podcast` for any video/audio, including YouTube** (yt-dlp handles
+  YouTube URLs). BUG: `--type youtube` (`CAPTION_TYPES` in `ingest.py`) feeds the
+  page HTML to `normalize_vtt` via the default fetcher — it never fetches real
+  captions, so it produces garbage. Fix later: route `youtube` through yt-dlp
+  caption extraction, or just fold it into the audio path. Also note discovery forces
+  every found item to `media_type: "article"`, so the cron never triggers the media
+  path — only manual intake does. Audio transcripts are noisier than articles (no
+  speaker labels, ASR errors), so expect more reviewer flags.
 
 ## Non-obvious lessons (paid for in real runs)
 
