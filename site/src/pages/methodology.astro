@@ -36,6 +36,78 @@ const dropped = loadDroppedCandidates();
       other issues a candidate raises are noted internally but not published here.
     </p>
 
+    <h2>Under the hood</h2>
+    <p>
+      For the technically curious: this is a scheduled pipeline that runs on
+      GitHub Actions and publishes a static site. Everything is
+      <a href="https://github.com/sbahamon/onrecord-chi-mayor-2027">open source</a>,
+      and every language-model step is dependency-injected so the whole flow is
+      tested offline on fixtures before it ever touches the live models.
+    </p>
+
+    <h3>Sources it watches</h3>
+    <ul>
+      <li><strong>News articles</strong> — Google News RSS (a shared housing/race
+        query plus a per-candidate query) and outlet pages, read as text with
+        <code>trafilatura</code> behind a real browser user-agent.</li>
+      <li><strong>YouTube</strong> — each candidate's campaign channel plus
+        standing channels (WTTW / Chicago Tonight, WGN News, City Club of Chicago),
+        via YouTube's per-channel RSS. Audio is pulled with <code>yt-dlp</code>
+        and transcribed.</li>
+      <li><strong>Podcasts</strong> — Chicago-politics shows (The Ben Joravsky
+        Show, The Fran Spielman Show, City Cast Chicago) via their RSS audio
+        enclosures. Long episodes are re-encoded to 16&nbsp;kHz mono before
+        transcription so they fit the transcription API's upload limit.</li>
+      <li><strong>Bluesky</strong> — each candidate's public posts via the
+        <code>app.bsky.feed.getAuthorFeed</code> API. The post text is the record
+        (no audio); reposts and media-only posts are skipped, and extraction is
+        scoped to the account owner so first-person posts are attributed correctly.</li>
+    </ul>
+    <p>
+      X, Instagram, and TikTok are <em>not</em> auto-tracked (no open feed / terms
+      of service), but a link to any of them can still be submitted manually.
+    </p>
+
+    <h3>The pipeline</h3>
+    <p><code>discover → ingest → extract → propose → review → human approval → publish</code></p>
+    <ol>
+      <li><strong>Discover</strong> polls each source daily, de-duplicates against
+        a ledger, and a cheap AI triage call decides whether an item plausibly
+        features a candidate discussing policy.</li>
+      <li><strong>Ingest</strong> turns the item into clean text — article
+        readability, audio&nbsp;→&nbsp;transcript, or a social post's text
+        directly. Transcripts are never stored; only the extracted quote and a
+        source link are kept (copyright).</li>
+      <li><strong>Extract</strong> asks a model to pull each housing position with
+        a <em>verbatim</em> quote. Any quote that doesn't literally appear in the
+        transcript is dropped, as is any statement about a candidate or topic that
+        isn't in our registry.</li>
+      <li><strong>Propose</strong> writes the evidence and a draft position and
+        opens a pull request.</li>
+      <li><strong>Review</strong> — a second, different-family model re-fetches the
+        source, re-verifies every quote, and labels the PR verified or flagged.</li>
+      <li><strong>Human approval</strong> — nothing publishes automatically; a
+        person merges the PR, which rebuilds and redeploys the site.</li>
+    </ol>
+
+    <h3>The models</h3>
+    <ul>
+      <li><strong>Extraction &amp; triage:</strong> DeepSeek V3.2
+        (<code>deepseek/deepseek-v3.2</code>).</li>
+      <li><strong>Independent review:</strong> Moonshot Kimi&nbsp;K2
+        (<code>moonshotai/kimi-k2-0905</code>) — deliberately a <em>different</em>
+        model family than the extractor, so it catches the extractor's mistakes
+        (a common one is attributing an opponent's words to the candidate).</li>
+      <li><strong>Transcription:</strong> Whisper large-v3-turbo, via Groq.</li>
+    </ul>
+    <p>
+      Language models are accessed through OpenRouter; the model choices live in a
+      config file and can change. The extractor is trusted only to <em>draft</em>:
+      a wrong or fabricated quote has to get past a verbatim-quote check, a
+      different-family reviewer, and a human before it can reach this site — and
+      the auto-publish switch ships off.
+    </p>
+
     {dropped.length > 0 && (
       <>
         <h2>Candidates we don't track</h2>
