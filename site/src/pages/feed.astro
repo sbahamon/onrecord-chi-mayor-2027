@@ -13,7 +13,6 @@ const topicLabel = Object.fromEntries(loadTopics().map((t) => [t.slug, t.label])
     <p>Every appearance the tracker has processed, newest first.</p>
   </section>
 
-  {feed.length === 0 && <p class="src">Nothing processed yet.</p>}
   {feed.map((e) => {
     const housing = e.statements.filter((s) => s.is_housing);
     const cands = [...new Set(housing.map((s) => candName[s.candidate] || s.candidate))];

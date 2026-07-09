@@ -131,42 +131,6 @@
       "google_news_rss": "https://news.google.com/rss/search?q=%22Liam%20Stanton%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
       "photo": null,
       "bio": "Serial entrepreneur and founder of the Chicago Style Project."
-    },
-    {
-      "slug": "bill-conway",
-      "name": "Bill Conway",
-      "status": "rumored",
-      "party": null,
-      "website": null,
-      "bluesky": null,
-      "youtube_channel": null,
-      "google_news_rss": "https://news.google.com/rss/search?q=%22Bill%20Conway%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
-      "photo": null,
-      "bio": "34th Ward alderman and Democratic committeeperson. Rumored, not yet declared."
-    },
-    {
-      "slug": "alexi-giannoulias",
-      "name": "Alexi Giannoulias",
-      "status": "rumored",
-      "party": null,
-      "website": null,
-      "bluesky": null,
-      "youtube_channel": null,
-      "google_news_rss": "https://news.google.com/rss/search?q=%22Alexi%20Giannoulias%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
-      "photo": null,
-      "bio": "Illinois Secretary of State. Rumored, not yet declared."
-    },
-    {
-      "slug": "willie-wilson",
-      "name": "Willie Wilson",
-      "status": "rumored",
-      "party": null,
-      "website": null,
-      "bluesky": null,
-      "youtube_channel": null,
-      "google_news_rss": "https://news.google.com/rss/search?q=%22Willie%20Wilson%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
-      "photo": null,
-      "bio": "Businessman and television producer. Rumored, not yet declared."
     }
   ]
 }
