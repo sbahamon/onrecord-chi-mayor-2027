@@ -16,6 +16,14 @@ from __future__ import annotations
 
 import re
 
+# Present a real browser UA: some campaign/outlet sites 403 non-browser agents
+# (seen on dannicformayor.com). The reviewer re-ingests the same URL to verify
+# quotes, so ingest and review must fetch identically — keep this the single source.
+BROWSER_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+)
+
 TEXT_TYPES = {"article", "website"}
 # YouTube goes through the audio path (yt-dlp downloads the audio, then Whisper).
 # yt-dlp resolves YouTube URLs directly; a prior caption-fetch path was broken.
@@ -113,22 +121,34 @@ def _preferred_encoding(header_encoding: str | None, apparent_encoding: str | No
     return header_encoding
 
 
-def _default_fetcher(url: str) -> str:
-    import requests
+def _default_fetcher(url: str, *, getter=None) -> str:
+    if getter is None:
+        import requests
 
-    resp = requests.get(url, timeout=30, headers={"User-Agent": "housing-tracker/0.1"})
+        getter = requests.get
+    resp = getter(url, timeout=30, headers={"User-Agent": BROWSER_USER_AGENT})
     resp.raise_for_status()
     resp.encoding = _preferred_encoding(resp.encoding, resp.apparent_encoding)
     return resp.text
 
 
-def ingest(source: dict, *, fetcher=None, downloader=None, transcriber=None) -> dict:
+# Below this, trafilatura almost certainly saw a JS shell, not the article body,
+# so a headless render (which executes client-side JS) is worth trying.
+MIN_ARTICLE_CHARS = 200
+
+
+def ingest(source: dict, *, fetcher=None, downloader=None, transcriber=None,
+           headless_fetcher=None) -> dict:
     media_type = source["media_type"]
     fetcher = fetcher or _default_fetcher
     title = source.get("title")
 
     if media_type in TEXT_TYPES:
         transcript, page_title = extract_article(fetcher(source["url"]))
+        if headless_fetcher is not None and len(transcript.strip()) < MIN_ARTICLE_CHARS:
+            # Plain fetch yielded little/no text — likely JS-rendered. Re-fetch
+            # with a headless render so both ingest and the reviewer can read it.
+            transcript, page_title = extract_article(headless_fetcher(source["url"]))
         if not title:
             title = page_title or source["url"]
     elif media_type in AUDIO_TYPES:

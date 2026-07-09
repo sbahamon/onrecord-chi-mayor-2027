@@ -32,6 +32,17 @@ def test_parse_feed_extracts_items():
     assert items[0]["source_id"] == "example"
 
 
+def test_media_type_for_feed_maps_by_feed_type():
+    # The feed declares its media type; discovery routes on it instead of
+    # hardcoding "article" (which sent YouTube/podcast items down the wrong path).
+    assert discover.media_type_for_feed({"type": "youtube"}) == "youtube"
+    assert discover.media_type_for_feed({"type": "podcast"}) == "podcast"
+    assert discover.media_type_for_feed({"type": "bluesky"}) == "social"
+    assert discover.media_type_for_feed({"type": "website"}) == "website"
+    assert discover.media_type_for_feed({"type": "google-news"}) == "article"
+    assert discover.media_type_for_feed({"type": "rss"}) == "article"
+
+
 def test_ledger_dedupe_filters_seen_urls(tmp_path):
     ledger_path = tmp_path / "ledger.json"
     ledger = discover.Ledger(ledger_path)
