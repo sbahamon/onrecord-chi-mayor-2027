@@ -145,6 +145,23 @@ pattern for any new workflow that reads issue/PR/comment text.
   written evidence/stances, then `... review <evidence.json>`.
 - The live loop: trigger `intake` workflow → a PR opens → `review` workflow comments on it.
 
+## Known gaps / planned work
+
+- **Backfill:** the daily cron only looks forward. Historical data (candidate
+  platform pages + prior press) is a planned one-time job — see
+  [`docs/backfill-plan.md`](./docs/backfill-plan.md). Needs a new `backfill` CLI mode
+  that batches **one PR per candidate**.
+- **Social media not wired:** candidate `bluesky`/`youtube_channel` fields are all
+  `null`; no Bluesky feed is in discovery. `discover.website_changed()` and the
+  `website` source type exist but aren't polled by `cmd_discover` (it only handles
+  `rss`/`google-news`/`youtube`). X/IG/TikTok are manual-intake only.
+- **Video/audio extraction is built but unverified end-to-end.** `transcribe.py`
+  (yt-dlp + Groq) and the caption path work in unit tests with fakes, but no real
+  video/podcast has been run through them, and the `-m live` Groq test only checks
+  auth, not a real transcription. Discovery also forces every found item to
+  `media_type: "article"`, so only manual `ingest-url --type youtube|podcast|social`
+  exercises the media path. Verify on one real URL before relying on it.
+
 ## Non-obvious lessons (paid for in real runs)
 
 - Only live runs catch: wrong model slugs, Pages base-path link breakage, `add-paths`
