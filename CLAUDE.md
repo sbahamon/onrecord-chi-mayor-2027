@@ -147,14 +147,22 @@ pattern for any new workflow that reads issue/PR/comment text.
 
 ## Known gaps / planned work
 
-- **Backfill:** the daily cron only looks forward. Historical data (candidate
-  platform pages + prior press) is a planned one-time job — see
-  [`docs/backfill-plan.md`](./docs/backfill-plan.md). Needs a new `backfill` CLI mode
-  that batches **one PR per candidate**.
-- **Social media not wired:** candidate `bluesky`/`youtube_channel` fields are all
-  `null`; no Bluesky feed is in discovery. `discover.website_changed()` and the
-  `website` source type exist but aren't polled by `cmd_discover` (it only handles
-  `rss`/`google-news`/`youtube`). X/IG/TikTok are manual-intake only.
+Two sequenced plans in `docs/` (run **backfill first**, then discovery expansion):
+
+- **Backfill** — [`docs/backfill-plan.md`](./docs/backfill-plan.md). One-time
+  historical seed (candidate platform pages + prior press). Needs a new `backfill`
+  CLI mode that batches **one PR per candidate**.
+- **Discovery expansion** — [`docs/discovery-expansion-plan.md`](./docs/discovery-expansion-plan.md).
+  Teach the daily cron to ingest media + social, not just name-matched articles:
+  media-type routing (cron currently hardcodes `article`), YouTube-channel + podcast
+  feeds, Bluesky, optional website-diff. Ongoing (raises daily review volume) — roll
+  out one source type at a time.
+
+Current wiring gaps these address: candidate `bluesky`/`youtube_channel` fields are
+all `null`; no Bluesky feed in discovery; `discover.website_changed()` and the
+`website` source type exist but aren't polled (`cmd_discover` handles only
+`rss`/`google-news`/`youtube`); `cmd_discover` hardcodes `media_type: "article"`.
+X/IG/TikTok stay manual-intake only.
 - **Audio/video extraction works** (verified live on a WGN YouTube interview):
   `ingest-url --type podcast|youtube|social` → yt-dlp downloads audio → Groq
   transcribes → extractor pulls statements. `youtube` is folded into the audio path

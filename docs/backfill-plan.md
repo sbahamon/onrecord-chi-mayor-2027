@@ -62,13 +62,13 @@ Prep alongside the code:
 
 ## Related gaps worth folding in (optional, decide per scope)
 
-- **Social media is not checked.** No candidate has a `bluesky`/`youtube_channel`
-  handle set; no Bluesky feed is wired into discovery. If wanted, populate handles and
-  add a Bluesky source (its public API is free and easy) — but that's *ongoing
-  discovery*, not backfill, so keep it a separate task.
-- **Video/audio extraction is built but unverified end-to-end** (see CLAUDE.md). If the
-  backfill includes any YouTube forums or podcast episodes, verify that path on one real
-  URL first (`ingest-url --type youtube|podcast`) before batching.
+- **Ongoing media + social discovery is a separate, sequenced plan** —
+  [`discovery-expansion-plan.md`](./discovery-expansion-plan.md), to run **after** this
+  backfill. It reuses the same media handling. Keep it out of scope here (this is a
+  bounded one-time job; that one changes the cron permanently).
+- **Video/audio extraction works** (verified live). `ingest-url --type
+  podcast|youtube` → yt-dlp → Groq → extract. So the backfill *can* include forum
+  videos / podcast episodes; just expect noisier transcripts (more reviewer flags).
 
 ## How to run (in a new session)
 
