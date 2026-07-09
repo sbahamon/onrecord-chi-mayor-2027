@@ -151,10 +151,11 @@ Two sequenced plans in `docs/` (run **backfill first**, then discovery expansion
 
 - **Backfill** — [`docs/backfill-plan.md`](./docs/backfill-plan.md). One-time
   historical seed (candidate platform pages + prior press). The `backfill` CLI mode
-  (`pipeline/backfill.py` + `backfill.yml`, **one PR per candidate**) is **built**,
-  and **Phase 1 ran 2026-07-08** (6 candidate PRs, `ai-verified`, awaiting merge).
-  **Phase 2 (curated press) is next and needs no new code** — just a rows file of
-  `type: "article"` URLs. See the plan's "Phase 1 outcome".
+  (`pipeline/backfill.py` + `backfill.yml`, **one PR per candidate**) is **built**, and
+  **Phase 1 + Phase 2 batch 1 ran 2026-07-08, all merged** — 7/11 candidates seeded.
+  The other 4 have no verifiable media-sourced housing position yet (deferred/held; a
+  property-tax-only quote does NOT count as housing). Remaining backfill work is optional
+  depth. See the plan's outcome tables.
 - **Discovery expansion** — [`docs/discovery-expansion-plan.md`](./docs/discovery-expansion-plan.md).
   Teach the daily cron to ingest media + social, not just name-matched articles:
   media-type routing (cron currently hardcodes `article`), YouTube-channel + podcast
