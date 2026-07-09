@@ -48,23 +48,25 @@ def housing_and_other_llm():
 
 
 class FlakyLLM:
-    """Emits a schema-invalid statement (empty quote) on the first call, then a
-    valid one — mimicking the extractor's documented occasional bad-field hiccup.
+    """Returns a structurally-broken payload (no 'statements' key) on the first
+    call, then a valid one — mimicking a transient malformed-JSON response that
+    extract raises on and process_source retries.
     """
-    def __init__(self, bad, good):
-        self._responses = [bad, good]
+    def __init__(self, payloads):
+        self._payloads = payloads
         self.calls = 0
 
     def complete_json(self, *, model, system, user):
-        idx = min(self.calls, len(self._responses) - 1)
+        idx = min(self.calls, len(self._payloads) - 1)
         self.calls += 1
-        return {"statements": self._responses[idx]}
+        return self._payloads[idx]
 
 
-def test_process_source_retries_extract_on_schema_invalid_statement(tmp_path):
-    # extract.py raises on a lone schema-invalid statement (e.g. an empty quote);
+def test_process_source_retries_extract_on_structural_failure(tmp_path):
+    # extract.py raises on a structurally-broken response (missing 'statements');
     # process_source should retry the extraction (reusing the transcript, so no
-    # re-download/re-transcribe) rather than aborting the whole source.
+    # re-download/re-transcribe) rather than aborting the whole source. (A lone
+    # malformed *statement* is dropped, not retried — see test_extract.py.)
     good_stmt = {
         "candidate": "example-candidate-a", "topic": "zoning-reform",
         "stance": "supports",
@@ -73,9 +75,8 @@ def test_process_source_retries_extract_on_schema_invalid_statement(tmp_path):
         "locator": None, "confidence": 0.9, "is_housing": True,
         "attribution_flag": False,
     }
-    bad_stmt = {**good_stmt, "quote": ""}  # empty quote -> ExtractionError
 
-    llm = FlakyLLM([bad_stmt], [good_stmt])
+    llm = FlakyLLM([{"oops": "malformed"}, {"statements": [good_stmt]}])
     result = run.process_source(
         SOURCE,
         data_dir=tmp_path,
@@ -87,7 +88,7 @@ def test_process_source_retries_extract_on_schema_invalid_statement(tmp_path):
         fetcher=lambda url: ARTICLE_HTML,
     )
 
-    assert llm.calls == 2  # retried once after the bad-field hiccup
+    assert llm.calls == 2  # retried once after the transient structural failure
     assert result.evidence_path.exists()
     assert result.housing_count == 1
 

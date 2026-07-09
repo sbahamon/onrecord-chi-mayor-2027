@@ -149,12 +149,15 @@ def test_marks_every_processed_url_in_the_ledger(tmp_path):
 
 
 class FlakyLLM:
-    """Fails (returns an out-of-range statement) N times, then returns good output.
+    """Returns a structurally-broken payload N times, then returns good output.
 
-    Models are nondeterministic; deepseek occasionally emits one malformed
-    statement (confidence -1, empty quote) that ``extract`` rightly rejects by
-    raising. For a one-time backfill of a page we know has content, retrying the
-    row usually yields a clean batch — that resilience is what these tests pin.
+    Models are nondeterministic and occasionally return malformed JSON (e.g. no
+    top-level ``statements`` key) that ``extract`` rejects by raising — a whole-
+    response failure with no per-statement recovery. ``process_source`` retries the
+    extraction, so for a page we know has content a retry usually yields a clean
+    batch; that resilience is what these tests pin. (A single *malformed statement*
+    among good ones is a different case: ``extract`` drops just that statement, no
+    retry — see ``test_extract.py``.)
     """
 
     def __init__(self, fail_times, good):
@@ -166,8 +169,7 @@ class FlakyLLM:
         self.calls += 1
         if self.remaining_fails > 0:
             self.remaining_fails -= 1
-            bad = dict(self.good, confidence=-1)  # schema minimum is 0 -> extract raises
-            return {"statements": [bad]}
+            return {"oops": "malformed model output"}  # no 'statements' key -> extract raises
         return {"statements": [self.good]}
 
 
