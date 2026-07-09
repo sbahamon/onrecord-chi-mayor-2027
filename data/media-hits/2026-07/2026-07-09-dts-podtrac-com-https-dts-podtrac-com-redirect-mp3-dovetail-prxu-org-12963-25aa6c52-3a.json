@@ -1,0 +1,45 @@
+{
+  "id": "2026-07-09-dts-podtrac-com-https-dts-podtrac-com-redirect-mp3-dovetail-prxu-org-12963-25aa6c52-3a",
+  "url": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/25aa6c52-3a72-4ed9-905c-2cca83ede8fb/0611_Fran_Show_Mendoza_mixdown.mp3",
+  "outlet": "dts.podtrac.com",
+  "media_type": "podcast",
+  "title": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/25aa6c52-3a72-4ed9-905c-2cca83ede8fb/0611_Fran_Show_Mendoza_mixdown.mp3",
+  "published_date": "2026-07-09",
+  "discovered_date": "2026-07-09",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "susana-mendoza",
+      "topic": "affordable-housing-funding",
+      "stance": "no-position",
+      "summary": "Implies affordability is a crisis but does not state a specific policy on affordable housing funding.",
+      "quote": "We have a financial crisis, which we need every penny that we can to go towards actually solving our financial crisis. It's an affordability issue for so many people across the city that can't even afford their rent or a home. I think that takes precedent over everything.",
+      "locator": null,
+      "confidence": 0.8,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "susana-mendoza",
+      "topic": "public-housing-cha",
+      "stance": "no-position",
+      "summary": "Criticizes the mayor for not filling leadership positions at the CHA but does not state her own policy on public housing.",
+      "quote": "He fumbled the ball at The public schools before the boards that he still controls chose Macklin King. And there is civilian oversight over the police department. So the mayor, really the power of the mayor has been greatly diminished. It been as I said it just one This is why I don say it just a little incompetence but a blizzard of incompetence Fran How can you go years without filling some of the most important critical positions in this city",
+      "locator": null,
+      "confidence": 0.7,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "susana-mendoza",
+      "topic": "zoning-reform",
+      "stance": "no-position",
+      "summary": "Advocates for building to grow the economy but does not specify zoning reforms.",
+      "quote": "That's going to mean build, build, build. We have five cranes in the sky right now where we used to have 65 in 2019. We need to get back to the core of our DNA as a city, and that's to build.",
+      "locator": null,
+      "confidence": 0.6,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}
