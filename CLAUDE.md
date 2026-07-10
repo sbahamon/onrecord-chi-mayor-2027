@@ -163,6 +163,20 @@ stance) in the proposed PR. This matters more as discovery-expansion widens the 
   `python -m pipeline --data-dir <scratch> ingest-url --url <real article>`; inspect the
   written evidence/stances, then `... review <evidence.json>`.
 - The live loop: trigger `intake` workflow → a PR opens → `review` workflow comments on it.
+- **Long-audio chunking (>106 min) — verified live in CI via a direct-mp3 podcast intake**
+  (2026-07-10, run 29098159099: a 2h09m episode → 29.7 MB downsampled → **split into 2 chunks**,
+  both transcribed by real Groq, no 413, run green). To re-verify a change, dispatch
+  `intake.yml --ref <code-branch> -f url=<a real >106-min direct .mp3> -f type=podcast` and grep the
+  Ingest log for `transcribe: audio NN.N MB over 25 MB cap; split into N chunk(s)`. Two things that
+  bit an earlier attempt: (1) **target the *code* branch** — `checkout@v4` defaults to the dispatch
+  ref, and `main` won't have the chunking code until #34 merges; (2) **use a direct mp3 / podcast RSS
+  enclosure, not YouTube** — YouTube 403s the runner IP (bot-gate, #32), but enclosures go through
+  yt-dlp's generic HTTP path and aren't gated (the earlier "must be local" claim conflated the two;
+  a *sandbox's* egress proxy — not the GitHub runner — was what blocked verifying URLs). Local
+  alternative (only `GROQ_API_KEY` + ffmpeg — no OpenRouter/PR):
+  `python -c "from pipeline.transcribe import download_media, transcribe_audio as t; print(len(t(download_media('<a real >106-min .mp3>'))))"`
+  — watch for the same split log and a non-empty transcript. A short/podcast clip won't trigger it
+  (stays under cap). Closes #33.
 
 ## Known gaps / planned work
 
@@ -184,13 +198,17 @@ Sequenced plans in `docs/` — **backfill and discovery expansion are both done.
   check (see "verify on demand" below). Candidate `youtube_channel`/`bluesky` are populated for
   those with confirmed accounts; X/IG/TikTok stay manual-intake only.
 
-Two follow-ups remain (tracked, not blocking — see `docs/discovery-expansion-plan.md` status):
+One follow-up remains (tracked, not blocking — see `docs/discovery-expansion-plan.md` status):
 - **Live headless fetcher.** The injected `headless_fetcher` seam exists and is offline-tested
   (`ingest` retries via it when a plain fetch yields `< MIN_ARTICLE_CHARS` of text — a JS shell).
   The *real* Playwright fetcher + browser install in `cron`/`review`/`intake` CI isn't wired yet.
   Unblocks JS-rendered campaign pages (e.g. `cardenas4chicago` platform grid) and 403 sites.
-- **Long-audio chunking.** The downsample keeps episodes under Groq's ~25 MB cap up to ~106 min
-  at 32 kbps; longer audio still 413s. Add ffmpeg segment-based chunking + transcript stitching.
+
+**Long-audio chunking is done.** When a downsampled file still exceeds Groq's ~25 MB cap
+(very long ~2 h+ audio), `transcribe.transcribe_audio` segments it with ffmpeg
+(`_split_audio`, duration-probed so each piece lands under the cap), transcribes each chunk,
+and stitches the parts (`_stitch_transcripts`). The split/upload steps are injected seams
+(`splitter=`/`poster=`) so the chunking decision stays offline-testable (`tests/test_transcribe.py`).
 
 `discover.website_changed()` and the `website` source type still exist but aren't polled
 (website-diff was descoped). `normalize_vtt` exists for a future caption-fetch path but isn't
@@ -228,7 +246,16 @@ full Groq transcription).
   upload size (~25 MB); a full podcast episode 413s. `transcribe.download_media` re-encodes to
   16 kHz mono ~32 kbps via ffmpeg (`_downsample_for_whisper`) before upload — CI installs
   ffmpeg (guard in `cron`/`review`/`intake`), locally `brew install ffmpeg`. Never upload raw
-  yt-dlp output. Downsample covers ~106 min; longer needs chunking (a tracked follow-up).
+  yt-dlp output. Downsample covers ~106 min; longer audio is segmented by `transcribe_audio`
+  (ffmpeg `-f segment`, duration-probed) and the chunk transcripts stitched.
+- **YouTube via yt-dlp is bot-gated on CI runner IPs — and it's IP-based, not length-based.**
+  A `workflow_dispatch` intake of any YouTube URL fails in `download_media` with
+  `[youtube] …: Sign in to confirm you're not a bot`. GitHub-runner datacenter IPs are flagged
+  and there are no logged-in cookies, so a 30-second clip and a 4-hour stream fail identically —
+  don't assume "it's too long"; a short YouTube link fails the same way. This degrades the real
+  cron/review YouTube path, not just tests. Fix is cookies or a proxy (tracked #32). Non-YouTube
+  audio (podcast RSS enclosures, direct `.mp3`/`.mp4`) downloads fine — yt-dlp's generic handler
+  has no such gate, so prefer those for any live audio check you can't run locally.
 - **First-person social posts have no name — scope extraction to the account owner.** A
   Bluesky post ("As Mayor, I'll cut the red tape…") gives the extractor no attribution signal,
   so unscoped it mis-attributes (it tagged a Mendoza post to Johnson, live). Per-candidate feeds
