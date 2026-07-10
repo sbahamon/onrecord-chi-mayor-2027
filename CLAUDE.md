@@ -184,13 +184,17 @@ Sequenced plans in `docs/` — **backfill and discovery expansion are both done.
   check (see "verify on demand" below). Candidate `youtube_channel`/`bluesky` are populated for
   those with confirmed accounts; X/IG/TikTok stay manual-intake only.
 
-Two follow-ups remain (tracked, not blocking — see `docs/discovery-expansion-plan.md` status):
+One follow-up remains (tracked, not blocking — see `docs/discovery-expansion-plan.md` status):
 - **Live headless fetcher.** The injected `headless_fetcher` seam exists and is offline-tested
   (`ingest` retries via it when a plain fetch yields `< MIN_ARTICLE_CHARS` of text — a JS shell).
   The *real* Playwright fetcher + browser install in `cron`/`review`/`intake` CI isn't wired yet.
   Unblocks JS-rendered campaign pages (e.g. `cardenas4chicago` platform grid) and 403 sites.
-- **Long-audio chunking.** The downsample keeps episodes under Groq's ~25 MB cap up to ~106 min
-  at 32 kbps; longer audio still 413s. Add ffmpeg segment-based chunking + transcript stitching.
+
+**Long-audio chunking is done.** When a downsampled file still exceeds Groq's ~25 MB cap
+(very long ~2 h+ audio), `transcribe.transcribe_audio` segments it with ffmpeg
+(`_split_audio`, duration-probed so each piece lands under the cap), transcribes each chunk,
+and stitches the parts (`_stitch_transcripts`). The split/upload steps are injected seams
+(`splitter=`/`poster=`) so the chunking decision stays offline-testable (`tests/test_transcribe.py`).
 
 `discover.website_changed()` and the `website` source type still exist but aren't polled
 (website-diff was descoped). `normalize_vtt` exists for a future caption-fetch path but isn't
@@ -228,7 +232,8 @@ full Groq transcription).
   upload size (~25 MB); a full podcast episode 413s. `transcribe.download_media` re-encodes to
   16 kHz mono ~32 kbps via ffmpeg (`_downsample_for_whisper`) before upload — CI installs
   ffmpeg (guard in `cron`/`review`/`intake`), locally `brew install ffmpeg`. Never upload raw
-  yt-dlp output. Downsample covers ~106 min; longer needs chunking (a tracked follow-up).
+  yt-dlp output. Downsample covers ~106 min; longer audio is segmented by `transcribe_audio`
+  (ffmpeg `-f segment`, duration-probed) and the chunk transcripts stitched.
 - **First-person social posts have no name — scope extraction to the account owner.** A
   Bluesky post ("As Mayor, I'll cut the red tape…") gives the extractor no attribution signal,
   so unscoped it mis-attributes (it tagged a Mendoza post to Johnson, live). Per-candidate feeds

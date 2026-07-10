@@ -20,7 +20,13 @@ mis-attributed (→ scope extraction to the feed's candidate).
 **Remaining (tracked follow-ups, not blocking):**
 - **Live Playwright headless fetcher** for JS-rendered pages — the injected `headless_fetcher`
   seam exists and is offline-tested; wire a real browser into `cron`/`review`/`intake` CI.
-- **Chunk very-long (~2 h+) audio** — the downsample covers up to ~106 min at 32 kbps.
+
+**Done:**
+- **Chunk very-long (~2 h+) audio** — the downsample covers up to ~106 min at 32 kbps; beyond
+  that `transcribe.transcribe_audio` segments the file with ffmpeg (`_split_audio`, duration-probed
+  so each piece stays under Groq's ~25 MB cap), transcribes each chunk, and stitches the parts
+  (`_stitch_transcripts`). Split/upload are injected seams (`splitter=`/`poster=`) so the chunking
+  logic is offline-tested in `tests/test_transcribe.py`.
 
 X / Instagram / TikTok remain **manual-intake only** (no free feed / ToS).
 
