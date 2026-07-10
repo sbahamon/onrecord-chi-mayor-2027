@@ -1,5 +1,13 @@
 # Gemini URL-based YouTube transcription — feasibility research (issue #36)
 
+> **⚠️ RESOLVED 2026-07-10 — see [`gemini-transcription-eval-log.md`](./gemini-transcription-eval-log.md).**
+> The conditional GO/NO-GO below was settled by a live eval (Phase 1 OpenRouter + Phase 2 native
+> SDK low-res). **Verdict: NO-GO as a general path** — Gemini's long-form transcription is
+> non-reproducible/runaway (the 88-min forum gave 54k vs 290k chars on identical runs; low-res
+> cleared only the token-ceiling, not the instability). **Recommendation: pursue #32 (yt-dlp
+> cookies/proxy).** Gemini remains a viable **short-clip (≤~11 min) fallback** if #32 fails. The
+> doc below is the pre-eval feasibility analysis, kept for context.
+
 **Status: RESEARCH ONLY — no production code changed (2026-07-10).** Deliverable is this
 findings doc + a go/no-go. **Read `CLAUDE.md` first** (transcription notes + the #32 YouTube
 bot-gate lesson). Answers issue [#36](https://github.com/sbahamon/onrecord-chi-mayor-2027/issues/36);
