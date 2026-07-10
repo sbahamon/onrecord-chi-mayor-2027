@@ -20,6 +20,10 @@ mis-attributed (→ scope extraction to the feed's candidate).
 **Remaining (tracked follow-ups, not blocking):**
 - **Live Playwright headless fetcher** for JS-rendered pages — the injected `headless_fetcher`
   seam exists and is offline-tested; wire a real browser into `cron`/`review`/`intake` CI.
+- **YouTube ingestion is bot-gated on CI runner IPs** (#32) — yt-dlp gets `Sign in to confirm
+  you're not a bot` from GitHub-runner datacenter IPs (IP-based, hits any length). The YouTube
+  path below is "verified" from an un-flagged network; on CI it needs cookies or a proxy. Podcast
+  RSS / direct-file audio is unaffected.
 
 **Done:**
 - **Chunk very-long (~2 h+) audio** — the downsample covers up to ~106 min at 32 kbps; beyond

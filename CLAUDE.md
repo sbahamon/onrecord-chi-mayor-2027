@@ -163,6 +163,14 @@ stance) in the proposed PR. This matters more as discovery-expansion widens the 
   `python -m pipeline --data-dir <scratch> ingest-url --url <real article>`; inspect the
   written evidence/stances, then `... review <evidence.json>`.
 - The live loop: trigger `intake` workflow → a PR opens → `review` workflow comments on it.
+- **Long-audio chunking (>106 min) must be verified locally, not in CI.** Two CI blockers
+  make the split path unreachable from a GitHub runner: YouTube 403s the runner IP (bot-gate,
+  see #32) and a hosted-cloud dev sandbox's egress proxy blocks arbitrary media hosts
+  (archive.org etc.), so you can't even verify a candidate URL before dispatch. Run it on a
+  machine with keys + open network. Minimal check (only `GROQ_API_KEY` + ffmpeg — no OpenRouter):
+  `python -c "from pipeline.transcribe import download_media, transcribe_audio as t; print(len(t(download_media('<a real >106-min .mp3/.mp4 or non-gated video url>'))))"`
+  — watch for the `transcribe: audio NN.N MB over 25 MB cap; split into N chunk(s)` log and a
+  non-empty transcript. Tracked as #33. A short/podcast clip won't trigger it (stays under cap).
 
 ## Known gaps / planned work
 
@@ -234,6 +242,14 @@ full Groq transcription).
   ffmpeg (guard in `cron`/`review`/`intake`), locally `brew install ffmpeg`. Never upload raw
   yt-dlp output. Downsample covers ~106 min; longer audio is segmented by `transcribe_audio`
   (ffmpeg `-f segment`, duration-probed) and the chunk transcripts stitched.
+- **YouTube via yt-dlp is bot-gated on CI runner IPs — and it's IP-based, not length-based.**
+  A `workflow_dispatch` intake of any YouTube URL fails in `download_media` with
+  `[youtube] …: Sign in to confirm you're not a bot`. GitHub-runner datacenter IPs are flagged
+  and there are no logged-in cookies, so a 30-second clip and a 4-hour stream fail identically —
+  don't assume "it's too long"; a short YouTube link fails the same way. This degrades the real
+  cron/review YouTube path, not just tests. Fix is cookies or a proxy (tracked #32). Non-YouTube
+  audio (podcast RSS enclosures, direct `.mp3`/`.mp4`) downloads fine — yt-dlp's generic handler
+  has no such gate, so prefer those for any live audio check you can't run locally.
 - **First-person social posts have no name — scope extraction to the account owner.** A
   Bluesky post ("As Mayor, I'll cut the red tape…") gives the extractor no attribution signal,
   so unscoped it mis-attributes (it tagged a Mendoza post to Johnson, live). Per-candidate feeds
