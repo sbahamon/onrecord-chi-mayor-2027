@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -87,11 +88,19 @@ def transcribe_audio(path: str, *, model: str = "whisper-large-v3-turbo",
         raise RuntimeError("GROQ_API_KEY is not set")
 
     poster = poster or _post_transcription
-    if os.path.getsize(path) <= GROQ_MAX_UPLOAD_BYTES:
+    size = os.path.getsize(path)
+    if size <= GROQ_MAX_UPLOAD_BYTES:
         return poster(path, model=model, api_key=api_key)
 
     splitter = splitter or _split_audio
     chunks = splitter(path)
+    # Rare path (very long audio) — log it so a live run shows chunking engaged.
+    print(
+        f"transcribe: audio {size / 1_048_576:.1f} MB over "
+        f"{GROQ_MAX_UPLOAD_BYTES / 1_048_576:.0f} MB cap; "
+        f"split into {len(chunks)} chunk(s)",
+        file=sys.stderr,
+    )
     parts = [poster(chunk, model=model, api_key=api_key) for chunk in chunks]
     return _stitch_transcripts(parts)
 
