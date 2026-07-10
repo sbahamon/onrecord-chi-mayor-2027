@@ -163,14 +163,20 @@ stance) in the proposed PR. This matters more as discovery-expansion widens the 
   `python -m pipeline --data-dir <scratch> ingest-url --url <real article>`; inspect the
   written evidence/stances, then `... review <evidence.json>`.
 - The live loop: trigger `intake` workflow → a PR opens → `review` workflow comments on it.
-- **Long-audio chunking (>106 min) must be verified locally, not in CI.** Two CI blockers
-  make the split path unreachable from a GitHub runner: YouTube 403s the runner IP (bot-gate,
-  see #32) and a hosted-cloud dev sandbox's egress proxy blocks arbitrary media hosts
-  (archive.org etc.), so you can't even verify a candidate URL before dispatch. Run it on a
-  machine with keys + open network. Minimal check (only `GROQ_API_KEY` + ffmpeg — no OpenRouter):
-  `python -c "from pipeline.transcribe import download_media, transcribe_audio as t; print(len(t(download_media('<a real >106-min .mp3/.mp4 or non-gated video url>'))))"`
-  — watch for the `transcribe: audio NN.N MB over 25 MB cap; split into N chunk(s)` log and a
-  non-empty transcript. Tracked as #33. A short/podcast clip won't trigger it (stays under cap).
+- **Long-audio chunking (>106 min) — verified live in CI via a direct-mp3 podcast intake**
+  (2026-07-10, run 29098159099: a 2h09m episode → 29.7 MB downsampled → **split into 2 chunks**,
+  both transcribed by real Groq, no 413, run green). To re-verify a change, dispatch
+  `intake.yml --ref <code-branch> -f url=<a real >106-min direct .mp3> -f type=podcast` and grep the
+  Ingest log for `transcribe: audio NN.N MB over 25 MB cap; split into N chunk(s)`. Two things that
+  bit an earlier attempt: (1) **target the *code* branch** — `checkout@v4` defaults to the dispatch
+  ref, and `main` won't have the chunking code until #34 merges; (2) **use a direct mp3 / podcast RSS
+  enclosure, not YouTube** — YouTube 403s the runner IP (bot-gate, #32), but enclosures go through
+  yt-dlp's generic HTTP path and aren't gated (the earlier "must be local" claim conflated the two;
+  a *sandbox's* egress proxy — not the GitHub runner — was what blocked verifying URLs). Local
+  alternative (only `GROQ_API_KEY` + ffmpeg — no OpenRouter/PR):
+  `python -c "from pipeline.transcribe import download_media, transcribe_audio as t; print(len(t(download_media('<a real >106-min .mp3>'))))"`
+  — watch for the same split log and a non-empty transcript. A short/podcast clip won't trigger it
+  (stays under cap). Closes #33.
 
 ## Known gaps / planned work
 
