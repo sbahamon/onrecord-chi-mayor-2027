@@ -1,0 +1,256 @@
+# Gemini URL-based YouTube transcription — feasibility research (issue #36)
+
+**Status: RESEARCH ONLY — no production code changed (2026-07-10).** Deliverable is this
+findings doc + a go/no-go. **Read `CLAUDE.md` first** (transcription notes + the #32 YouTube
+bot-gate lesson). Answers issue [#36](https://github.com/sbahamon/onrecord-chi-mayor-2027/issues/36);
+related: [#32](https://github.com/sbahamon/onrecord-chi-mayor-2027/issues/32) (YouTube bot-gate,
+open), #33 + PR #34 (long-audio chunking, done).
+
+**Bottom line — CONDITIONAL GO to *de-risk*, NO-GO on committing yet.** The core idea is
+sound: passing a YouTube URL to Gemini moves the video fetch **server-side to Google**, which
+*should* bypass the GitHub-runner IP bot-gate (#32), and — importantly — **OpenRouter already
+passes YouTube URLs through to Gemini**, so it can reuse `OPENROUTER_API_KEY` with **no new
+secret**. Cost is small (~+$15–40/mo). **But** two documented problems hit *this project*
+specifically and must be cleared by a live spike before adoption: (1) Gemini's YouTube fetch is
+**flaky for very recent videos** (<~1 month old) — and this tracker ingests fresh media; and (2)
+LLM transcription is **non-deterministic**, which breaks the deterministic `quote_in_transcript`
+re-verification that is the spine of the project's trust model. Recommendation: run the CI spike
+in §D, and treat the simpler **yt-dlp cookies/proxy fix in #32 as the lower-risk default** unless
+the spike clears both risks.
+
+---
+
+## Why
+
+Today's audio path is `yt-dlp download → ffmpeg 16 kHz-mono downsample → Groq Whisper`
+(`pipeline/transcribe.py`; `pipeline/ingest.py` `AUDIO_TYPES`). It works for **podcasts /
+direct-file audio**, but **YouTube is bot-gated on CI runner IPs** (#32): yt-dlp gets `Sign in to
+confirm you're not a bot` from GitHub-Actions datacenter IPs. It's IP-based (any length fails) and
+degrades the real `cron`/`review` YouTube discovery + verification paths. The hypothesis: let
+**Gemini** ingest a public YouTube URL directly (Google fetches the video), removing yt-dlp from
+the YouTube path.
+
+## Governing constraint (the trust model — do not weaken)
+
+The project's credibility rests on three things this research must preserve, not just note:
+
+1. **Independent, deterministic re-verification.** The reviewer re-ingests the source and checks
+   each quote appears verbatim: `verify_statement` AND-gates `quote_in_transcript` (in
+   `pipeline/extract.py` — whitespace-collapsed, case-folded **substring containment**) with a
+   different-family reviewer LLM (`pipeline/review.py`). The model *cannot* override a missing
+   quote. This works today because **Groq Whisper is deterministic per input file** — re-ingest
+   reproduces the same transcript, so the exact substring check holds.
+2. **Different-family reviewer.** Extractor is DeepSeek, reviewer is Kimi *on purpose*
+   (`data/registry/config.json > models`). A second family checks the first.
+3. **Human review before publish** (`auto_merge_enabled: false`, asserted by `test_review.py`);
+   **never invent facts** — quotes come from the source and are verified to appear in it.
+
+An LLM transcription step collides head-on with #1 (see §Trust-model handling).
+
+---
+
+## A. Feasibility — does it work, especially in CI/CD?
+
+### It works, via a documented mechanism
+
+- Gemini accepts a **YouTube URL directly** as a `fileData` part with the URL in `file_uri`
+  (mime `video/*`) — no download, no File API upload for YouTube specifically. Google's servers
+  retrieve the video. Supported on **Gemini 2.5 Flash / Pro** (and later). Sources:
+  [Video understanding | Gemini API](https://ai.google.dev/gemini-api/docs/video-understanding),
+  [File input methods | Gemini API](https://ai.google.dev/gemini-api/docs/file-input-methods).
+- **Limits (primary docs):** **public videos only** (not private/unlisted); **1 video per
+  request** recommended (max 10 for 2.5+); **free tier ≤ 8 h of YouTube/day**, **paid tier no
+  length cap**; video sampled at **1 FPS**; clip windows via `video_metadata`
+  `start_offset`/`end_offset`. Source:
+  [Video understanding | Gemini API](https://ai.google.dev/gemini-api/docs/video-understanding).
+- **Transcription quality:** Gemini can transcribe and can emit timestamps on request, but it is
+  a general model, **not a dedicated ASR** — output is not guaranteed strictly verbatim (it may
+  normalize filler words / disfluencies). No speaker diarization guarantee. This matters for a
+  *verbatim-quote* project (see Trust-model handling).
+
+### CI/CD crux — the fetch is server-side (the whole point), with caveats
+
+The YouTube fetch happens **on Google's infrastructure**, not the client, so a flagged
+GitHub-runner IP never touches YouTube — this is the mechanism that would bypass #32. OpenRouter's
+own docs confirm the URL approach "allows the provider to retrieve the video from its source."
+**However, "Google fetches it" is not "Google fetches it reliably":**
+
+- **Recent-video flakiness (biggest risk for us).** Multiple current reports: **videos less than
+  ~1 month old fail to load correctly** (wrong titles, timeouts) via the API. This tracker
+  ingests *fresh* candidate media, so this is not an edge case — it's the common case. Sources:
+  [Recent YouTube Videos Inaccessible via Gemini API](https://discuss.ai.google.dev/t/recent-youtube-videos-inaccessible-via-gemini-3-flash-preview-api/114076),
+  [Certain YouTube links don't work](https://discuss.ai.google.dev/t/certain-youtube-links-dont-work/88350).
+- **Intermittent transient 400s.** YouTube-URL input returns intermittent `400 INVALID_ARGUMENT`
+  that succeeds on retry (mis-typed as a 400 rather than a retryable 503). Manageable with
+  retries, but real. Source:
+  [Intermittent 400 on YouTube URL input](https://discuss.ai.google.dev/t/youtube-url-video-input-returns-intermittent-400-invalid-argument-should-be-503-or-retryable-error-code/125883).
+
+**Verdict on the crux:** the approach *should* clear the #32 IP gate because the fetch is
+Google-side, and there is no documented GitHub-runner-specific gate on the Gemini API itself — but
+the **recent-video failures could reintroduce "YouTube silently doesn't work" through a different
+door.** This cannot be settled from docs; it needs the live CI spike in §D against a *fresh*
+public video. Treat any "it works in CI" claim as unproven until then.
+
+### Native vs OpenRouter
+
+- **OpenRouter passes YouTube URLs through to Gemini.** Video input is supported via the
+  `video_url` content part on `/api/v1/chat/completions`; the docs explicitly state that for
+  **Google AI Studio** Gemini you must pass a **YouTube link** (Vertex does not support it).
+  Source: [OpenRouter — Video Inputs](https://openrouter.ai/docs/guides/overview/multimodal/videos).
+  → We can **reuse `OPENROUTER_API_KEY`** (`pipeline/llm.py` `OpenRouterLLM`) and pin the provider
+  to `google-ai-studio`. **No new secret.** (Native `GEMINI_API_KEY` + SDK is the fallback if
+  OpenRouter's passthrough proves unreliable.)
+- Caveat: our current `OpenRouterLLM.complete_json` builds **text-only** messages. Video needs a
+  multimodal `content` array (a `video_url` part). That's a small new method, not a rewrite.
+
+---
+
+## B. Re-architecture
+
+The transcription layer is already dependency-injected (map below), so a Gemini path can hide
+behind the same seams and the offline suite stays fixture-only (golden rule #1, TDD).
+
+| Seam (innermost → outermost) | Where | Change |
+|---|---|---|
+| `transcribe_audio(path, *, model, poster=, splitter=)` | `pipeline/transcribe.py` | For YouTube, **not used** — the Gemini path takes a URL, not a downsampled file. No ffmpeg/chunking on this path. |
+| `download_media(url)` | `pipeline/transcribe.py` | For YouTube, **replaced** by "pass the URL straight to Gemini." yt-dlp/ffmpeg drop off the YouTube path (still needed for podcasts). |
+| `ingest(source, *, downloader=, transcriber=)` | `pipeline/ingest.py:160-165` | The audio branch composes `transcriber(downloader(url))`. Add a **Gemini transcriber** injected as `transcriber=` when `media_type == "youtube"`; keep Groq for `podcast`/`social`/`manual`. |
+| `review_evidence(evidence, *, ingest_fn)` | `pipeline/review.py` | Reviewer re-runs `ingest` (rebuilt source has **no `text`**, so it re-transcribes). The Gemini path must satisfy this too — this is where non-determinism bites (§Trust). |
+| `OpenRouterLLM(..., post=)` / new multimodal call | `pipeline/llm.py` | Add a `complete_video`/multimodal path (a `video_url` content part, `provider: google-ai-studio`). Note: **base URL is hardcoded** (`ENDPOINT`); the native-Gemini fallback would need a new base URL/SDK. |
+| Routing | `pipeline/__main__.py` | `AUDIO_TYPES`/`media_type_for_feed` already isolate `youtube`; route it to the Gemini transcriber. |
+| Config | `data/registry/config.json` | Add a transcription model id. **Note:** a `transcription.model` key already exists but is **not threaded through** any call site (`transcribe_audio` uses its own default) — wire it through as part of this. |
+| Workflows | `.github/workflows/{cron,review,intake}.yml` | The YouTube path no longer needs ffmpeg/yt-dlp (podcasts still do, so keep them). No new secret if OpenRouter route. |
+
+**Recommended scope — hybrid, not a full swap.** Keep **Groq for podcasts / direct-file audio**
+(works today, deterministic, ~$0.04/hr). Use **Gemini only for YouTube** (the broken path). A full
+unification onto Gemini would trade a working, deterministic, cheap path for a non-deterministic,
+pricier one for no benefit.
+
+---
+
+## C. Cost shift (back-of-envelope)
+
+**Rate inputs (cited):**
+- Gemini 2.5 Flash: **$0.30 / 1M input**, **$2.50 / 1M output**. Gemini 2.5 Pro: $1.25 / $10.
+  Sources: [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing),
+  [artificialanalysis: 2.5 Flash](https://artificialanalysis.ai/models/gemini-2-5-flash),
+  [2.5 Pro](https://artificialanalysis.ai/models/gemini-2-5-pro).
+  *(No separate audio-input rate found for 2.5 Flash; newer models do split audio — confirm on
+  the pricing page before relying on it.)*
+- Gemini **video tokenization**: **~300 tokens/sec** at default media resolution, **~100
+  tokens/sec** at low resolution (`media_resolution: low`); audio 32 tok/sec. Source:
+  [Video understanding | Gemini API](https://ai.google.dev/gemini-api/docs/video-understanding).
+- Groq baseline: **whisper-large-v3-turbo = $0.04 / hr** audio; yt-dlp effectively free. Source:
+  [Groq — Whisper Large v3 Turbo](https://groq.com/blog/whisper-large-v3-turbo-now-available-on-groq-combining-speed-quality-for-speech-recognition).
+
+**Per hour of video (Gemini 2.5 Flash, transcript output ≈ 12k tok/hr ≈ $0.03):**
+
+| | input tok/hr | input $ | + output $ | **≈ $/hr** |
+|---|---|---|---|---|
+| Flash, **low** media-res (100 tok/s) | 360k | $0.108 | $0.03 | **~$0.14** |
+| Flash, default media-res (300 tok/s) | 1.08M | $0.324 | $0.03 | **~$0.35** |
+| **Groq turbo (baseline)** | — | — | — | **$0.04** |
+
+So Gemini-Flash-low-res is **~3.5×** Groq per hour; default-res **~9×**. In absolute terms both
+are cents/hour. For transcription we don't need visual detail → **use `media_resolution: low`.**
+
+**Monthly estimate.** Assumptions (rescale as needed): daily cron; discovery caps
+`days_lookback: 7`, `max_items_per_run: 25` (`config.json`); **~3 YouTube videos/day** pass triage
+to transcription, avg **45 min** (0.75 h). **The reviewer re-ingests, so each video transcribes
+twice** (×2) unless cached.
+
+- Volume: 3 × 30 = 90 videos/mo × 0.75 h = **67.5 h/mo**, ×2 re-ingest = **135 h/mo**.
+- **Groq (if YouTube worked): 135 × $0.04 ≈ $5.4/mo** — but today $0 realized (blocked by #32).
+- **Gemini Flash low-res: 135 × $0.14 ≈ $19/mo.** Default-res: ≈ **$47/mo**.
+- **With transcript caching (no re-transcribe on review): halve →** Gemini ≈ **$9–24/mo**.
+
+**Δ = making the YouTube path actually work costs ≈ +$15 to +$40/month** with Flash (vs. the
+theoretical-but-unrealizable Groq cost). Extraction/triage/reviewer LLM spend is unchanged. **The
+real cost is engineering + trust complexity, not dollars.** (Show-your-work so the maintainer can
+re-run with real volume: `$/mo ≈ videos_per_day × 30 × avg_hours × re_ingest_factor × $/hr`.)
+
+---
+
+## Trust-model handling (the hard part)
+
+LLM transcription is **non-deterministic**: a re-transcription in `review.yml` may not reproduce
+the extractor's exact wording, so `quote_in_transcript`'s exact-substring check **would start
+false-flagging real quotes**. Options, least-to-most trust-preserving:
+
+1. **Strict fuzzy matcher (recommended default).** Replace exact substring with a *tight*
+   normalized match (e.g. require the quote to appear as a near-contiguous span with ≥~95%
+   token-sequence overlap). **Preserves independent re-transcription** (reviewer still re-fetches
+   via Gemini, different pass). Risk: loosens the verbatim guarantee; must stay strict enough that
+   a fabricated/mis-attributed quote still fails. Add tests with adversarial near-misses.
+2. **Cache the extractor's transcript for the reviewer.** The reviewer verifies against the *same*
+   transcript the extractor used (passed as a PR/CI artifact — **not committed**, per the
+   copyright rule that keeps transcripts out of the repo). Keeps exact-substring + halves cost,
+   **but weakens "independent re-ingest"** — the reviewer no longer re-fetches the source. The
+   different-family reviewer LLM still independently judges faithfulness/attribution, so it's a
+   *reasonable* trade, not a free one. Document the downgrade explicitly.
+3. **Timestamped/grounded transcript** — request timestamps and store the cited span; still
+   non-deterministic text, so pair with (1) or (2).
+
+**Do not** simply trust the model's word (drop the deterministic check) — that removes the guard
+that also blocks path-injection via extractor output (see the Security note in `CLAUDE.md`).
+Keep #2 (different-family reviewer) and #3 (human review) untouched. Also weigh that Gemini
+transcripts **may not be truly verbatim** — if it cleans up disfluencies, a quote the extractor
+pulls may never have been said word-for-word. That is a first-order threat to the project's
+premise and is the main reason this is a *conditional* go.
+
+---
+
+## D. Proposed CI de-risking spike (for a future session — NOT run here)
+
+The only way to truly answer "works in CI/CD" and "handles fresh videos" is one real run from a
+GitHub-Actions runner. Keep it **throwaway (scratch branch / `workflow_dispatch`), not merged.**
+
+1. **Prefer the OpenRouter route first** (reuses `OPENROUTER_API_KEY`, no new secret). Add a
+   scratch `workflow_dispatch` job that POSTs to OpenRouter `/chat/completions` with a
+   `video_url` part = a **public YouTube URL**, `model: google/gemini-2.5-flash`,
+   `provider: {order: ["google-ai-studio"]}`, prompt "Transcribe verbatim." (Native fallback:
+   a `GEMINI_API_KEY` secret the maintainer adds + `fileData`/`file_uri`.)
+2. **Test the real risk, not a soft one:** use a **video < 1 week old** (a fresh candidate clip),
+   because recent-video fetch is the documented failure mode. Also test a 60–90 min forum.
+3. **Assert:** non-empty transcript **and** a known verbatim phrase from the video appears
+   (normalized). Log token usage → real $/episode. Record latency and any `400 INVALID_ARGUMENT`
+   retries.
+4. **Pass/fail:** GO only if fresh videos transcribe reliably across a few tries **and** a strict
+   matcher (§Trust option 1) still matches across two independent transcriptions of the same
+   video. Otherwise NO-GO — fall back to the #32 cookies/proxy fix.
+
+Command shape (once the scratch workflow exists):
+`gh workflow run gemini-spike.yml --ref <scratch-branch> -f url=<fresh public YouTube URL>` → read
+the job log for the transcript + token/cost lines.
+
+---
+
+## Recommendation
+
+- **Conditional GO to de-risk; NO-GO on committing until the §D spike clears the recent-video and
+  verbatim-determinism risks.** The mechanism is real and cheap, and OpenRouter passthrough means
+  no new secret — but the two project-specific risks are exactly the ones that would silently
+  degrade trust or re-break YouTube through a different door.
+- **If adopted:** hybrid scope (Gemini for YouTube only, Groq stays for podcasts/direct audio),
+  `media_resolution: low`, retries on transient 400s, and a **strict fuzzy matcher** (or cached
+  transcript) so `quote_in_transcript` survives non-determinism — with tests.
+- **Lower-risk alternative to weigh first:** the **#32 cookies/proxy fix for yt-dlp** keeps the
+  entire deterministic, verbatim, independent-re-ingest trust model intact and is a smaller
+  change. Gemini is the bigger bet; pick it only if the spike shows it's clearly more reliable
+  for *fresh* YouTube than cookies/proxy.
+
+## Sources
+- [Video understanding | Gemini API](https://ai.google.dev/gemini-api/docs/video-understanding) ·
+  [File input methods](https://ai.google.dev/gemini-api/docs/file-input-methods) ·
+  [Pricing](https://ai.google.dev/gemini-api/docs/pricing)
+- [OpenRouter — Video Inputs](https://openrouter.ai/docs/guides/overview/multimodal/videos) ·
+  [OpenRouter — Multimodal overview](https://openrouter.ai/docs/guides/overview/multimodal/overview)
+- [Groq — Whisper Large v3 Turbo](https://groq.com/blog/whisper-large-v3-turbo-now-available-on-groq-combining-speed-quality-for-speech-recognition)
+- [artificialanalysis — Gemini 2.5 Flash](https://artificialanalysis.ai/models/gemini-2-5-flash) ·
+  [2.5 Pro](https://artificialanalysis.ai/models/gemini-2-5-pro)
+- Reliability: [Recent videos inaccessible](https://discuss.ai.google.dev/t/recent-youtube-videos-inaccessible-via-gemini-3-flash-preview-api/114076) ·
+  [Certain links don't work](https://discuss.ai.google.dev/t/certain-youtube-links-dont-work/88350) ·
+  [Intermittent 400 on YouTube URL](https://discuss.ai.google.dev/t/youtube-url-video-input-returns-intermittent-400-invalid-argument-should-be-503-or-retryable-error-code/125883)
+
+*Capability/pricing claims verified against sources fetched 2026-07-10; model APIs drift — re-check
+before implementing.*
