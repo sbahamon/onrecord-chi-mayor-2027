@@ -261,14 +261,21 @@ full Groq transcription).
   so unscoped it mis-attributes (it tagged a Mendoza post to Johnson, live). Per-candidate feeds
   carry a `candidate`; `cmd_discover` passes `candidates=[that_slug]` for them — the same
   scoping backfill uses for a candidate's own platform page.
-- **Use `gh`, not raw `git`, for remote operations in this environment.** `git fetch`/`pull`/
-  `checkout` reliably hang/time out here (and leave a stale `.git/index.lock`); `git push`
-  usually works, `gh` (the API) always does. To branch+commit+PR a file with no local fetch/push:
+- **Raw `git` remote ops used to hang here — root-caused and fixed (2026-07-10).** The hang was
+  never git: the HTTPS remote's **`osxkeychain`** credential helper raised a macOS GUI approval /
+  locked-keychain dialog that nothing can click in an agent context, so git blocked forever (kill
+  it → stale `.git/index.lock` → next command breaks). Intermittent because it only fires when the
+  login keychain is locked or git isn't on the item's ACL; `gh` never hung because it uses its own
+  OAuth token, not the keychain. **Fix:** `gh auth setup-git` wired
+  `credential.https://github.com.helper` → `!gh auth git-credential` (empty value first, clearing
+  the inherited osxkeychain helper), so git now authenticates through gh's token — no GUI, no hang.
+  Raw `git fetch`/`pull`/`push`/`checkout` are safe here now. If it ever recurs (e.g. the helper
+  config is lost), re-run `gh auth setup-git`; the pure-`gh` recipe below is still a fine fallback.
+- **`gh`-only branch+commit+PR (no local git needed):**
   `gh api repos/OWNER/REPO/commits/main --jq .sha` → `gh api --method POST …/git/refs -f
   ref=refs/heads/BRANCH -f sha=SHA` → `gh api --method PUT …/contents/PATH --input payload.json`
   (payload = base64 `content` + the file's blob `sha` + `branch`) → `gh pr create`. Delete a
-  branch with `gh api --method DELETE …/git/refs/heads/BRANCH`. Don't chain many `git` ops in
-  one shell line — a single hang kills the whole command.
+  branch with `gh api --method DELETE …/git/refs/heads/BRANCH`.
 - When the extractor persistently can't parse a page you can read, the sanctioned
   fallback is a **manual extraction**: pull a *verbatim* quote from the fetched text
   and run it through `process_source` via a hand-authored statements payload — the
