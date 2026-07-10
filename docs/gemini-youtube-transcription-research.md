@@ -10,7 +10,8 @@ open), #33 + PR #34 (long-audio chunking, done).
 sound: passing a YouTube URL to Gemini moves the video fetch **server-side to Google**, which
 *should* bypass the GitHub-runner IP bot-gate (#32), and — importantly — **OpenRouter already
 passes YouTube URLs through to Gemini**, so it can reuse `OPENROUTER_API_KEY` with **no new
-secret**. Cost is small (~+$15–40/mo). **But** two documented problems hit *this project*
+secret**. Cost is small-to-nil (~$0–20/mo; **Gemini 2.5 Flash-Lite ≈ Groq-parity**, confirmed
+against Google's pricing page). **But** two documented problems hit *this project*
 specifically and must be cleared by a live spike before adoption: (1) Gemini's YouTube fetch is
 **flaky for very recent videos** (<~1 month old) — and this tracker ingests fresh media; and (2)
 LLM transcription is **non-deterministic**, which breaks the deterministic `quote_in_transcript`
@@ -155,29 +156,43 @@ pricier one for no benefit.
 
 ## C. Cost shift (back-of-envelope)
 
-**Rate inputs (cited):**
-- Gemini 2.5 Flash: **$0.30 / 1M input**, **$2.50 / 1M output**. Gemini 2.5 Pro: $1.25 / $10.
-  Sources: [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing),
-  [artificialanalysis: 2.5 Flash](https://artificialanalysis.ai/models/gemini-2-5-flash),
-  [2.5 Pro](https://artificialanalysis.ai/models/gemini-2-5-pro).
-  *(No separate audio-input rate found for 2.5 Flash; newer models do split audio — confirm on
-  the pricing page before relying on it.)*
+**Rate inputs — confirmed against Google's [pricing page](https://ai.google.dev/gemini-api/docs/pricing)
+directly (Standard/paid tier; read 2026-07-10):**
+
+| Model | Input — text/image/**video** | Input — **audio** | Output |
+|---|---|---|---|
+| **Gemini 2.5 Flash** | **$0.30 / 1M** | **$1.00 / 1M** | $2.50 / 1M |
+| **Gemini 2.5 Flash-Lite** | **$0.10 / 1M** | **$0.30 / 1M** | $0.40 / 1M |
+| Gemini 2.5 Pro | $1.25 / 1M (≤200k), $2.50 (>200k) | — | $10 / 1M (≤200k), $15 (>200k) |
+
+- **Key confirmation:** a YouTube URL is **video** input, billed at the **$0.30/1M (Flash) /
+  $0.10/1M (Flash-Lite)** rate — *not* the higher audio rate. The **$1.00/1M audio** rate only
+  applies to audio-*only* inputs (e.g. an mp3 passed as `audio`), which matters for the
+  full-unification option below.
 - Gemini **video tokenization**: **~300 tokens/sec** at default media resolution, **~100
-  tokens/sec** at low resolution (`media_resolution: low`); audio 32 tok/sec. Source:
+  tokens/sec** at low resolution (`media_resolution: low`); the audio track is ~32 tok/sec of
+  that. Source:
   [Video understanding | Gemini API](https://ai.google.dev/gemini-api/docs/video-understanding).
 - Groq baseline: **whisper-large-v3-turbo = $0.04 / hr** audio; yt-dlp effectively free. Source:
   [Groq — Whisper Large v3 Turbo](https://groq.com/blog/whisper-large-v3-turbo-now-available-on-groq-combining-speed-quality-for-speech-recognition).
 
-**Per hour of video (Gemini 2.5 Flash, transcript output ≈ 12k tok/hr ≈ $0.03):**
+**Per hour of video (transcript output ≈ 12k tok/hr; video billed at the $0.30/$0.10 rate):**
 
 | | input tok/hr | input $ | + output $ | **≈ $/hr** |
 |---|---|---|---|---|
-| Flash, **low** media-res (100 tok/s) | 360k | $0.108 | $0.03 | **~$0.14** |
-| Flash, default media-res (300 tok/s) | 1.08M | $0.324 | $0.03 | **~$0.35** |
+| **Flash-Lite, low** media-res (100 tok/s) | 360k | $0.036 | $0.005 | **~$0.04** |
+| Flash-Lite, default (300 tok/s) | 1.08M | $0.108 | $0.005 | ~$0.11 |
+| **Flash, low** media-res (100 tok/s) | 360k | $0.108 | $0.030 | **~$0.14** |
+| Flash, default (300 tok/s) | 1.08M | $0.324 | $0.030 | ~$0.35 |
 | **Groq turbo (baseline)** | — | — | — | **$0.04** |
 
-So Gemini-Flash-low-res is **~3.5×** Groq per hour; default-res **~9×**. In absolute terms both
-are cents/hour. For transcription we don't need visual detail → **use `media_resolution: low`.**
+So **Flash-Lite at low-res ≈ Groq ($0.04/hr)** — the cost objection essentially disappears if its
+transcription quality is adequate (unknown — a smaller model may transcribe worse; the spike in §D
+should compare quality, not just cost). **Flash** low-res is ~3.5× Groq; default-res ~9×. All are
+cents/hour. For transcription we don't need visual detail → **use `media_resolution: low`.**
+*(Footnote: the ~$0.30/$0.10 rate treats the whole video — including its audio track — as "video."
+If Google instead meters the in-video audio at the $1.00 audio rate, add ~$0.08/hr to the Flash
+rows; still cents.)*
 
 **Monthly estimate.** Assumptions (rescale as needed): daily cron; discovery caps
 `days_lookback: 7`, `max_items_per_run: 25` (`config.json`); **~3 YouTube videos/day** pass triage
@@ -186,13 +201,15 @@ twice** (×2) unless cached.
 
 - Volume: 3 × 30 = 90 videos/mo × 0.75 h = **67.5 h/mo**, ×2 re-ingest = **135 h/mo**.
 - **Groq (if YouTube worked): 135 × $0.04 ≈ $5.4/mo** — but today $0 realized (blocked by #32).
-- **Gemini Flash low-res: 135 × $0.14 ≈ $19/mo.** Default-res: ≈ **$47/mo**.
-- **With transcript caching (no re-transcribe on review): halve →** Gemini ≈ **$9–24/mo**.
+- **Gemini Flash-Lite low-res: 135 × $0.04 ≈ $5/mo** (≈ Groq). **Flash low-res: 135 × $0.14 ≈
+  $19/mo**; Flash default-res ≈ **$47/mo**.
+- **With transcript caching (no re-transcribe on review): halve** → Flash ≈ $9/mo, Flash-Lite ≈ $3/mo.
 
-**Δ = making the YouTube path actually work costs ≈ +$15 to +$40/month** with Flash (vs. the
-theoretical-but-unrealizable Groq cost). Extraction/triage/reviewer LLM spend is unchanged. **The
-real cost is engineering + trust complexity, not dollars.** (Show-your-work so the maintainer can
-re-run with real volume: `$/mo ≈ videos_per_day × 30 × avg_hours × re_ingest_factor × $/hr`.)
+**Δ = making the YouTube path actually work costs ≈ $0–5/mo on Flash-Lite (≈ Groq-parity) or
+≈ +$5–20/mo on Flash** (vs. the theoretical-but-unrealizable Groq cost). Extraction/triage/reviewer
+LLM spend is unchanged. **With the real numbers in hand, cost is *not* the blocker — the
+non-determinism and recent-video reliability are.** (Show-your-work so the maintainer can re-run
+with real volume: `$/mo ≈ videos_per_day × 30 × avg_hours × re_ingest_factor × $/hr`.)
 
 ### Consolidated options matrix (all on the same volume: 67.5 YouTube-h/mo base)
 
@@ -203,13 +220,15 @@ the trust column is what actually decides.**
 | # | Option | model / res | $/hr | ×2 (re-ingest) | ×1 (cached) | Trust / notes |
 |---|---|---|---|---|---|---|
 | 0 | **#32 fix: yt-dlp cookies/proxy + keep Groq** | Whisper turbo | $0.04 | **~$5/mo** | n/a | ✅ deterministic, verbatim, independent re-ingest all intact. Lowest risk. (+ maybe $0–10/mo if a residential proxy is used.) |
-| 1 | **Gemini YouTube, Flash, low-res** *(recommended if Gemini at all)* | Flash / low | ~$0.14 | ~$19/mo | **~$9/mo** | ⚠️ non-deterministic transcript → needs fuzzy-match or cache; recent-video flakiness. |
-| 2 | Gemini YouTube, Flash, default-res | Flash / default | ~$0.35 | ~$47/mo | ~$24/mo | Same risks; no quality reason to pay this for transcription. |
-| 3 | Gemini YouTube, **Pro**, low-res | Pro / low | ~$0.57 | ~$77/mo | ~$38/mo | ❌ overkill for ASR; Pro buys reasoning we don't use here. |
-| 4 | **Full unification** (podcasts+direct audio → Gemini too) | Flash / audio-only 32 tok/s | ~$0.04* | ~$5/mo* | ~$3/mo* | ❌ *roughly cost-neutral on the audio, but trades today's **working, deterministic** Groq path for a non-deterministic one for **no benefit**. Not recommended. |
+| 1 | **Gemini YouTube, Flash-Lite, low-res** *(cheapest Gemini)* | Flash-Lite / low | ~$0.04 | **~$5/mo** | ~$3/mo | ⚠️ ≈ Groq cost, but a smaller model — **transcription quality unverified**; test in §D before trusting it. |
+| 2 | **Gemini YouTube, Flash, low-res** *(recommended if Gemini)* | Flash / low | ~$0.14 | ~$19/mo | **~$9/mo** | ⚠️ non-deterministic transcript → needs fuzzy-match or cache; recent-video flakiness. |
+| 3 | Gemini YouTube, Flash, default-res | Flash / default | ~$0.35 | ~$47/mo | ~$24/mo | Same risks; no quality reason to pay this for transcription. |
+| 4 | Gemini YouTube, **Pro**, low-res | Pro / low | ~$0.57 | ~$77/mo | ~$38/mo | ❌ overkill for ASR; Pro buys reasoning we don't use here. |
+| 5 | **Full unification** (podcasts+direct audio → Gemini too) | Flash / audio 32 tok/s @ $1.00 | ~$0.15* | ~$20/mo* | ~$10/mo* | ❌ audio-only is billed at the **$1.00/1M audio rate** → ~4× Groq, *and* trades today's **working, deterministic** Groq path for a non-deterministic one for **no benefit**. Not recommended. |
 
-\* Audio-only (a podcast file, not a YouTube URL) tokenizes at ~32 tok/s → ~$0.035/hr on Flash —
-coincidentally ~Groq — but this is the wrong trade (see #4).
+\* Audio-*only* (a podcast mp3 passed as `audio`, not a YouTube URL) tokenizes at ~32 tok/s but
+bills at the **$1.00/1M audio** rate → ~32k×3600÷1e6×$1.00 ≈ **$0.12/hr** + output ≈ $0.15/hr,
+i.e. ~4× Groq — the opposite of cost-neutral, and the wrong trade regardless (see #5).
 
 **Two things the matrix makes clear:**
 - **The pipeline-depth axis (transcription-only vs transcription+analysis) is ~cost-neutral.**
