@@ -14,7 +14,8 @@ secret**. Cost is small-to-nil (~$0–20/mo; **Gemini 2.5 Flash-Lite ≈ Groq-pa
 against Google's pricing page). **But** two documented problems hit *this project*
 specifically and must be cleared by a live spike before adoption: (1) Gemini's YouTube fetch is
 **flaky for very recent videos** (<~1 month old) — and this tracker ingests fresh media; and (2)
-LLM transcription is **non-deterministic**, which breaks the deterministic `quote_in_transcript`
+Gemini's transcript **varies run-to-run and may not be strictly verbatim** (unlike Groq-Whisper,
+a reproducible temp-0 dedicated ASR), which breaks the exact-substring `quote_in_transcript`
 re-verification that is the spine of the project's trust model. Recommendation: run the CI spike
 in §D, and treat the simpler **yt-dlp cookies/proxy fix in #32 as the lower-risk default** unless
 the spike clears both risks.
@@ -39,8 +40,12 @@ The project's credibility rests on three things this research must preserve, not
    each quote appears verbatim: `verify_statement` AND-gates `quote_in_transcript` (in
    `pipeline/extract.py` — whitespace-collapsed, case-folded **substring containment**) with a
    different-family reviewer LLM (`pipeline/review.py`). The model *cannot* override a missing
-   quote. This works today because **Groq Whisper is deterministic per input file** — re-ingest
-   reproduces the same transcript, so the exact substring check holds.
+   quote. This works today because **Groq Whisper is reproducible in practice** — it's a
+   dedicated ASR run at temperature-0 (greedy decoding), so the same audio file yields ~the same
+   transcript on re-ingest and the exact substring check holds. (Not *perfectly* bit-identical —
+   GPU float nondeterminism + Whisper's temperature-fallback cause a small drift, which is why
+   `CLAUDE.md` already notes audio flags more than articles — but stable enough that the exact
+   match survives re-ingest today.)
 2. **Different-family reviewer.** Extractor is DeepSeek, reviewer is Kimi *on purpose*
    (`data/registry/config.json > models`). A second family checks the first.
 3. **Human review before publish** (`auto_merge_enabled: false`, asserted by `test_review.py`);
@@ -245,9 +250,16 @@ i.e. ~4× Groq — the opposite of cost-neutral, and the wrong trade regardless 
 
 ## Trust-model handling (the hard part)
 
-LLM transcription is **non-deterministic**: a re-transcription in `review.yml` may not reproduce
-the extractor's exact wording, so `quote_in_transcript`'s exact-substring check **would start
-false-flagging real quotes**. Options, least-to-most trust-preserving:
+**Both Groq-Whisper and Gemini are generative transcription models** — the difference isn't
+"LLM vs not." It's that **Groq-Whisper is reproducible run-to-run and verbatim-by-design** (a
+dedicated ASR at temp-0, whose objective is to reproduce the spoken words), whereas **Gemini's
+transcript varies across calls** (it samples output and re-fetches/re-samples the video each time)
+**and may not be strictly verbatim** (a general model may normalize disfluencies or lightly
+paraphrase). So a re-transcription in `review.yml` may not reproduce the extractor's exact wording,
+and `quote_in_transcript`'s exact-substring check **would start false-flagging real quotes**.
+Today's audio path already carries a *small* version of this drift; Gemini **enlarges** it (and
+weakens the verbatim guarantee) rather than introducing a brand-new failure mode. Options,
+least-to-most trust-preserving:
 
 1. **Strict fuzzy matcher (recommended default).** Replace exact substring with a *tight*
    normalized match (e.g. require the quote to appear as a near-contiguous span with ≥~95%
