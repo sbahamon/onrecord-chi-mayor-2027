@@ -126,6 +126,31 @@ behind the same seams and the offline suite stays fixture-only (golden rule #1, 
 unification onto Gemini would trade a working, deterministic, cheap path for a non-deterministic,
 pricier one for no benefit.
 
+**Two *independent* scope decisions — keep them separate:**
+
+1. **Which media types use Gemini** → **YouTube only.** Everything else stays on the existing
+   Groq/yt-dlp path *unchanged* (it works; no "simplified" rewrite is warranted — the ffmpeg
+   downsample + long-audio chunking only exist to feed Groq, which podcasts still need). The
+   YouTube path is the only one that *loses* ffmpeg/yt-dlp, because Gemini takes the URL directly.
+
+2. **How deep into the pipeline Gemini goes → transcription ONLY, not analysis (recommended).**
+   Gemini returns a plain transcript string that flows into the **unchanged** DeepSeek extractor
+   (`extract.py`) and different-family Kimi reviewer (`review.py`). **Gemini never selects quotes
+   or judges faithfulness/attribution.** This is precisely why it hides cleanly behind the
+   `transcriber=` seam, and it keeps trust rule #2 (different-family checker) fully intact — the
+   transcription model and the extraction/review models are different families by construction.
+
+   The alternative — **Gemini also extracts/analyzes** (one call transcribes *and* picks the
+   housing quotes/stances) — is **not recommended**: it would collapse transcription and analysis
+   into a single model, putting the same model on both sides of the extract→review check and
+   gutting the independent-checker design. It's also harder to verify (no separable transcript to
+   run `quote_in_transcript` against). **Rule:** if Gemini ever feeds extraction, the reviewer
+   must remain a *different* family — never let one model both produce and judge the same quote.
+
+   (Transcription-only does *not* dodge the non-determinism problem in §Trust — a re-transcription
+   still may not be verbatim-identical — but it contains the blast radius to one well-understood
+   step and leaves the two-model verification untouched.)
+
 ---
 
 ## C. Cost shift (back-of-envelope)
@@ -231,9 +256,11 @@ the job log for the transcript + token/cost lines.
   verbatim-determinism risks.** The mechanism is real and cheap, and OpenRouter passthrough means
   no new secret — but the two project-specific risks are exactly the ones that would silently
   degrade trust or re-break YouTube through a different door.
-- **If adopted:** hybrid scope (Gemini for YouTube only, Groq stays for podcasts/direct audio),
-  `media_resolution: low`, retries on transient 400s, and a **strict fuzzy matcher** (or cached
-  transcript) so `quote_in_transcript` survives non-determinism — with tests.
+- **If adopted:** hybrid scope on **both** axes — Gemini for **YouTube only** (Groq stays for
+  podcasts/direct audio) and **transcription only** (DeepSeek extractor + different-family Kimi
+  reviewer unchanged; Gemini never selects or judges quotes). Plus `media_resolution: low`,
+  retries on transient 400s, and a **strict fuzzy matcher** (or cached transcript) so
+  `quote_in_transcript` survives non-determinism — with tests.
 - **Lower-risk alternative to weigh first:** the **#32 cookies/proxy fix for yt-dlp** keeps the
   entire deterministic, verbatim, independent-re-ingest trust model intact and is a smaller
   change. Gemini is the bigger bet; pick it only if the spike shows it's clearly more reliable
