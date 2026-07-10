@@ -309,12 +309,51 @@ the job log for the transcript + token/cost lines.
 
 ---
 
+## E. Recommended evals before committing (price × accuracy × complexity)
+
+§D proves *"does it fetch in CI."* This §E is the complementary question: *"is the transcript good
+and reproducible enough, and is it worth it?"* The go/no-go above rests on *documented* risks; a
+small eval turns them into measured numbers. This is **what to compare and why — not how to build
+it.**
+
+**Configs to put side by side** (same handful of real Chicago-mayoral sources — a few YouTube
+clips + a couple podcasts):
+- **Groq Whisper turbo** — control/baseline (what we ship today).
+- **Gemini 2.5 Flash-Lite** — cheapest (~Groq parity on cost).
+- **Gemini 2.5 Flash** — mid-tier.
+- *(Optional)* the **#32 cookies/proxy path** — accuracy identical to Groq (it *is* Groq); differs
+  only on reliability + complexity, so it's a useful "no-accuracy-risk" reference point.
+
+**Axes to measure:**
+1. **Accuracy / verbatim fidelity** — on clips with a trusted reference transcript. Weight a
+   project-specific metric over raw WER: **quote-recall** — do the specific *housing* quotes
+   survive verbatim, i.e. would `quote_in_transcript` still match? A model can have great overall
+   WER and still paraphrase the one sentence we cite.
+2. **Reproducibility** — transcribe each source **twice**; measure how often the same quote fails
+   to re-match. This directly sizes the trust-model risk (the reviewer re-ingests → drift = false
+   flags on real quotes).
+3. **Recent-video reliability** — fetch-success rate on **fresh** (<1 wk / <1 mo) public videos
+   vs. older ones (overlaps §D; the single biggest CI unknown).
+4. **Measured cost/episode** — log real token usage to replace the back-of-envelope with actual $.
+
+**Complexity** isn't an eval — it's a judgment (new seams, lines changed, whether the offline
+suite stays fixture-only). Score it qualitatively alongside the three measured axes.
+
+**Scope:** the **lightweight version** (axes 1–3 on ~5–10 clips across the three transcriber
+configs) is cheap and targets the two decision-blockers → do it **first**. A **full end-to-end
+eval** (same sources through the whole extract→review pipeline, comparing final proposed stances +
+reviewer verdicts per transcriber) is higher effort and can wait until the lightweight pass clears.
+Output: a small **price × accuracy × complexity** table to decide on.
+
+---
+
 ## Recommendation
 
-- **Conditional GO to de-risk; NO-GO on committing until the §D spike clears the recent-video and
-  verbatim-determinism risks.** The mechanism is real and cheap, and OpenRouter passthrough means
-  no new secret — but the two project-specific risks are exactly the ones that would silently
-  degrade trust or re-break YouTube through a different door.
+- **Conditional GO to de-risk; NO-GO on committing until the §D spike + §E evals clear the
+  recent-video and verbatim-reproducibility risks.** The mechanism is real and cheap, and
+  OpenRouter passthrough means no new secret — but the two project-specific risks are exactly the
+  ones that would silently degrade trust or re-break YouTube through a different door. Decide with
+  the §E price × accuracy × complexity table in hand, not on the documented risks alone.
 - **If adopted:** hybrid scope on **both** axes — Gemini for **YouTube only** (Groq stays for
   podcasts/direct audio) and **transcription only** (DeepSeek extractor + different-family Kimi
   reviewer unchanged; Gemini never selects or judges quotes). Plus `media_resolution: low`,
