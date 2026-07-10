@@ -198,11 +198,15 @@ Sequenced plans in `docs/` — **backfill and discovery expansion are both done.
   check (see "verify on demand" below). Candidate `youtube_channel`/`bluesky` are populated for
   those with confirmed accounts; X/IG/TikTok stay manual-intake only.
 
-One follow-up remains (tracked, not blocking — see `docs/discovery-expansion-plan.md` status):
+Two follow-ups remain (tracked, not blocking — see `docs/discovery-expansion-plan.md` status):
 - **Live headless fetcher.** The injected `headless_fetcher` seam exists and is offline-tested
   (`ingest` retries via it when a plain fetch yields `< MIN_ARTICLE_CHARS` of text — a JS shell).
   The *real* Playwright fetcher + browser install in `cron`/`review`/`intake` CI isn't wired yet.
   Unblocks JS-rendered campaign pages (e.g. `cardenas4chicago` platform grid) and 403 sites.
+- **YouTube ingestion is bot-gated on CI runner IPs (#32).** yt-dlp gets `Sign in to confirm
+  you're not a bot` from GitHub-runner datacenter IPs — IP-based, so it hits any length. This
+  degrades the cron/review YouTube path (not just tests); needs cookies or a proxy. Podcast RSS /
+  direct-file audio is unaffected (see the YouTube bot-gate lesson below).
 
 **Long-audio chunking is done.** When a downsampled file still exceeds Groq's ~25 MB cap
 (very long ~2 h+ audio), `transcribe.transcribe_audio` segments it with ffmpeg

@@ -30,7 +30,9 @@ mis-attributed (→ scope extraction to the feed's candidate).
   that `transcribe.transcribe_audio` segments the file with ffmpeg (`_split_audio`, duration-probed
   so each piece stays under Groq's ~25 MB cap), transcribes each chunk, and stitches the parts
   (`_stitch_transcripts`). Split/upload are injected seams (`splitter=`/`poster=`) so the chunking
-  logic is offline-tested in `tests/test_transcribe.py`.
+  logic is offline-tested in `tests/test_transcribe.py`. **Live-verified end-to-end with real Groq
+  in CI (2026-07-10, #33 closed):** a 2h09m direct-mp3 intake downsampled to 29.7 MB → split into
+  2 chunks → both transcribed, no 413.
 
 X / Instagram / TikTok remain **manual-intake only** (no free feed / ToS).
 
