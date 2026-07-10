@@ -194,6 +194,34 @@ theoretical-but-unrealizable Groq cost). Extraction/triage/reviewer LLM spend is
 real cost is engineering + trust complexity, not dollars.** (Show-your-work so the maintainer can
 re-run with real volume: `$/mo ≈ videos_per_day × 30 × avg_hours × re_ingest_factor × $/hr`.)
 
+### Consolidated options matrix (all on the same volume: 67.5 YouTube-h/mo base)
+
+$/hr = input video-tokens + ~$0.03/hr transcript output. Monthly = `$/hr × 67.5 × re-ingest`
+(×2 if the reviewer re-transcribes, ×1 if the transcript is cached). **Rank by dollars only —
+the trust column is what actually decides.**
+
+| # | Option | model / res | $/hr | ×2 (re-ingest) | ×1 (cached) | Trust / notes |
+|---|---|---|---|---|---|---|
+| 0 | **#32 fix: yt-dlp cookies/proxy + keep Groq** | Whisper turbo | $0.04 | **~$5/mo** | n/a | ✅ deterministic, verbatim, independent re-ingest all intact. Lowest risk. (+ maybe $0–10/mo if a residential proxy is used.) |
+| 1 | **Gemini YouTube, Flash, low-res** *(recommended if Gemini at all)* | Flash / low | ~$0.14 | ~$19/mo | **~$9/mo** | ⚠️ non-deterministic transcript → needs fuzzy-match or cache; recent-video flakiness. |
+| 2 | Gemini YouTube, Flash, default-res | Flash / default | ~$0.35 | ~$47/mo | ~$24/mo | Same risks; no quality reason to pay this for transcription. |
+| 3 | Gemini YouTube, **Pro**, low-res | Pro / low | ~$0.57 | ~$77/mo | ~$38/mo | ❌ overkill for ASR; Pro buys reasoning we don't use here. |
+| 4 | **Full unification** (podcasts+direct audio → Gemini too) | Flash / audio-only 32 tok/s | ~$0.04* | ~$5/mo* | ~$3/mo* | ❌ *roughly cost-neutral on the audio, but trades today's **working, deterministic** Groq path for a non-deterministic one for **no benefit**. Not recommended. |
+
+\* Audio-only (a podcast file, not a YouTube URL) tokenizes at ~32 tok/s → ~$0.035/hr on Flash —
+coincidentally ~Groq — but this is the wrong trade (see #4).
+
+**Two things the matrix makes clear:**
+- **The pipeline-depth axis (transcription-only vs transcription+analysis) is ~cost-neutral.**
+  If Gemini also extracted, you'd save only the DeepSeek extractor call — negligible *text*
+  tokens (a transcript in, small JSON out, ≈ $0.001/episode). So that axis is a **trust decision,
+  not a cost one** (§B axis 2). Don't pick transcription+analysis to "save money" — there's none.
+- **Native vs OpenRouter:** OpenRouter bills Gemini at ~Google list price (its margin is a small
+  credit-purchase fee, not a per-token markup), so options 1–4 are ≈ the same either way — the
+  OpenRouter route's advantage is operational (**no new secret**), not cost. Confirm on the
+  [OpenRouter Gemini model page](https://openrouter.ai/google/gemini-2.5-flash) before relying on
+  exact parity.
+
 ---
 
 ## Trust-model handling (the hard part)
