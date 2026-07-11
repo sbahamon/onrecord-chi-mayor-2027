@@ -1,0 +1,57 @@
+[
+  {
+    "id": "quigley-fresh",
+    "url": "https://www.youtube.com/watch?v=LJO16xf9yG8",
+    "candidate": "Mike Quigley",
+    "bucket": "fresh",
+    "uploaded": "2026-07-09",
+    "duration_sec": 276,
+    "outlet": "CBS Chicago",
+    "note": "fresh <2d; housing-shortage platform; primary recent-video test",
+    "use": true
+  },
+  {
+    "id": "nee-fresh",
+    "url": "https://www.youtube.com/watch?v=1HRzF5DG1FQ",
+    "candidate": "Lisa Nee",
+    "bucket": "fresh",
+    "uploaded": "2026-07-08",
+    "duration_sec": 270,
+    "outlet": "CBS Chicago",
+    "note": "fresh <2d; affordability framing; second fresh test",
+    "use": true
+  },
+  {
+    "id": "brewer-recent",
+    "url": "https://www.youtube.com/watch?v=fNfbfNS8eFI",
+    "candidate": "Matt Brewer",
+    "bucket": "recent",
+    "uploaded": "2026-07-02",
+    "duration_sec": 639,
+    "outlet": "FOX 32 Chicago",
+    "note": "~8d; ex-CHA chair, housing-forward; substantive 10-min segment",
+    "use": true
+  },
+  {
+    "id": "johnson-older",
+    "url": "https://www.youtube.com/watch?v=KQ61-Mpo2wA",
+    "candidate": "Brandon Johnson",
+    "bucket": "older",
+    "uploaded": "2025-07-17",
+    "duration_sec": 2966,
+    "outlet": "WBEZ",
+    "note": "~12mo; housing is a named topic; 49-min interview, housing-dense",
+    "use": true
+  },
+  {
+    "id": "abc7-debate-long",
+    "url": "https://www.youtube.com/watch?v=ck8GPV5Rtpo",
+    "candidate": "Johnson vs Vallas",
+    "bucket": "long-forum",
+    "uploaded": "2023-01-20",
+    "duration_sec": 5307,
+    "outlet": "ABC 7 Chicago",
+    "note": "88-min debate; property taxes/development; long-audio stress test (Groq chunking)",
+    "use": true
+  }
+]

@@ -206,7 +206,12 @@ Two follow-ups remain (tracked, not blocking — see `docs/discovery-expansion-p
 - **YouTube ingestion is bot-gated on CI runner IPs (#32).** yt-dlp gets `Sign in to confirm
   you're not a bot` from GitHub-runner datacenter IPs — IP-based, so it hits any length. This
   degrades the cron/review YouTube path (not just tests); needs cookies or a proxy. Podcast RSS /
-  direct-file audio is unaffected (see the YouTube bot-gate lesson below).
+  direct-file audio is unaffected (see the YouTube bot-gate lesson below). **The Gemini-URL
+  workaround (#36) was evaluated and is NO-GO as a general path** — Gemini transcribes short YouTube
+  clips well but its long-form output is non-reproducible/runaway (full eval:
+  `docs/gemini-transcription-eval-log.md`; harness: `evals/gemini_transcription/`). **#32
+  (cookies/proxy) is the recommended fix.** If the proxy also gets gated, Gemini is a documented
+  **short-clip-only (≤~11 min)** fallback (design in the eval log).
 
 **Long-audio chunking is done.** When a downsampled file still exceeds Groq's ~25 MB cap
 (very long ~2 h+ audio), `transcribe.transcribe_audio` segments it with ffmpeg
