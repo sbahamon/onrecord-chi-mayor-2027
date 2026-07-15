@@ -27,6 +27,7 @@ class ProcessResult:
     pr_body: str = ""
     housing_count: int = 0
     other_count: int = 0
+    transcript_chars: int = 0  # length only (text is never stored) — for discovery logs
 
 
 def _write_other(ingest_doc: dict, other_statements: list[dict], data_dir) -> Path:
@@ -81,6 +82,7 @@ def process_source(source: dict, *, data_dir, llm, extractor_model: str, today: 
     result = ProcessResult(
         housing_count=len(extraction.housing),
         other_count=len(extraction.other),
+        transcript_chars=len(ingest_doc["transcript"]),
     )
 
     if extraction.other:

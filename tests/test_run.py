@@ -123,6 +123,9 @@ def test_process_source_writes_evidence_stance_and_other(tmp_path):
 
     assert "Example Chicago News" in result.pr_body
     assert result.housing_count == 1
+    # The transcript length is surfaced (length only — the text is never stored)
+    # so the discovery loop can log that a fetch produced real article content.
+    assert result.transcript_chars >= 200
 
 
 def test_process_source_with_no_housing_writes_no_evidence(tmp_path):
