@@ -181,6 +181,13 @@ stance) in the proposed PR. This matters more as discovery-expansion widens the 
 
 ## Known gaps / planned work
 
+> **CODE FREEZE until 2026-07-22: do not modify the discovery/ingest code path**
+> (`discover.py`, `ingest.py`, the fetcher, `data/registry/sources.json`) — the week of
+> 2026-07-16→22 is a clean production measurement of the #42 direct-RSS fix, validated
+> via issue #47. That includes NOT preemptively adding the #41 429-backoff (retry-next-run
+> already self-heals). Merging data PRs, running #43 (eval-only), and intake *usage* are
+> all fine. Delete this note once #47 closes.
+
 Sequenced plans in `docs/` — **backfill and discovery expansion are both done.**
 **Start with [`docs/architecture-review-2026-07-15.md`](./docs/architecture-review-2026-07-15.md)**
 — the full-project audit (what actually worked in production vs. not, root cause = runner

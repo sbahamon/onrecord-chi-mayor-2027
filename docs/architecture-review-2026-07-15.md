@@ -162,10 +162,12 @@ guard; `review.yml` + human merge still gate. Scope question to resolve first: s
 design decision.
 
 ### Meanwhile / deferred
-- **Week-one RSS validation — tracked in #47** (full checklist + decision tree there;
-  a one-shot scheduled Claude session fires 2026-07-22 15:00 UTC to execute it and
-  comments its verdict on the issue). #41 (429s) is handled by retry-next-run and only
-  matters if block-club/reader throughput does.
+- **Week-one RSS validation — tracked in #47** (full checklist + decision tree there).
+  **Until it closes (~2026-07-22), the discovery/ingest code path is frozen** —
+  `discover.py`, `ingest.py`, the fetcher, `sources.json` — so the week measures #42
+  as merged, not a moving target. #41 (429s) is handled by retry-next-run and only
+  matters if block-club/reader throughput does; do NOT add the backoff during the
+  freeze. Merging data PRs and running #43 (eval-only) are fine meanwhile.
 - **Headless fetcher (#30)** stays deferred; the weekly Claude session can hand-fetch
   the occasional JS-shell page more cheaply than wiring Playwright into 3 workflows.
 - **`auto_merge_enabled` stays `false`** — human review is the bottleneck by design.
