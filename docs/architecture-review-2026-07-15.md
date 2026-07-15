@@ -162,8 +162,10 @@ guard; `review.yml` + human merge still gate. Scope question to resolve first: s
 design decision.
 
 ### Meanwhile / deferred
-- **Observe the post-#42 cron for a week** before judging article yield; #41 (429s) is
-  handled by retry-next-run and only matters if block-club/reader throughput does.
+- **Week-one RSS validation — tracked in #47** (full checklist + decision tree there;
+  a one-shot scheduled Claude session fires 2026-07-22 15:00 UTC to execute it and
+  comments its verdict on the issue). #41 (429s) is handled by retry-next-run and only
+  matters if block-club/reader throughput does.
 - **Headless fetcher (#30)** stays deferred; the weekly Claude session can hand-fetch
   the occasional JS-shell page more cheaply than wiring Playwright into 3 workflows.
 - **`auto_merge_enabled` stays `false`** — human review is the bottleneck by design.
