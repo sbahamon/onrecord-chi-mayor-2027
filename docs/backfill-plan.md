@@ -40,6 +40,12 @@ Expected: ~11 small PRs, matrix fills with defensible positions quickly.
 
 #### Phase 1 outcome (2026-07-08)
 
+> **Note (2026-07-15):** `.github/workflows/backfill.yml` has since been removed (its
+> only two recorded runs failed; the data landed via the merged PRs). The `backfill`
+> CLI mode remains — future backfills (e.g. #46, Johnson incumbency) are driven from a
+> Claude session via `ingest-url` / `backfill` mode. References to the workflow below
+> are historical.
+
 Ran via the `backfill` mode + `.github/workflows/backfill.yml`. Not all 11
 candidates had a usable platform page, so Phase 1 covered **6**; the rest move to
 Phase 2 / later work:

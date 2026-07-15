@@ -182,13 +182,22 @@ stance) in the proposed PR. This matters more as discovery-expansion widens the 
 ## Known gaps / planned work
 
 Sequenced plans in `docs/` — **backfill and discovery expansion are both done.**
+**Start with [`docs/architecture-review-2026-07-15.md`](./docs/architecture-review-2026-07-15.md)**
+— the full-project audit (what actually worked in production vs. not, root cause = runner
+IP reputation, decision log) and the sequenced next steps, each tracked as an issue:
+**#43** (Gemini short-clip calibration eval, CI-dispatchable), **#44** (implement the
+length-capped Gemini YouTube path, blocked by #43), **#45** (weekly scheduled-Claude
+discovery session), **#46** (Johnson incumbency backfill, Claude-session driven).
 
 - **Backfill** — [`docs/backfill-plan.md`](./docs/backfill-plan.md). One-time
   historical seed (candidate platform pages + prior press). The `backfill` CLI mode
-  (`pipeline/backfill.py` + `backfill.yml`, **one PR per candidate**) is **built + merged
+  (`pipeline/backfill.py`, **one PR per candidate**) is **built + merged
   — 8/11 candidates seeded** (incl. george-cardenas from his platform housing pillar).
   danielle-carter-walters is dropped (`tracked: false`); lisa-nee and maria-pappas have no
-  position yet (a property-tax-only quote does NOT count as housing).
+  position yet (a property-tax-only quote does NOT count as housing). The `backfill.yml`
+  workflow was **removed** (2026-07-15; its only 2 recorded runs failed) — future
+  backfills (e.g. #46) are Claude-session-driven via the kept CLI (`ingest-url` per
+  source, or `backfill` mode with a phase file).
 - **Discovery expansion** — [`docs/discovery-expansion-plan.md`](./docs/discovery-expansion-plan.md).
   **Done (2026-07-09).** The daily cron now discovers **articles, YouTube** (per-candidate
   campaign channels + standing WTTW/WGN/City Club), **podcasts** (Ben Joravsky / Fran Spielman /
@@ -206,13 +215,16 @@ Two follow-ups remain (tracked, not blocking — see `docs/discovery-expansion-p
   Unblocks JS-rendered campaign pages (e.g. `cardenas4chicago` platform grid) and 403 sites.
 - **YouTube ingestion is bot-gated on CI runner IPs (#32).** yt-dlp gets `Sign in to confirm
   you're not a bot` from GitHub-runner datacenter IPs — IP-based, so it hits any length. This
-  degrades the cron/review YouTube path (not just tests); needs cookies or a proxy. Podcast RSS /
-  direct-file audio is unaffected (see the YouTube bot-gate lesson below). **The Gemini-URL
-  workaround (#36) was evaluated and is NO-GO as a general path** — Gemini transcribes short YouTube
-  clips well but its long-form output is non-reproducible/runaway (full eval:
-  `docs/gemini-transcription-eval-log.md`; harness: `evals/gemini_transcription/`). **#32
-  (cookies/proxy) is the recommended fix.** If the proxy also gets gated, Gemini is a documented
-  **short-clip-only (≤~11 min)** fallback (design in the eval log).
+  degrades the cron/review YouTube path (not just tests). Podcast RSS / direct-file audio is
+  unaffected (see the YouTube bot-gate lesson below). **Chosen direction (2026-07-15, supersedes
+  the earlier cookies/proxy recommendation): a length-capped Gemini path for short clips** —
+  Gemini transcribes short YouTube clips well (NO-GO only for long-form, which stays
+  untranscribable in CI; full eval: `docs/gemini-transcription-eval-log.md`). Sequence:
+  calibration eval first (**#43** — CI-dispatchable, because the native SDK passes the YouTube
+  URL as `file_uri` and *Google fetches the video server-side*, so the bot-gate doesn't apply
+  to Gemini), then implementation (**#44**: YouTube Data API v3 duration gate — yt-dlp metadata
+  is bot-gated too — plus a strict fuzzy quote matcher, since Gemini transcripts drift
+  run-to-run and the reviewer re-transcribes on re-ingest).
 
 **Long-audio chunking is done.** When a downsampled file still exceeds Groq's ~25 MB cap
 (very long ~2 h+ audio), `transcribe.transcribe_audio` segments it with ffmpeg
@@ -221,8 +233,7 @@ and stitches the parts (`_stitch_transcripts`). The split/upload steps are injec
 (`splitter=`/`poster=`) so the chunking decision stays offline-testable (`tests/test_transcribe.py`).
 
 `discover.website_changed()` and the `website` source type still exist but aren't polled
-(website-diff was descoped). `normalize_vtt` exists for a future caption-fetch path but isn't
-wired in. Audio transcripts are noisier than articles (no speaker labels, ASR errors) — expect
+(website-diff was descoped). Audio transcripts are noisier than articles (no speaker labels, ASR errors) — expect
 more reviewer flags; enable each podcast/YouTube feed deliberately (every candidate episode is a
 full Groq transcription).
 
