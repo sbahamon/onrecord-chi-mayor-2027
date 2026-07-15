@@ -67,71 +67,69 @@ def cmd_discover(args) -> int:
     ledger = discover.Ledger(data_dir / "ledger.json")
     candidates = config.candidate_slugs(data_dir, active_only=True)
     topics = config.topic_slugs(data_dir)
-    # Bound cost + PR size: cap how many fresh items are ingested per run.
-    max_items = args.max_items or cfg.get("discovery", {}).get("max_items_per_run", 25)
 
-    # Fetch feed XML with the same browser-UA fetcher ingest/review use, so a site
-    # that 403s a non-browser agent behaves the same for feed and article fetches.
+    disc_cfg = cfg.get("discovery", {})
+    # Bound cost + PR size: cap fresh items per run, and per feed so one noisy
+    # feed can't starve later high-signal feeds (podcasts, Bluesky).
+    max_items = args.max_items or disc_cfg.get("max_items_per_run", 25)
+    max_items_per_feed = disc_cfg.get("max_items_per_feed")
+    # Google News item links are news.google.com redirects a plain fetch can't
+    # read; gate them off until a headless-fetch path (#30) can resolve them.
+    google_news_enabled = disc_cfg.get("google_news_enabled", True)
+
+    # Same browser-UA fetcher ingest/review use, so a site that 403s a non-browser
+    # agent behaves identically for feed and article fetches.
     fetch = ingest_mod._default_fetcher
+    triage_model = cfg["models"]["triage"]
+    extractor_model = cfg["models"]["extractor"]
 
-    bodies, processed, ingested = [], 0, 0
-    for feed in config.discovery_feeds(data_dir):
-        if feed["type"] not in {"rss", "google-news", "youtube", "podcast", "bluesky"}:
-            continue
+    def item_fetcher(feed):
+        if feed["type"] == "bluesky":
+            # Bluesky is a JSON API, not RSS; the client returns the post text on
+            # each item, which ingest uses directly (no fetch/transcribe).
+            return bluesky.fetch_author_feed(feed["url"])
         # The feed declares its media type; route ingestion on it instead of
         # forcing "article" (which sent youtube/podcast items down the text path).
+        media_type = discover.media_type_for_feed(feed)
+        return discover.parse_feed(
+            fetch(feed["url"]), source_id=feed["id"],
+            prefer_enclosure=(media_type == "podcast"),
+        )
+
+    def process_fn(feed, item):
         media_type = discover.media_type_for_feed(feed)
         # A candidate's own Bluesky feed is first-person with no name in the text,
         # so scope extraction to that candidate; the extractor would otherwise
         # mis-attribute the post. Other feeds keep the full candidate set.
         feed_candidates = [feed["candidate"]] if feed.get("candidate") else candidates
-        try:
-            if feed["type"] == "bluesky":
-                # Bluesky is a JSON API, not RSS; the client returns the post text
-                # on each item, which ingest uses directly (no fetch/transcribe).
-                items = bluesky.fetch_author_feed(feed["url"])
-            else:
-                items = discover.parse_feed(
-                    fetch(feed["url"]), source_id=feed["id"],
-                    prefer_enclosure=(media_type == "podcast"),
-                )
-        except Exception as e:  # noqa: BLE001
-            print(f"skip feed {feed['id']}: {e}", file=sys.stderr)
-            continue
-        for item in ledger.filter_new(items):
-            if ingested >= max_items:
-                print(f"reached max_items={max_items}; remaining items deferred to next run",
-                      file=sys.stderr)
-                break
-            ledger.mark(item["url"])
-            if not discover.triage(item["title"], llm=llm, model=cfg["models"]["triage"]):
-                continue
-            source = {
-                "url": item["url"], "outlet": feed["name"], "media_type": media_type,
-                "title": item["title"], "published_date": _today(),
-                "text": item.get("text"),  # set for Bluesky; None (ignored) otherwise
-            }
-            # process_source retries the extraction internally (a lone bad field no
-            # longer loses the item); skip only on a hard ingest/extract failure.
-            try:
-                result = run.process_source(
-                    source, data_dir=data_dir, llm=llm,
-                    extractor_model=cfg["models"]["extractor"], today=_today(),
-                    candidates=feed_candidates, topics=topics,
-                )
-            except Exception as e:  # noqa: BLE001
-                print(f"skip item {item['url']}: {e}", file=sys.stderr)
-                continue
-            ingested += 1
-            if result.housing_count:
-                bodies.append(result.pr_body)
-                processed += 1
-        if ingested >= max_items:
-            break
+        source = {
+            "url": item["url"], "outlet": feed["name"], "media_type": media_type,
+            "title": item["title"], "published_date": _today(),
+            "text": item.get("text"),  # set for Bluesky; None (ignored) otherwise
+        }
+        # process_source retries the extraction internally (a lone bad field no
+        # longer loses the item); run_discovery skips only on a hard failure.
+        return run.process_source(
+            source, data_dir=data_dir, llm=llm, extractor_model=extractor_model,
+            today=_today(), candidates=feed_candidates, topics=topics,
+        )
 
-    ledger.save()
-    _write(args.pr_body_out, "\n\n---\n\n".join(bodies) if bodies else "No new housing statements found.")
-    print(f"processed {processed} item(s) with housing content")
+    def triage_fn(title):
+        return discover.triage(title, llm=llm, model=triage_model)
+
+    feeds = discover.active_media_feeds(
+        config.discovery_feeds(data_dir), google_news_enabled=google_news_enabled
+    )
+    result = discover.run_discovery(
+        feeds, ledger=ledger, item_fetcher=item_fetcher, triage_fn=triage_fn,
+        process_fn=process_fn, max_items=max_items,
+        max_items_per_feed=max_items_per_feed,
+    )
+
+    _write(args.pr_body_out,
+           "\n\n---\n\n".join(result.bodies) if result.bodies
+           else "No new housing statements found.")
+    print(f"processed {result.housing_hits} item(s) with housing content")
     return 0
 
 

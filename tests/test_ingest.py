@@ -115,6 +115,40 @@ def test_ingest_skips_headless_when_plain_fetch_has_text():
     assert "legalize apartment buildings" in doc["transcript"]
 
 
+def test_ingest_raises_on_empty_article_text_when_no_headless_rescue():
+    # A Google News redirect / JS shell yields ~no article text to trafilatura.
+    # Without a headless fetcher to rescue it, ingest must RAISE rather than
+    # return an empty transcript that silently extracts to 0 statements (which is
+    # exactly how a fetch failure masqueraded as "processed, no housing"). The
+    # discovery loop catches this and leaves the URL un-marked so it can retry.
+    shell = (FIXTURES / "js_rendered.html").read_text()
+
+    def plain(url):
+        return shell
+
+    try:
+        ingest.ingest(dict(_ARTICLE_SOURCE), fetcher=plain)  # no headless_fetcher
+    except ingest.EmptyTranscriptError:
+        pass
+    else:
+        raise AssertionError("expected EmptyTranscriptError on an empty article fetch")
+
+
+def test_ingest_allows_short_supplied_text_social_post():
+    # A first-person social post (Bluesky) is legitimately short and is supplied
+    # as text, so the empty-article guard must NOT apply to the supplied-text path.
+    source = {
+        "url": "https://bsky.app/profile/x/post/1",
+        "outlet": "Bluesky",
+        "media_type": "social",
+        "title": "Bluesky post",
+        "published_date": "2026-07-06",
+        "text": "As mayor I'll cut the red tape on new housing.",
+    }
+    doc = ingest.ingest(source)
+    assert doc["transcript"] == "As mayor I'll cut the red tape on new housing."
+
+
 def test_make_evidence_id_is_length_capped_for_junk_titles():
     # Some pages (e.g. a CBS browser-notice) yield a monster "title"; the id must
     # stay a safe filename (well under the 255-char FS limit) and not crash writes.

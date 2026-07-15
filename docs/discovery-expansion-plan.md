@@ -5,6 +5,13 @@
 and **Bluesky**. **Backfill is done** ([`backfill-plan.md`](./backfill-plan.md)). **Read
 `CLAUDE.md` first.** The rest of this doc is the original plan, kept for historical context.
 
+> **Superseded 2026-07-15:** where this plan calls **Google News RSS** the article
+> "backbone" and the `website` feed type "not polled," that's now inverted. The backbone
+> is **direct outlet RSS** (Block Club / WTTW / Chicago Reader / The TRiiBE / Sun-Times —
+> the former `website` feeds, now `type: "rss"`); **Google News is gated off by default**
+> (`config.discovery.google_news_enabled: false`) because its links are unreadable
+> redirects. See the CLAUDE.md "Non-obvious lessons" entry.
+
 **What shipped** (each TDD + live-verified, merged):
 - **Foundation** — browser-UA fetcher + injected headless seam + feed→media-type routing (#22)
 - **YouTube** channel feeds — per-candidate + standing (WTTW/WGN/City Club) (#23)

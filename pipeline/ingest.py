@@ -137,6 +137,17 @@ def _default_fetcher(url: str, *, getter=None) -> str:
 MIN_ARTICLE_CHARS = 200
 
 
+class EmptyTranscriptError(ValueError):
+    """A fetched article/website yielded no usable text.
+
+    Raised instead of returning a near-empty transcript, so a failed fetch
+    (a Google News redirect, a JS shell, a blocked/consent page) is *visible*
+    rather than silently extracting to zero statements — the failure mode that
+    hid broken discovery for a week. The discovery loop catches this and leaves
+    the URL un-marked so it retries next run.
+    """
+
+
 def ingest(source: dict, *, fetcher=None, downloader=None, transcriber=None,
            headless_fetcher=None) -> dict:
     media_type = source["media_type"]
@@ -154,6 +165,14 @@ def ingest(source: dict, *, fetcher=None, downloader=None, transcriber=None,
             # Plain fetch yielded little/no text — likely JS-rendered. Re-fetch
             # with a headless render so both ingest and the reviewer can read it.
             transcript, page_title = extract_article(headless_fetcher(source["url"]))
+        if len(transcript.strip()) < MIN_ARTICLE_CHARS:
+            # Still no real article body (redirect/JS shell/blocked page). Fail
+            # loudly instead of returning an empty transcript that extracts to 0.
+            raise EmptyTranscriptError(
+                f"article fetch yielded {len(transcript.strip())} chars "
+                f"(< {MIN_ARTICLE_CHARS}); likely a redirect, JS shell, or blocked "
+                f"page: {source['url']}"
+            )
         if not title:
             title = page_title or source["url"]
     elif media_type in AUDIO_TYPES:

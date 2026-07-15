@@ -20,7 +20,10 @@ you:                  review on GitHub, edit if needed, merge
 on merge:             the static site rebuilds and deploys to GitHub Pages
 ```
 
-- **Discovery** polls Google News RSS, candidate sites, and outlet pages.
+- **Discovery** polls direct outlet RSS feeds (Block Club, WTTW, Chicago Reader,
+  The TRiiBE, Sun-Times), plus per-candidate YouTube/podcast channels and Bluesky.
+  (Google News RSS is kept but disabled by default — its links are redirects a
+  plain fetch can't read.)
 - **Ingestion** fetches article text, pulls YouTube captions, or downloads audio
   (podcasts/TikTok/etc.) to a temp runner and transcribes it with Whisper.
   Neither media files nor full transcripts are committed — only extracted quotes

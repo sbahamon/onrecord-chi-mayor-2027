@@ -6,7 +6,7 @@
       "type": "google-news",
       "url": "https://news.google.com/rss/search?q=Chicago+mayor+housing+OR+zoning+OR+affordable&hl=en-US&gl=US&ceid=US:en",
       "enabled": true,
-      "notes": "Backbone discovery feed. Google News RSS is a stable public endpoint; per-candidate queries live on each candidate's google_news_rss field."
+      "notes": "Google News item links are news.google.com REDIRECTS a plain fetch can't read (JS interstitial -> empty extract). Gated off at poll time via config.discovery.google_news_enabled until a headless-fetch path (#30) can resolve the redirect; data kept so flipping the flag re-enables it."
     },
     {
       "id": "google-news-chicago-mayoral-race",
@@ -14,31 +14,47 @@
       "type": "google-news",
       "url": "https://news.google.com/rss/search?q=%22Chicago+mayoral%22+2027&hl=en-US&gl=US&ceid=US:en",
       "enabled": true,
-      "notes": "Catches candidacy declarations and forum/debate announcements."
+      "notes": "See the sibling google-news feed note: gated off via config.discovery.google_news_enabled (unreadable redirect links) until #30 lands."
     },
     {
       "id": "block-club-chicago",
       "name": "Block Club Chicago",
-      "type": "website",
-      "url": "https://blockclubchicago.org/category/citywide/",
+      "type": "rss",
+      "url": "https://blockclubchicago.org/feed/",
       "enabled": true,
-      "notes": "Monitored by website-diff. Verify/replace with the outlet's RSS feed if one is confirmed."
+      "notes": "WordPress site feed — verified live 2026-07-15: 200, 10 entries, both UAs, every attempt (the `/category/citywide/feed/` path 404/429'd — a bad URL, not an IP block). Server-rendered articles trafilatura reads directly; triage filters relevance per item."
     },
     {
       "id": "wttw-news",
       "name": "WTTW News — Chicago politics",
-      "type": "website",
-      "url": "https://news.wttw.com/politics",
+      "type": "rss",
+      "url": "https://news.wttw.com/rss.xml",
       "enabled": true,
-      "notes": "Monitored by website-diff. Frequent candidate-forum coverage and video."
+      "notes": "Best-effort RSS URL; if the live discovery log shows `skip feed wttw-news`, replace with the confirmed feed path. Frequent candidate-forum coverage."
     },
     {
       "id": "chicago-reader-politics",
-      "name": "Chicago Reader — Politics",
-      "type": "website",
-      "url": "https://chicagoreader.com/category/news-politics/",
+      "name": "Chicago Reader",
+      "type": "rss",
+      "url": "https://chicagoreader.com/feed/",
       "enabled": true,
-      "notes": "Home of the Ben Joravsky Show; monitor for episode posts and columns."
+      "notes": "WordPress site feed — verified live 2026-07-15: 200, 100 entries, both UAs, every attempt (the `/category/news-politics/feed/` path 404/429'd — a bad URL, not an IP block). High-volume site feed; triage filters per item (each new item is one cheap triage call until it's ledgered)."
+    },
+    {
+      "id": "the-triibe",
+      "name": "The TRiiBE",
+      "type": "rss",
+      "url": "https://thetriibe.com/feed/",
+      "enabled": true,
+      "notes": "WordPress site feed (server-rendered). Chicago civic/political coverage; triage filters relevance per item."
+    },
+    {
+      "id": "chicago-sun-times",
+      "name": "Chicago Sun-Times",
+      "type": "rss",
+      "url": "https://chicago.suntimes.com/feed",
+      "enabled": true,
+      "notes": "Best-effort feed URL (Sun-Times/WBEZ). If the live log shows `skip feed chicago-sun-times`, replace with the confirmed feed path. Strong City Hall coverage."
     },
     {
       "id": "city-club-chicago-youtube",

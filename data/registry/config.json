@@ -8,7 +8,9 @@
   "auto_merge_min_confidence": 0.85,
   "discovery": {
     "days_lookback": 7,
-    "max_items_per_run": 25
+    "max_items_per_run": 25,
+    "max_items_per_feed": 8,
+    "google_news_enabled": false
   },
   "transcription": {
     "model": "whisper-large-v3-turbo"
