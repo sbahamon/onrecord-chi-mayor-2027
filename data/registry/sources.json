@@ -18,11 +18,11 @@
     },
     {
       "id": "block-club-chicago",
-      "name": "Block Club Chicago — Citywide",
+      "name": "Block Club Chicago",
       "type": "rss",
-      "url": "https://blockclubchicago.org/category/citywide/feed/",
+      "url": "https://blockclubchicago.org/feed/",
       "enabled": true,
-      "notes": "WordPress category feed (server-rendered articles trafilatura reads directly). Direct publisher URLs, deterministically re-ingestable by the reviewer."
+      "notes": "WordPress site feed — verified live 2026-07-15: 200, 10 entries, both UAs, every attempt (the `/category/citywide/feed/` path 404/429'd — a bad URL, not an IP block). Server-rendered articles trafilatura reads directly; triage filters relevance per item."
     },
     {
       "id": "wttw-news",
@@ -34,11 +34,11 @@
     },
     {
       "id": "chicago-reader-politics",
-      "name": "Chicago Reader — Politics",
+      "name": "Chicago Reader",
       "type": "rss",
-      "url": "https://chicagoreader.com/category/news-politics/feed/",
+      "url": "https://chicagoreader.com/feed/",
       "enabled": true,
-      "notes": "WordPress category feed. Home of the Ben Joravsky Show; columns + politics coverage as direct publisher URLs."
+      "notes": "WordPress site feed — verified live 2026-07-15: 200, 100 entries, both UAs, every attempt (the `/category/news-politics/feed/` path 404/429'd — a bad URL, not an IP block). High-volume site feed; triage filters per item (each new item is one cheap triage call until it's ledgered)."
     },
     {
       "id": "the-triibe",
