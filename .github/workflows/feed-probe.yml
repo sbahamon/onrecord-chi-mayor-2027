@@ -1,0 +1,46 @@
+name: feed-probe
+# THROWAWAY: characterize the block-club / chicago-reader 429s from a GitHub runner
+# IP — persistent vs transient, UA-sensitive, category vs root feed. Delete after.
+on:
+  push:
+    branches: [claude/housing-statement-prs-check-epgirp]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests feedparser
+      - name: Probe feeds
+        run: |
+          python - <<'PY'
+          import time, requests, feedparser
+          CHROME = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+                    "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+          feeds = {
+            "blockclub/category": "https://blockclubchicago.org/category/citywide/feed/",
+            "blockclub/root":     "https://blockclubchicago.org/feed/",
+            "reader/category":    "https://chicagoreader.com/category/news-politics/feed/",
+            "reader/root":        "https://chicagoreader.com/feed/",
+            "wttw(control)":      "https://news.wttw.com/rss.xml",
+            "suntimes(control)":  "https://chicago.suntimes.com/feed",
+          }
+          for name, url in feeds.items():
+              for attempt in range(3):
+                  for label, ua in (("chrome", CHROME), ("default", "python-requests/2")):
+                      try:
+                          r = requests.get(url, timeout=25, headers={"User-Agent": ua})
+                          n = len(feedparser.parse(r.text).entries)
+                          print(f"{name:20} try{attempt} ua={label:7} -> {r.status_code} "
+                                f"entries={n} server={r.headers.get('server','')} "
+                                f"cf-ray={'yes' if r.headers.get('cf-ray') else 'no'}")
+                      except Exception as e:
+                          print(f"{name:20} try{attempt} ua={label:7} -> ERR {type(e).__name__}: {str(e)[:60]}")
+                  time.sleep(3)
+          PY
