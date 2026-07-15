@@ -59,7 +59,7 @@ implementations; tests pass fakes.
 | `extract.py` | LLM → statements; **quote-in-transcript**, housing/other routing; **drops** individual schema-invalid statements (keeps valid siblings) |
 | `propose.py` | Build evidence record + stance cells + PR body; write files |
 | `review.py` | Deterministic quote check + model judgment; label + auto-merge gate |
-| `config.py` | Load registries; `candidate_slugs`, `topic_slugs`, `discovery_feeds` (per-candidate Google News + YouTube + Bluesky) |
+| `config.py` | Load registries; `candidate_slugs`, `topic_slugs`, `discovery_feeds` (shared outlet RSS + per-candidate Google News [gated off by default] / YouTube / Bluesky) |
 | `run.py` | `process_source`: ingest→extract→propose; **retries extract** (`extract_attempts`) reusing the transcript; `ProcessResult.transcript_chars` (length only, for discovery logs) |
 | `__main__.py` | CLI: `ingest-url`, `discover` (routes by feed media-type; Bluesky via `bluesky.py`), `review`, `backfill` |
 
@@ -83,7 +83,8 @@ Stance enum: `supports | supports-with-conditions | opposes | mixed | no-positio
   — off the site matrix/profiles, excluded from discovery/extraction (`config._is_tracked`),
   and listed on the methodology "Candidates we don't track" section instead.
 - `topics.json` — the matrix rows (housing taxonomy).
-- `sources.json` — shared discovery feeds (Google News, outlet pages).
+- `sources.json` — shared discovery feeds (direct outlet RSS: Block Club / WTTW /
+  Chicago Reader / The TRiiBE / Sun-Times; Google News kept but gated off by default).
 - `config.json` — model ids, `auto_merge_enabled`, discovery caps.
 
 **Data integrity is enforced by tests:** every file under `data/` validates against its

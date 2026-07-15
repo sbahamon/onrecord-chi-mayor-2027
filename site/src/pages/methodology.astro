@@ -16,8 +16,9 @@ const dropped = loadDroppedCandidates();
 
     <h2>How positions get here</h2>
     <ol>
-      <li><strong>Discovery.</strong> On a schedule, the system scans news feeds,
-        candidate websites, and outlet pages for new appearances.</li>
+      <li><strong>Discovery.</strong> On a schedule, the system scans local-outlet
+        news feeds, video and podcast channels, and candidate social posts for new
+        appearances.</li>
       <li><strong>Ingestion.</strong> Articles are read as text; videos use their
         captions; audio is transcribed. We store only the extracted quotes and a
         link to the source — not full transcripts or media files.</li>
@@ -47,9 +48,11 @@ const dropped = loadDroppedCandidates();
 
     <h3>Sources it watches</h3>
     <ul>
-      <li><strong>News articles</strong> — Google News RSS (a shared housing/race
-        query plus a per-candidate query) and outlet pages, read as text with
-        <code>trafilatura</code> behind a real browser user-agent.</li>
+      <li><strong>News articles</strong> — direct RSS feeds from Chicago outlets
+        (Block Club Chicago, WTTW News, Chicago Reader, The TRiiBE, Chicago
+        Sun-Times), read as text with <code>trafilatura</code> behind a real
+        browser user-agent. (Google News RSS is kept as a fallback but disabled by
+        default — its links are redirects a plain fetch can't read.)</li>
       <li><strong>YouTube</strong> — each candidate's campaign channel plus
         standing channels (WTTW / Chicago Tonight, WGN News, City Club of Chicago),
         via YouTube's per-channel RSS. Audio is pulled with <code>yt-dlp</code>
