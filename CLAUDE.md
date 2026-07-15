@@ -245,15 +245,21 @@ full Groq transcription).
   (data kept; flip back on once the headless fetcher #30 can resolve the redirect). Verified
   live (run 29434616787, RSS-only scratch run): wttw/triibe/sun-times returned 75 items,
   ingested a real Sun-Times article at 4826 chars → 2 housing statements — a story the old
-  path missed. **Feed-URL gotcha (paid for live):** a WordPress `/category/<slug>/feed/`
-  path is NOT reliable — `blockclubchicago.org/category/citywide/feed/` and
-  `chicagoreader.com/category/news-politics/feed/` returned **404/429** (a bad path, not an IP
-  block, and NOT a transient burst — a probe hit both 3× with two UAs, always failing). The
-  **root `/feed/`** works cleanly: block-club → 200/10 entries, reader → 200/100 entries,
-  every attempt, both UAs. Lesson: use the outlet's **root `/feed/`** (verify with a quick
-  GET, don't guess a category path), and let triage filter the site-wide feed. A `429` here
-  meant "wrong URL," not "rate-limited" — don't hand-wave a skip-logged feed as transient;
-  probe it.
+  path missed. **Two distinct 429s, both paid for live — don't guess which:**
+  (1) *Feed-level* 429/404 was a **wrong URL** — a WordPress `/category/<slug>/feed/` path
+  isn't reliable (`blockclubchicago.org/category/citywide/feed/`,
+  `chicagoreader.com/category/news-politics/feed/` both 404/429'd on a probe, 3× × 2 UAs,
+  always). The **root `/feed/`** works cleanly (block-club 200/10 entries, reader 200/100).
+  (2) *Article-page* 429 is **genuine IP rate-limiting**: block-club & reader (nginx)
+  throttle the *article HTML* fetch from GitHub-runner datacenter IPs — run 29435684414 saw
+  3 of ~13 article fetches 429 (wttw/triibe/sun-times don't). This is handled, not fatal:
+  `run_discovery` skips a 429'd item and **leaves it un-marked**, so it retries next run
+  (the mark-after-success hardening — a 429'd URL is never burned), and discovery still
+  ingested 8 articles + a housing hit that run. If block-club/reader throughput ever matters,
+  add a 429 backoff/retry (or same-host politeness delay) to `_default_fetcher`; at the daily
+  cron's low volume the retry-next-run behavior is fine. Lesson: verify a feed URL with a
+  quick GET (don't guess a category path); and a `429` can be *either* a bad URL *or* real
+  rate-limiting — check which before explaining it.
 - **Discovery starves its own good feeds without a per-feed cap.** The global `max_items`
   alone let a noisy feed consume the whole budget; the ledger had **zero** podcast/Bluesky
   URLs ever. `run_discovery` now takes `max_items_per_feed` (config `discovery.max_items_per_feed`)
