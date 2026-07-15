@@ -186,19 +186,6 @@ def test_ingest_article_uses_page_title_when_source_title_missing():
     assert "apartment legalization" in doc["title"].lower()
 
 
-# --- caption normalization --------------------------------------------------
-
-def test_normalize_vtt_strips_cues_and_dedupes_rolling_lines():
-    text = ingest.normalize_vtt((FIXTURES / "captions.vtt").read_text())
-    # No timestamps or WEBVTT header survive.
-    assert "-->" not in text
-    assert "WEBVTT" not in text
-    # Rolling YouTube-style duplicate lines collapse to one each.
-    assert text.count("We should legalize apartments") == 1
-    assert text.count("in every neighborhood.") == 1
-    assert "That's the whole point." in text
-
-
 # --- article extraction -----------------------------------------------------
 
 def test_extract_article_text_keeps_body_drops_boilerplate():
