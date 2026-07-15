@@ -51,8 +51,8 @@ implementations; tests pass fakes.
 | `schemas.py` | Load JSON Schemas (`schemas/*.schema.json`), `validate(record, name)` |
 | `data_integrity.py` | Walk `data/`, map each file to its schema |
 | `citations.py` | Resolve `"<evidence-id>#<index>"` → statement |
-| `discover.py` | RSS parse (`parse_feed`, `prefer_enclosure` for podcasts), `media_type_for_feed`, `Ledger` dedup, website-diff, LLM triage |
-| `ingest.py` | Article text (trafilatura, browser-UA + injected `headless_fetcher` seam), audio→transcript, pre-supplied `text` passthrough (social); `domain_of`, title |
+| `discover.py` | RSS parse (`parse_feed`, `prefer_enclosure` for podcasts), `media_type_for_feed`, `active_media_feeds` (poll-time type filter + `google_news_enabled` gate), `Ledger` dedup, LLM triage, **`run_discovery`** (the whole daily loop: dedup→triage→process, mark-after-success, global+per-feed caps, per-item logging — injected seams, offline-testable like `run_backfill`) |
+| `ingest.py` | Article text (trafilatura, browser-UA + injected `headless_fetcher` seam); **`EmptyTranscriptError`** if a fetched article yields `< MIN_ARTICLE_CHARS` (a redirect/JS-shell/blocked page — fail loud, don't return empty); audio→transcript, pre-supplied `text` passthrough (social); `domain_of`, title |
 | `transcribe.py` | yt-dlp download → **ffmpeg 16 kHz-mono downsample** → Groq Whisper (the only heavy external step; downsample keeps long audio under Groq's size cap) |
 | `bluesky.py` | `fetch_author_feed` — public `getAuthorFeed` (injected HTTP); a candidate's original text posts as items (skips reposts + media-only) |
 | `llm.py` | `OpenRouterLLM.complete_json` — OpenAI-compatible, injectable `post`, retries |
@@ -60,7 +60,7 @@ implementations; tests pass fakes.
 | `propose.py` | Build evidence record + stance cells + PR body; write files |
 | `review.py` | Deterministic quote check + model judgment; label + auto-merge gate |
 | `config.py` | Load registries; `candidate_slugs`, `topic_slugs`, `discovery_feeds` (per-candidate Google News + YouTube + Bluesky) |
-| `run.py` | `process_source`: ingest→extract→propose; **retries extract** (`extract_attempts`) reusing the transcript |
+| `run.py` | `process_source`: ingest→extract→propose; **retries extract** (`extract_attempts`) reusing the transcript; `ProcessResult.transcript_chars` (length only, for discovery logs) |
 | `__main__.py` | CLI: `ingest-url`, `discover` (routes by feed media-type; Bluesky via `bluesky.py`), `review`, `backfill` |
 
 ## Data model (two layers)
@@ -229,6 +229,31 @@ full Groq transcription).
 
 - Only live runs catch: wrong model slugs, Pages base-path link breakage, `add-paths`
   glob-miss, ugly URL-slug IDs. After nontrivial changes, do a real run, not just tests.
+- **Google News RSS links are unreadable redirects — they silently zeroed discovery for
+  a week (fixed 2026-07-15).** `news.google.com/rss/articles/CBMi…` item links are *redirect*
+  URLs; a plain fetch returns Google's JS interstitial, not the article, so trafilatura
+  extracted ~nothing and every item "processed" with 0 housing while its URL was marked seen.
+  The cron ran green daily and the PR always said "No new housing statements found" — the
+  failure was invisible because `ingest` returned an empty transcript instead of raising, and
+  the loop marked the ledger *before* ingest. Three-part fix: (1) `ingest` raises
+  `EmptyTranscriptError` on `< MIN_ARTICLE_CHARS`; (2) the loop (`discover.run_discovery`)
+  marks the ledger only on success **or** definitive triage-reject — never on a raised
+  failure, so transient/blocked fetches retry; (3) the article backbone moved from Google
+  News to **direct outlet RSS** (Block Club, WTTW, Chicago Reader, The TRiiBE, Sun-Times),
+  which give real publisher URLs trafilatura reads and the reviewer re-ingests
+  deterministically. Google News is gated off via `config.discovery.google_news_enabled`
+  (data kept; flip back on once the headless fetcher #30 can resolve the redirect). Verified
+  live (run 29434616787, RSS-only scratch run): wttw/triibe/sun-times returned 75 items,
+  ingested a real Sun-Times article at 4826 chars → 2 housing statements — a story the old
+  path missed. **block-club & chicago-reader 429'd the runner IP in the burst check** (they
+  skip cleanly, un-burned); expected to fetch on the daily single-pass cadence — watch the
+  cron log and swap the URL if a feed keeps logging `skip feed`. The `wttw-news`/`sun-times`
+  feed URLs were best-effort guesses **confirmed live**; if a feed ever 404s, its note says so.
+- **Discovery starves its own good feeds without a per-feed cap.** The global `max_items`
+  alone let a noisy feed consume the whole budget; the ledger had **zero** podcast/Bluesky
+  URLs ever. `run_discovery` now takes `max_items_per_feed` (config `discovery.max_items_per_feed`)
+  so podcasts/Bluesky are reached. Note: a triaged-*out* item still costs one triage call and
+  is marked seen; only *ingested* items count toward the caps.
 - The extractor is a bit loose on attribution (it will tag a deputy's or opponent's words
   to the candidate). The reviewer catches this from the quote text — that's the whole point
   of the two-model, human-approved design. Don't "fix" it by trusting the extractor more.
