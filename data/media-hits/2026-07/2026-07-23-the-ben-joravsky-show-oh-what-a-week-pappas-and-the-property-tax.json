@@ -1,0 +1,56 @@
+{
+  "id": "2026-07-23-the-ben-joravsky-show-oh-what-a-week-pappas-and-the-property-tax",
+  "url": "https://rss.art19.com/episodes/36d672d7-fa9e-4e8d-8dc2-73e3c6b211ae.mp3?rss_browser=BAhJIgtDaHJvbWUGOgZFVA%3D%3D--d05363d83ce333c74f32188013892b2863ad051c",
+  "outlet": "The Ben Joravsky Show",
+  "media_type": "podcast",
+  "title": "Oh, What a Week\u2014Pappas And The Property Tax",
+  "published_date": "2026-07-23",
+  "discovered_date": "2026-07-23",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "maria-pappas",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Issued a report highlighting that property taxes have outpaced inflation and wage growth, driven by TIF districts, and argues property taxes are too high.",
+      "quote": "Property taxes are too high. They've been too high forever. We as a city, we as a state are dependent on a property tax, a tax to fund our schools that we can't afford.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "maria-pappas",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Notes that TIFs raise property taxes citywide and that her report brings attention to this issue.",
+      "quote": "And she notes the impact of TIFs on property taxes because guess what, folks? That's what a TIF is. It's a property tax increase citywide.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "susana-mendoza",
+      "topic": "property-taxes-tif",
+      "stance": "no-position",
+      "summary": "The speaker criticizes Mendoza as clueless about TIFs and property taxes, but no direct statement from Mendoza is given.",
+      "quote": "Susanna Mendoza is just like unabashedly clueless when it comes to TIFs.",
+      "locator": null,
+      "confidence": 0.3,
+      "is_housing": true,
+      "attribution_flag": true
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "no-position",
+      "summary": "The transcript mentions Johnson in passing but contains no direct statement from him on property taxes or TIFs.",
+      "quote": "Let's hear what Mayor Brandon Johnson has to say about that.",
+      "locator": null,
+      "confidence": 0.1,
+      "is_housing": true,
+      "attribution_flag": true
+    }
+  ]
+}

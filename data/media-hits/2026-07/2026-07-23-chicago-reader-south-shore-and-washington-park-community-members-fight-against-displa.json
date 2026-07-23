@@ -1,0 +1,23 @@
+{
+  "id": "2026-07-23-chicago-reader-south-shore-and-washington-park-community-members-fight-against-displa",
+  "url": "https://chicagoreader.com/news/obama-presidential-center-south-shore-washington-park-community-benefits-agreement/",
+  "outlet": "Chicago Reader",
+  "media_type": "article",
+  "title": "South Shore and Washington Park community members\u2019 fight against displacement near the Obama Center is ongoing",
+  "published_date": "2026-07-23",
+  "discovered_date": "2026-07-23",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Introduced the Protecting Renters Ordinance to establish a rental registry and a new body to oversee housing disputes.",
+      "quote": "Mayor Brandon Johnson introduced the Protecting Renters Ordinance during Monday\u2019s Committee on Housing and Real Estate. The ordinance would establish a rental registry and a new body to oversee housing disputes between landlords and renters.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}

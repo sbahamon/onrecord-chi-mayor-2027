@@ -1,0 +1,118 @@
+{
+  "id": "2026-07-23-the-fran-spielman-show-in-depth-analysis-of-mayor-brandon-johnson-s-16-6-billion-budget-propo",
+  "url": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/99696343-9735-4929-a973-650a9e6d3941/1023_Fran_Show_Alds_mixdown.mp3",
+  "outlet": "The Fran Spielman Show",
+  "published_date": "2026-07-23",
+  "statements": [
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Proposed a head tax of $21 for companies with more than 1,000 employees per month.",
+      "quote": "This tax-heavy budget would hit businesses hard. It includes a revived and dramatically expanded head tax of $21 for companies with more than 1,000 employees per month,",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": false,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Proposed a second consecutive increase in the tax on cloud computing from 11 to 14 percent.",
+      "quote": "A second consecutive increase in the tax on cloud computing, which would go from 11 to 14 percent after going from 9 to 11 last year.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": false,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Proposed a higher and reconfigured ride sharing fee in an expanded area beyond downtown.",
+      "quote": "And a higher and reconfigured ride sharing fee in an expanded area beyond downtown.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": false,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Proposed a social media tax.",
+      "quote": "It also includes a social media tax.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": false,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Called the head tax a job creator.",
+      "quote": "You know, I read where the mayor called it a job creator.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": false,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Proposed doubling the police overtime budget to $200 million and capping it at that amount.",
+      "quote": "The mayor is doubling what was an absurd $100 million annually for police overtime that routinely was more than doubled that. He's making it $200 million. He says that Snelling, the superintendent, can live with that, and he's capping overtime at that amount.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": false,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "opposes",
+      "summary": "Does not use the word cut and avoids layoffs and furlough days to avoid alienating unions.",
+      "quote": "And I think when you look at the fact that he doesn't use the word cut, it's not in his vocabulary, that really presents a problem for people when we're seeing spending that is well beyond our means.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": false,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "opposes",
+      "summary": "Avoided layoffs and furlough days because he's afraid of alienating the unions that put him in office.",
+      "quote": "But do you favor layoffs and furlough days that the mayor has steered clear of because he's afraid of alienating the unions that put him in office?",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": false,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "opposes",
+      "summary": "Removed the shot spotter system.",
+      "quote": "He removed the spot shotter system, which led to a lot of deaths in certain communities that really wanted spot shotter.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": false,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "mixed",
+      "summary": "Had a history of supporting defunding the police during the campaign but vowed not to cut one penny from the police department, though he slowed police hiring and eliminated vacancies.",
+      "quote": "Mayor Johnson had a history of supporting defunding the police during the campaign. He tried to distance himself from that controversy by vowing not to cut one penny from the police department. But that hasn't happened either. He balanced his first two budgets in part by slowing police hiring, eliminating hundreds of police vacancies.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": false,
+      "attribution_flag": false
+    }
+  ]
+}

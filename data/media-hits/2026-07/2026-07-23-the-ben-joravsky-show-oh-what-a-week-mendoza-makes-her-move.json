@@ -1,0 +1,34 @@
+{
+  "id": "2026-07-23-the-ben-joravsky-show-oh-what-a-week-mendoza-makes-her-move",
+  "url": "https://rss.art19.com/episodes/d09ba07e-b827-4ccd-be81-b767821d3db0.mp3?rss_browser=BAhJIgtDaHJvbWUGOgZFVA%3D%3D--d05363d83ce333c74f32188013892b2863ad051c",
+  "outlet": "The Ben Joravsky Show",
+  "media_type": "podcast",
+  "title": "Oh, What a Week\u2014Mendoza Makes Her Move",
+  "published_date": "2026-07-23",
+  "discovered_date": "2026-07-23",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "susana-mendoza",
+      "topic": "property-taxes-tif",
+      "stance": "no-position",
+      "summary": "Mendoza's campaign ad mentions rising property taxes as a problem but does not state her specific policy on TIF reform.",
+      "quote": "Families are being squeezed by rising rents, higher fees and property taxes.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "susana-mendoza",
+      "topic": "affordable-housing-funding",
+      "stance": "no-position",
+      "summary": "Mendoza's campaign ad mentions rising rents as a problem but does not state a specific policy to address affordable housing funding.",
+      "quote": "Families are being squeezed by rising rents, higher fees and property taxes.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}

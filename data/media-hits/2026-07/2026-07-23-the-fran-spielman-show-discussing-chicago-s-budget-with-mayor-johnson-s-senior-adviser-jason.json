@@ -1,0 +1,67 @@
+{
+  "id": "2026-07-23-the-fran-spielman-show-discussing-chicago-s-budget-with-mayor-johnson-s-senior-adviser-jason",
+  "url": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/7ec01d75-8aad-44b5-8648-2d010affc94e/1017_Fran_Show_Jason_Lee_mixdown.mp3",
+  "outlet": "The Fran Spielman Show",
+  "media_type": "podcast",
+  "title": "Discussing Chicago's budget with Mayor Johnson's senior adviser Jason Lee",
+  "published_date": "2026-07-23",
+  "discovered_date": "2026-07-23",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "brandon-johnson",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports a real estate transfer tax on high-end transactions to fund homelessness services, referencing the defeated Bring Chicago Home referendum.",
+      "quote": "Of course, the real estate transfer tax brings Chicago home, which would have provided over $100 million for the unhoused, didn't pass under the face of millions of dollars of propaganda, which led to levels of misinformation.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "opposes",
+      "summary": "Opposes raising property taxes, including restoring an automatic cost-of-living escalator, in the current budget.",
+      "quote": "What the mayor was clear on was that he would not introduce a budget that included a property tax increase.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "mixed",
+      "summary": "Open to city council proposals on property taxes but emphasizes his position is against an increase.",
+      "quote": "Yes or no? what was said and what I can confirm and what has been confirmed is the mayor introduced a budget without a property tax increase. Again, I have not, we have not had any conversations yet with any counter proposals with anyone in the city council. What we've always said is we're open to listening and engaging on all ideas ultimately.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Supports a billion-dollar TIF surplus to fund city services, arguing it does not create an operating budget hole.",
+      "quote": "A billion-dollar surplus does not create a billion-dollar hole in the budget. It's a different accounting. It has nothing to do with the operating expenses of the budget.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Defends TIF surplus, stating neighborhood TIF projects will still be available and that resources are concentrated in already-developed areas.",
+      "quote": "And when you look at the program that was designed, the billion dollar surplus, you'll see many of those neighborhood tips are still there and available for the use for neighborhood projects. That's not where the resources are. And that's part of the problem with tip. is that the resources accumulate in a small number of TIFs in areas that are already developed.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}
