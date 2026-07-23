@@ -1,0 +1,34 @@
+{
+  "id": "2026-07-23-the-fran-spielman-show-mayor-brandon-johnson",
+  "url": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/2a1cb187-eda0-46b8-b2ad-b5ed1e1b3c5a/0514_Fran_Show_Mayor_Johnson_mixdown.mp3",
+  "outlet": "The Fran Spielman Show",
+  "media_type": "podcast",
+  "title": "Mayor Brandon Johnson",
+  "published_date": "2026-07-23",
+  "discovered_date": "2026-07-23",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "brandon-johnson",
+      "topic": "homelessness",
+      "stance": "supports",
+      "summary": "Supports funding for homelessness initiatives, including shelter revitalization and a one-shelter initiative.",
+      "quote": "That means that we can put more money to respond to the crisis of those who are unhoused. We secured $64 million from Springfield to build a one-shelter initiative. And now for the first time in over a decade, families are not on a waiting list when it comes to looking for temporary housing. But we also have put $40 million to revitalize shelters so that families can experience housing with some dignity.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "adus",
+      "stance": "supports",
+      "summary": "Supports expanding accessory dwelling units (ADUs) throughout Chicago.",
+      "quote": "You know, our ADUs is another good example, another campaign promise and victory, where now we have the ability to expand ADUs throughout the city of Chicago.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}

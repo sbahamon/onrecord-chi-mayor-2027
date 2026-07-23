@@ -1,0 +1,23 @@
+{
+  "id": "2026-07-23-the-fran-spielman-show-in-depth-analysis-of-mayor-brandon-johnson-s-16-6-billion-budget-propo",
+  "url": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/99696343-9735-4929-a973-650a9e6d3941/1023_Fran_Show_Alds_mixdown.mp3",
+  "outlet": "The Fran Spielman Show",
+  "media_type": "podcast",
+  "title": "In-depth analysis of Mayor Brandon Johnson's $16.6 billion budget proposal",
+  "published_date": "2026-07-23",
+  "discovered_date": "2026-07-23",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Proposed a $1 billion tax increment financing surplus to bail out Chicago Public Schools and help the city.",
+      "quote": "He also declared a $1 billion tax increment financing surplus to bail out the Chicago public schools while also helping the city.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}

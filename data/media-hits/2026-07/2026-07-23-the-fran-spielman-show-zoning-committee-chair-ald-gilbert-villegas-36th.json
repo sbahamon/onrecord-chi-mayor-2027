@@ -1,0 +1,67 @@
+{
+  "id": "2026-07-23-the-fran-spielman-show-zoning-committee-chair-ald-gilbert-villegas-36th",
+  "url": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/d76c7232-dd6e-4d35-a2c2-8e93d219af9b/0508_Fran_Show_Villegas_mixdown.mp3",
+  "outlet": "The Fran Spielman Show",
+  "media_type": "podcast",
+  "title": "Zoning Committee Chair Ald. Gilbert Villegas (36th)",
+  "published_date": "2026-07-23",
+  "discovered_date": "2026-07-23",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "brandon-johnson",
+      "topic": "zoning-reform",
+      "stance": "supports",
+      "summary": "Supports cutting red tape and streamlining permitting processes to speed up development.",
+      "quote": "And we have to make sure that from the onset that when the policy idea is being put forward, that we're listening to all sides, all parties to make sure that we can get a comprehensive plan that's going to ultimately pass and be successful for the city of Chicago.",
+      "locator": null,
+      "confidence": 0.7,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports affordable housing and emphasizes the need to educate the public about what affordable housing means.",
+      "quote": "We need to educate the public around what affordable housing is. Unfortunately, it's had a negative stigma attached to it. When people talk about affordability, they're thinking it's the Chicago Housing Authority. There are components of that, Of course, but affordability, affordable housing also is taking into account the annual median income that's associated with people with with projects. So, for example, when you're talking about 60 percent AMI, that's fifty one thousand dollars a year. That's about twenty six dollars an hour that that person's making. These are people that work at Target, Starbucks. They may be driving. Maybe they're a driver for Amazon. These are people that live in the city, and they deserve an opportunity to live in the city. So I think we need to remind people as to what affordable housing really is and remove this negative stigma.",
+      "locator": null,
+      "confidence": 0.8,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "property-taxes-tif",
+      "stance": "opposes",
+      "summary": "Opposes high property taxes that discourage investment and development.",
+      "quote": "But we also need to make sure that with property taxes, that these property taxes are not rising so high that's putting the owners of these properties in a position where they're having to raise rents. And then in turn, some of these larger establishments are saying, look, the rent's too high here. We're not getting as much traffic. So there's a there's a cost associated with that. So I think that finding out how to allow for predictability around property taxes, figuring out how to make sure it's safe, and then taking a look at continuing to beautify that strip, I think will encourage people to come.",
+      "locator": null,
+      "confidence": 0.75,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "zoning-reform",
+      "stance": "supports",
+      "summary": "Supports using technology to streamline zoning and permitting processes.",
+      "quote": "And so we're just beginning that process now because having been the chairman of Economic Capital Technology, I learned a lot from the technology world. And what I want to do is figure out how to incorporate technology into the way that we're permitting and getting projects approved so that we can streamline the process.",
+      "locator": null,
+      "confidence": 0.8,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "public-housing-cha",
+      "stance": "mixed",
+      "summary": "Acknowledges the Chicago Housing Authority as part of affordable housing but wants to broaden the definition.",
+      "quote": "When people talk about affordability, they're thinking it's the Chicago Housing Authority. There are components of that, Of course, but affordability, affordable housing also is taking into account the annual median income that's associated with people with with projects.",
+      "locator": null,
+      "confidence": 0.7,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}
