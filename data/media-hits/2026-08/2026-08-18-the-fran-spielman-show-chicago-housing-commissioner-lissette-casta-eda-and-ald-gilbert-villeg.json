@@ -1,0 +1,100 @@
+{
+  "id": "2026-08-18-the-fran-spielman-show-chicago-housing-commissioner-lissette-casta-eda-and-ald-gilbert-villeg",
+  "url": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/67ebbc18-aea2-46c1-a6d1-47106e0c4d3f/0723_Fran_Show_Castaneda_Villegas_mixdown.mp3",
+  "outlet": "The Fran Spielman Show",
+  "media_type": "podcast",
+  "title": "Chicago Housing Commissioner Lissette Casta\u00f1eda and Ald. Gilbert Villegas (36th)",
+  "published_date": "2026-08-18",
+  "discovered_date": "2026-08-18",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Supports just cause eviction protections to prevent no-fault evictions, arguing any eviction is an opportunity for homelessness.",
+      "quote": "For us, any eviction is an opportunity, an unfortunate opportunity for someone to become homeless. And so the just cause protections that we have are very important in ensuring that the 10,000 no-fault evictions that occur every year in the city are prevented.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Supports a rental registry to identify property owners and increase transparency, especially regarding LLCs.",
+      "quote": "The rental registry will give us a place where we will have the most basic information and will also help inform policies as we move forward.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Supports relocation assistance fees for tenants displaced through no fault of their own, citing research from other cities that it doesn't slow construction or increase rents.",
+      "quote": "Just cause protections have actually been in other markets and pure cities, and the research does not back the notion that they've slowed housing construction or have a direct tie to any increases in rent.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Supports a tiered fee structure for the rental registry, exempting smallest landlords and charging larger landlords more.",
+      "quote": "The pro ordinance exempts owner-occupied six units or less from having to pay a fee. There are tiers, which means that the smallest landlords pay the smallest amount. It adds up to less than $2 a month per unit, and that the biggest landlords are paying the biggest amount.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Highlights administration's work on affordable housing supply, announcing new units and a fund.",
+      "quote": "This administration has advanced thousands of units of affordable housing. Just on April 1st, we announced another 1,100 units that are going to be created and preserved. That's a $300 million investment that the city is making.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "permitting-reform",
+      "stance": "supports",
+      "summary": "Claims administration is working on cutting red tape and reducing deal closing times.",
+      "quote": "We've been working on cutting the tape since the mayor established his executive order in 2023. And since then, over half of the goals that we have set have seen movement or have been successful. We, in fact, within the Department of Housing, are looking at cutting down the time from what it used to take to close a deal all the way down to no more than 18 months.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Argues the PRO ordinance targets bad actors and provides services for small landlords.",
+      "quote": "The biggest thing about PRO is that it is coming after the bad actors. We know that not everyone is a bad actor, but we need a framework in place that allows us to enforce what the things that the bad actors are doing and the ways in which they are abusing renters.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "States commitment to not rolling back existing tenant protections like the fair notice ordinance.",
+      "quote": "We want to make sure that no current protections are rolled back. We want to make sure that things like the fair notice ordinance, which has been code for some time now, remain intact so that renters can make sure that they have adequate notice before they are forced to move.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}

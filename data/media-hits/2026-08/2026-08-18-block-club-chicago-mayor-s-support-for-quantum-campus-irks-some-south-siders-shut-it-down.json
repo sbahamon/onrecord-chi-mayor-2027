@@ -1,0 +1,45 @@
+{
+  "id": "2026-08-18-block-club-chicago-mayor-s-support-for-quantum-campus-irks-some-south-siders-shut-it-down",
+  "url": "https://blockclubchicago.org/2026/08/17/mayors-support-for-quantum-campus-irks-some-south-siders-shut-it-down-mayor-johnson/",
+  "outlet": "Block Club Chicago",
+  "media_type": "article",
+  "title": "Mayor\u2019s Support For Quantum Campus Irks Some South Siders: \u2018Shut It Down, Mayor Johnson\u2019",
+  "published_date": "2026-08-18",
+  "discovered_date": "2026-08-18",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "brandon-johnson",
+      "topic": "affordable-housing-funding",
+      "stance": "supports-with-conditions",
+      "summary": "Mayor Johnson has pledged city funding for the Quantum Shore development, which includes housing and economic development components, but emphasizes that development must align with community interests and not harm public health or utilities.",
+      "quote": "Johnson has pledged $5 million to the project from the city\u2019s housing and economic development bond program.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "zoning-reform",
+      "stance": "supports-with-conditions",
+      "summary": "Johnson supports development but calls for a moratorium on new data centers and has signed an executive order to strengthen regulatory processes to ensure community interests are prioritized.",
+      "quote": "Instead, he reiterated his call for a moratorium on new data centers and drew attention to a recent executive order that established new regulations for data centers in Chicago.",
+      "locator": null,
+      "confidence": 0.85,
+      "is_housing": true,
+      "attribution_flag": false
+    },
+    {
+      "candidate": "brandon-johnson",
+      "topic": "affordable-housing-funding",
+      "stance": "supports-with-conditions",
+      "summary": "Johnson states that private investment and development cannot happen at the expense of public health, utilities, working people, or environmental justice, indicating conditional support for projects that align with these values.",
+      "quote": "\u201cHere are my values: That innovation cannot take place at the expense of environmental justice, that \u2026 development cannot happen at the expense of utilities and working people, and that private investment cannot happen at the expense of our overall public health,\u201d Johnson said.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}
