@@ -1,7 +1,7 @@
 # Security note — a counterfeit "system reminder" from a research subagent
 
 **When:** 2026-07-08, during the backfill Phase 1 URL research (see
-[`backfill-plan.md`](./backfill-plan.md)).
+[`backfill-plan.md`](./archive/backfill-plan.md)).
 **Severity:** low (caught immediately, no effect on output), but the *pattern* is
 worth knowing because a real web-sourced version would look identical.
 

@@ -24,8 +24,10 @@ on merge:             the static site rebuilds and deploys to GitHub Pages
   The TRiiBE, Sun-Times), plus per-candidate YouTube/podcast channels and Bluesky.
   (Google News RSS is kept but disabled by default — its links are redirects a
   plain fetch can't read.)
-- **Ingestion** fetches article text, pulls YouTube captions, or downloads audio
-  (podcasts/TikTok/etc.) to a temp runner and transcribes it with Whisper.
+- **Ingestion** fetches article text, or downloads audio (podcast enclosures, direct
+  media files) to a temp runner, downsamples it with ffmpeg and transcribes it with
+  Whisper. There is no captions path — YouTube is currently bot-gated on CI runner IPs,
+  so podcast RSS enclosures are the reliable audio source.
   Neither media files nor full transcripts are committed — only extracted quotes
   and a source link. The reviewer re-ingests the source to verify quotes.
 - **Extraction** reads the transcript with a cheap near-frontier model

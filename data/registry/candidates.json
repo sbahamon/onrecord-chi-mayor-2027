@@ -63,6 +63,18 @@
       "drop_reason": "Not actively tracked — a long-shot candidate with no media-sourced housing position on the record. Will revisit if that changes."
     },
     {
+      "slug": "alexi-giannoulias",
+      "name": "Alexi Giannoulias",
+      "status": "declared",
+      "party": null,
+      "website": null,
+      "bluesky": null,
+      "youtube_channel": null,
+      "google_news_rss": "https://news.google.com/rss/search?q=%22Alexi%20Giannoulias%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
+      "photo": null,
+      "bio": "Illinois Secretary of State; former Illinois State Treasurer. Announced his campaign for mayor 2026-08-02."
+    },
+    {
       "slug": "joe-holberg",
       "name": "Joe Holberg",
       "status": "declared",
@@ -125,14 +137,15 @@
     {
       "slug": "liam-stanton",
       "name": "Liam Stanton",
-      "status": "declared",
+      "status": "withdrawn",
       "party": null,
       "website": "https://www.stantonforchicago.com/",
       "bluesky": null,
       "youtube_channel": "UCloUhmNmH6qb25npRUJOmLQ",
       "google_news_rss": "https://news.google.com/rss/search?q=%22Liam%20Stanton%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
       "photo": null,
-      "bio": "Serial entrepreneur and founder of the Chicago Style Project."
+      "bio": "Serial entrepreneur and founder of the Chicago Style Project.",
+      "status_note": "Withdrew from the race 2026-08-10 and endorsed Alexi Giannoulias. Positions already on the record are kept as history; he is excluded from further discovery."
     }
   ]
 }

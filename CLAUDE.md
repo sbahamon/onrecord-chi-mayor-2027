@@ -51,13 +51,13 @@ implementations; tests pass fakes.
 | `schemas.py` | Load JSON Schemas (`schemas/*.schema.json`), `validate(record, name)` |
 | `data_integrity.py` | Walk `data/`, map each file to its schema |
 | `citations.py` | Resolve `"<evidence-id>#<index>"` → statement |
-| `discover.py` | RSS parse (`parse_feed`, `prefer_enclosure` for podcasts), `media_type_for_feed`, `active_media_feeds` (poll-time type filter + `google_news_enabled` gate), `Ledger` dedup, LLM triage, **`run_discovery`** (the whole daily loop: dedup→triage→process, mark-after-success, global+per-feed caps, per-item logging — injected seams, offline-testable like `run_backfill`) |
+| `discover.py` | RSS parse (`parse_feed`, `prefer_enclosure` for podcasts), `media_type_for_feed`, `active_media_feeds` (poll-time type filter + `google_news_enabled` gate), `Ledger` dedup, LLM triage, **`run_discovery`** (the whole daily loop: dedup→triage→process, mark-after-success **on both the triage and process calls**, global+per-feed caps, per-item logging — injected seams, offline-testable like `run_backfill`) |
 | `ingest.py` | Article text (trafilatura, browser-UA + injected `headless_fetcher` seam); **`EmptyTranscriptError`** if a fetched article yields `< MIN_ARTICLE_CHARS` (a redirect/JS-shell/blocked page — fail loud, don't return empty); audio→transcript, pre-supplied `text` passthrough (social); `domain_of`, title |
 | `transcribe.py` | yt-dlp download → **ffmpeg 16 kHz-mono downsample** → Groq Whisper (the only heavy external step; downsample keeps long audio under Groq's size cap) |
 | `bluesky.py` | `fetch_author_feed` — public `getAuthorFeed` (injected HTTP); a candidate's original text posts as items (skips reposts + media-only) |
 | `llm.py` | `OpenRouterLLM.complete_json` — OpenAI-compatible, injectable `post`, retries |
 | `extract.py` | LLM → statements; **quote-in-transcript**, housing/other routing; **drops** individual schema-invalid statements (keeps valid siblings) |
-| `propose.py` | Build evidence record + stance cells + PR body; write files |
+| `propose.py` | Build evidence record + stance cells + PR body; write files; `write_stance` **preserves an existing `record`** so discovery can't erase backfilled history |
 | `review.py` | Deterministic quote check + model judgment; label + auto-merge gate |
 | `config.py` | Load registries; `candidate_slugs`, `topic_slugs`, `discovery_feeds` (shared outlet RSS + per-candidate Google News [gated off by default] / YouTube / Bluesky) |
 | `run.py` | `process_source`: ingest→extract→propose; **retries extract** (`extract_attempts`) reusing the transcript; `ProcessResult.transcript_chars` (length only, for discovery logs) |
@@ -74,6 +74,18 @@ implementations; tests pass fakes.
   (unreviewed, unpublished).
 
 Stance enum: `supports | supports-with-conditions | opposes | mixed | no-position`.
+
+- **Record** (optional `record` array on a stance) — what an officeholder actually *did* on
+  that topic, wins and losses alike. Separate from `stance`, which is their *position*: a
+  champion of a defeated measure still `supports` it. Entries are
+  `{action, outcome, date, citations}` with `outcome` a closed enum —
+  `enacted | failed | stalled | pending | withdrawn` — closed on purpose so a backfill can't
+  quietly report only wins (e.g. Bring Chicago Home is `failed`, filed under `homelessness`:
+  one primary topic per item, not duplicated across every row it touches). Citations use the
+  same `"<evidence-id>#<index>"` form as stances, so a record entry is held to identical
+  sourcing discipline and a dangling one fails CI. Written by the per-candidate backfill;
+  `propose.write_stance` **preserves** it when daily discovery rewrites the cell. Rendered on
+  candidate profiles; the matrix stays position-only.
 
 ## Registries (`data/registry/`, hand-edited)
 
@@ -109,6 +121,10 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
   `"drop_reason"`) on their `candidates.json` record. Removes them from the matrix/profiles
   and from discovery; they show on the methodology "don't track" list. One-line flip to re-add.
 - **Add a housing topic (matrix row):** add to `data/registry/topics.json` (unique slug, `order`). The matrix and profiles pick it up on rebuild.
+- **Record an officeholder action (incl. a defeat):** add an entry to the `record` array of
+  the relevant `data/stances/<candidate>/<topic>.json`, with an `outcome` from the enum and a
+  citation resolving to a committed media hit. Don't restate it under every related topic —
+  file it under the one that matches its purpose.
 - **Change a model or discovery cap:** `data/registry/config.json`.
 - **Change what the extractor/reviewer looks for:** the prompts are `SYSTEM_PROMPT` in
   `extract.py` and `REVIEW_SYSTEM` in `review.py`. Add a test if behavior changes.
@@ -181,31 +197,45 @@ stance) in the proposed PR. This matters more as discovery-expansion widens the 
 
 ## Known gaps / planned work
 
-> **CODE FREEZE until 2026-07-22: do not modify the discovery/ingest code path**
-> (`discover.py`, `ingest.py`, the fetcher, `data/registry/sources.json`) — the week of
-> 2026-07-16→22 is a clean production measurement of the #42 direct-RSS fix, validated
-> via issue #47. That includes NOT preemptively adding the #41 429-backoff (retry-next-run
-> already self-heals). Merging data PRs, running #43 (eval-only), and intake *usage* are
-> all fine. Delete this note once #47 closes.
+> **CURRENT STATE (2026-08-19): the daily cron is deliberately PAUSED.** The `schedule:`
+> trigger in `cron.yml` is commented out while the per-candidate backfill track runs;
+> `workflow_dispatch` still works. **Re-enable condition:** every per-candidate backfill
+> issue closed and its PR merged to `main`. Until then each daily run would just re-triage
+> the same ~200 items (main's ledger only advances when a discovery PR merges) and open PRs
+> against a matrix that is mid-rebuild. Tracked in **#50**. The #42 direct-RSS fix is
+> **validated** in production (#47 closed) — the freeze that guarded it is over.
 
-Sequenced plans in `docs/` — **backfill and discovery expansion are both done.**
+**The active piece of work is the per-candidate backfill track (#50)** — one GitHub issue per
+tracked candidate (#51–#60), each rebuilding that candidate's housing positions *and* (for sitting
+officeholders) their `record`: what they did in office, including what they tried and
+failed to do. Each issue drives a workflow — Fable orchestrating, Sonnet agents searching,
+Opus agents verifying quotes and attribution — but all output funnels through the existing
+`backfill` CLI, so it's still one PR per candidate with the quote-in-transcript guard and
+`review.yml` intact. The daily cron stays paused until every one of those PRs is merged.
+
 **Start with [`docs/architecture-review-2026-07-15.md`](./docs/architecture-review-2026-07-15.md)**
 — the full-project audit (what actually worked in production vs. not, root cause = runner
-IP reputation, decision log) and the sequenced next steps, each tracked as an issue:
-**#43** (Gemini short-clip calibration eval, CI-dispatchable), **#44** (implement the
-length-capped Gemini YouTube path, blocked by #43), **#45** (weekly scheduled-Claude
-discovery session), **#46** (Johnson incumbency backfill, Claude-session driven).
+IP reputation, decision log). Note it predates the 2026-08-19 cleanup, so its "next steps"
+are partly superseded. Still-open issues: **#43** (Gemini short-clip calibration eval,
+CI-dispatchable) and **#44** (length-capped Gemini YouTube path, blocked by #43) — both
+untouched for a month, park or schedule them deliberately; **#45** (weekly scheduled-Claude
+discovery session) — never built, and its absence is exactly why a month of silent failure
+went unnoticed; **#41** (Block Club / Reader article-page 429s, degraded not blocking);
+**#30** (live headless fetcher); **#61** (discovery re-triages the same ~200 items daily
+while a PR sits unreviewed — the ledger on `main` only advances on merge). #46 (Johnson
+incumbency backfill) folded into #51. #47 closed: RSS validated.
 
-- **Backfill** — [`docs/backfill-plan.md`](./docs/backfill-plan.md). One-time
+- **Backfill** — [`docs/archive/backfill-plan.md`](./docs/archive/backfill-plan.md). One-time
   historical seed (candidate platform pages + prior press). The `backfill` CLI mode
   (`pipeline/backfill.py`, **one PR per candidate**) is **built + merged
   — 8/11 candidates seeded** (incl. george-cardenas from his platform housing pillar).
   danielle-carter-walters is dropped (`tracked: false`); lisa-nee and maria-pappas have no
   position yet (a property-tax-only quote does NOT count as housing). The `backfill.yml`
-  workflow was **removed** (2026-07-15; its only 2 recorded runs failed) — future
-  backfills (e.g. #46) are Claude-session-driven via the kept CLI (`ingest-url` per
-  source, or `backfill` mode with a phase file).
-- **Discovery expansion** — [`docs/discovery-expansion-plan.md`](./docs/discovery-expansion-plan.md).
+  workflow was **removed** (2026-07-15; its only 2 recorded runs failed) — backfills are
+  Claude-session-driven via the kept CLI (`ingest-url` per source, or `backfill` mode with a
+  phase file). Superseded 2026-08-19 by the per-candidate backfill track described above,
+  which uses the same CLI but covers officeholder records too.
+- **Discovery expansion** — [`docs/archive/discovery-expansion-plan.md`](./docs/archive/discovery-expansion-plan.md).
   **Done (2026-07-09).** The daily cron now discovers **articles, YouTube** (per-candidate
   campaign channels + standing WTTW/WGN/City Club), **podcasts** (Ben Joravsky / Fran Spielman /
   City Cast via RSS enclosures), and **Bluesky** (per-candidate text posts). Feed→media-type
@@ -215,7 +245,7 @@ discovery session), **#46** (Johnson incumbency backfill, Claude-session driven)
   check (see "verify on demand" below). Candidate `youtube_channel`/`bluesky` are populated for
   those with confirmed accounts; X/IG/TikTok stay manual-intake only.
 
-Two follow-ups remain (tracked, not blocking — see `docs/discovery-expansion-plan.md` status):
+Two follow-ups remain (tracked, not blocking — see `docs/archive/discovery-expansion-plan.md` status):
 - **Live headless fetcher.** The injected `headless_fetcher` seam exists and is offline-tested
   (`ingest` retries via it when a plain fetch yields `< MIN_ARTICLE_CHARS` of text — a JS shell).
   The *real* Playwright fetcher + browser install in `cron`/`review`/`intake` CI isn't wired yet.
@@ -239,12 +269,45 @@ Two follow-ups remain (tracked, not blocking — see `docs/discovery-expansion-p
 and stitches the parts (`_stitch_transcripts`). The split/upload steps are injected seams
 (`splitter=`/`poster=`) so the chunking decision stays offline-testable (`tests/test_transcribe.py`).
 
-`discover.website_changed()` and the `website` source type still exist but aren't polled
-(website-diff was descoped). Audio transcripts are noisier than articles (no speaker labels, ASR errors) — expect
+`discover.website_changed()` was removed (2026-08-19) — website-diff was descoped and it had
+no caller. The `website` **feed** type remains valid in `sources.schema.json` and mapped by
+`media_type_for_feed`, but is not polled (`_POLLED_FEED_TYPES` excludes it); the `website`
+**media** type is separate and very much live (it's `backfill.py`'s default for a platform page). Audio transcripts are noisier than articles (no speaker labels, ASR errors) — expect
 more reviewer flags; enable each podcast/YouTube feed deliberately (every candidate episode is a
 full Groq transcription).
 
 ## Non-obvious lessons (paid for in real runs)
+
+- **A green-looking pipeline published nothing for a month — two bugs, both silent
+  (found + fixed 2026-08-19).** Between 2026-07-16 and 2026-08-19 the cron ran daily, a
+  PR updated daily, and the reviewer commented daily. Nothing reached the site and every
+  day's extraction was thrown away. Two independent causes, and the *combination* is what
+  made it invisible:
+  (1) **Every LLM call in the discovery loop needs a per-item guard.** `run_discovery`
+  wrapped `item_fetcher` and `process_fn` but called `triage_fn` bare. Triage is an LLM
+  call and fails the same transient ways — the model intermittently answers with a
+  non-JSON refusal (seen live: `'作为一个人工智能语言模型，我还没学习如何回答这个问题…'`), which
+  `complete_json` raises as `LLMError`. Unguarded it propagated out of the loop, aborted
+  the run *after* a completed 27-minute podcast transcription, and skipped the
+  `ledger.save()` that sits after the loop — so the run's marks were lost too. **12 of 30
+  scheduled runs died this way.** Guard it like `process_fn`: count it skipped, leave the
+  URL un-marked, let it retry.
+  (2) **A rolling PR on a fixed branch destroys unreviewed work.**
+  `peter-evans/create-pull-request` force-rebuilds its branch as one commit on base. With
+  `branch: discovery/auto` and a PR that never merged, each run **replaced** the previous
+  run's evidence and stance files. The reviewer verdicts on the PR are the fossil record:
+  26/35 statements confirmed, then 22/35, then 10/11 — three different bodies of work,
+  each overwriting the last. Use one branch per run (`discovery/<date>-<run_number>` —
+  include the run number, or a manual dispatch collides with the schedule that day).
+  **The lesson that generalises: "the workflow is green" and "the PR updated" are not
+  evidence that work was kept.** The only real check is whether `main` moved. It hadn't
+  since 2026-07-15. A zero-merge streak is the alarm worth wiring (#45).
+- **`write_stance` rewrites a cell wholesale — anything it doesn't know about gets erased.**
+  The `record` array (an officeholder's actions, written only by the backfill) would have
+  been wiped the first time daily discovery proposed a position for that candidate+topic.
+  It now preserves an existing `record`, and there's a test pinning that. Any *future*
+  field on a stance needs the same treatment — this is the same failure shape as the PR
+  clobber above, just one layer down.
 
 - Only live runs catch: wrong model slugs, Pages base-path link breakage, `add-paths`
   glob-miss, ugly URL-slug IDs. After nontrivial changes, do a real run, not just tests.

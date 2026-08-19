@@ -1,6 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { loadTrackedCandidates, buildCandidateProfile, STANCE_META } from "../../lib/data.js";
+import { loadTrackedCandidates, buildCandidateProfile, STANCE_META, OUTCOME_META } from "../../lib/data.js";
 
 export function getStaticPaths() {
   return loadTrackedCandidates().map((c) => ({ params: { slug: c.slug } }));
@@ -20,6 +20,7 @@ const { candidate, positions, timeline } = profile;
       {candidate.website && <> · <a href={candidate.website}>Campaign / office</a></>}
     </p>
     {candidate.bio && <p>{candidate.bio}</p>}
+    {candidate.status_note && <p class="status-note">{candidate.status_note}</p>}
   </section>
 
   <h2 style="font-family:var(--serif)">Positions</h2>
@@ -35,6 +36,23 @@ const { candidate, positions, timeline } = profile;
           <span class="lbl">{meta.label}</span>
         </span>
         <p>{p.stance.summary}</p>
+        {p.stance.record && p.stance.record.length > 0 && (
+          <div class="record">
+            <h4>In office</h4>
+            <ul>
+              {p.stance.record.map((r) => {
+                const om = OUTCOME_META[r.outcome] || { label: r.outcome, tone: "none" };
+                return (
+                  <li>
+                    <span class={"pill tone-" + om.tone}><span class="lbl">{om.label}</span></span>
+                    <span class="action">{r.action}</span>
+                    {r.date && <span class="src"> · {r.date}</span>}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
         {p.sources.map(({ statement, evidence }) => (
           <div>
             <blockquote class="quote">“{statement.quote}”</blockquote>

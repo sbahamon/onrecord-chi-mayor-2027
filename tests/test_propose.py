@@ -93,3 +93,53 @@ def test_write_stance_refuses_path_traversal(tmp_path):
     with pytest.raises(ValueError):
         propose.write_stance(bad, tmp_path)
     assert not (tmp_path / "ledger.json").exists()
+
+
+def test_write_stance_preserves_an_existing_record(tmp_path):
+    # `record` is written by the per-candidate backfill; `write_stance` is called
+    # by daily discovery. Since write_stance rewrites the cell wholesale, an
+    # unguarded write would silently erase the backfilled record the first time
+    # discovery proposed a new position for that candidate+topic — the same class
+    # of quiet data loss as the fixed-branch PR clobber, surfacing weeks later.
+    existing = {
+        "candidate": "example-candidate-a", "topic": "zoning-reform",
+        "stance": "supports", "summary": "old", "citations": ["e#0"],
+        "updated_date": "2026-07-07",
+        "record": [{
+            "action": "Bring Chicago Home transfer-tax referendum",
+            "outcome": "failed", "date": "2024-03-19", "citations": ["e#0"],
+        }],
+    }
+    propose.write_stance(existing, tmp_path)
+
+    # Discovery proposes a fresh position for the same cell; it carries no record.
+    updated = {
+        "candidate": "example-candidate-a", "topic": "zoning-reform",
+        "stance": "mixed", "summary": "new", "citations": ["e#1"],
+        "updated_date": "2026-08-19",
+    }
+    path = propose.write_stance(updated, tmp_path)
+
+    written = json.loads(path.read_text())
+    assert written["summary"] == "new"          # position updated
+    assert written["stance"] == "mixed"
+    assert written["record"] == existing["record"]  # record survived
+
+
+def test_write_stance_lets_an_explicit_record_win(tmp_path):
+    # Preserving must not make the field un-editable: a caller that deliberately
+    # supplies `record` (the backfill) overwrites what is on disk.
+    first = {
+        "candidate": "example-candidate-a", "topic": "zoning-reform",
+        "stance": "supports", "summary": "x", "citations": ["e#0"],
+        "updated_date": "2026-07-07",
+        "record": [{"action": "old", "outcome": "stalled", "citations": ["e#0"]}],
+    }
+    propose.write_stance(first, tmp_path)
+
+    second = dict(first, record=[
+        {"action": "new", "outcome": "enacted", "citations": ["e#1"]},
+    ])
+    path = propose.write_stance(second, tmp_path)
+
+    assert json.loads(path.read_text())["record"] == second["record"]

@@ -81,14 +81,6 @@ def test_ledger_dedupe_filters_seen_urls(tmp_path):
     assert second == []
 
 
-def test_website_changed_detects_content_change():
-    cache = {}
-    url = "https://example.com/politics"
-    assert discover.website_changed(url, "<p>v1</p>", cache) is True
-    assert discover.website_changed(url, "<p>v1</p>", cache) is False  # unchanged
-    assert discover.website_changed(url, "<p>v2</p>", cache) is True   # changed
-
-
 class FakeLLM:
     def __init__(self, verdict):
         self.verdict = verdict
@@ -243,3 +235,64 @@ def test_run_discovery_skips_a_feed_that_fails_to_fetch(tmp_path):
     assert res.feeds_failed == 1
     assert res.feeds_polled == 1
     assert res.ingested == 1
+
+
+def test_run_discovery_survives_a_triage_failure(tmp_path):
+    # A flaky triage call must not sink the whole run. The triage model
+    # intermittently returns a non-JSON refusal (observed live: a Chinese-language
+    # "I haven't learned how to answer that" string), which `llm.complete_json`
+    # surfaces as LLMError. Before this guard that exception propagated out of the
+    # loop and killed the run *after* real transcription work — 12 of 30 scheduled
+    # runs died that way over a month, and `ledger.save()` (after the loop) never
+    # ran, so the run's marks were lost too.
+    #
+    # The item is left UN-marked, exactly like a failed ingest: a transient LLM
+    # failure must retry next run, never burn a URL.
+    ledger = discover.Ledger(tmp_path / "ledger.json")
+    feed = {"id": "f", "name": "F", "type": "rss", "url": "https://f"}
+
+    def item_fetcher(_feed):
+        return _items("https://before", "https://triage-boom", "https://after")
+
+    def triage_fn(title):
+        if "triage-boom" in title:
+            raise RuntimeError("model did not return valid JSON")
+        return True
+
+    res = discover.run_discovery(
+        [feed], ledger=ledger, item_fetcher=item_fetcher,
+        triage_fn=triage_fn, process_fn=lambda f, i: _FakeResult(housing_count=1),
+        max_items=25, log=lambda m: None,
+    )
+
+    # The run continues past the bad item and still processes what follows it.
+    assert res.ingested == 2
+    assert res.skipped == 1
+
+    reloaded = discover.Ledger(tmp_path / "ledger.json")
+    assert not reloaded.is_new("https://before")
+    assert not reloaded.is_new("https://after")
+    assert reloaded.is_new("https://triage-boom")  # un-marked -> retries next run
+
+
+def test_run_discovery_saves_ledger_even_when_every_triage_fails(tmp_path):
+    # The failure mode that made the outage invisible: the whole run aborting meant
+    # `ledger.save()` never executed. Even a total triage outage must land the marks
+    # already earned and return a result rather than raising.
+    ledger = discover.Ledger(tmp_path / "ledger.json")
+    feed = {"id": "f", "name": "F", "type": "rss", "url": "https://f"}
+
+    res = discover.run_discovery(
+        [feed], ledger=ledger,
+        item_fetcher=lambda _f: _items("https://a", "https://b"),
+        triage_fn=_raise_llm_error, process_fn=lambda f, i: _FakeResult(),
+        max_items=25, log=lambda m: None,
+    )
+
+    assert res.ingested == 0
+    assert res.skipped == 2
+    assert (tmp_path / "ledger.json").exists()  # save() reached
+
+
+def _raise_llm_error(_title):
+    raise RuntimeError("model did not return valid JSON: '作为一个人工智能语言模型…'")

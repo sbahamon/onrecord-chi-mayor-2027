@@ -1,8 +1,17 @@
 name: discover
 
 on:
-  schedule:
-    - cron: "0 12 * * *" # daily ~7am Central
+  # PAUSED 2026-08-19. The daily schedule is intentionally disabled while the
+  # per-candidate backfill track is in flight: each run costs credits to
+  # re-triage the same ~200 items (main's ledger only advances when a discovery
+  # PR merges) and would open PRs against a matrix that is mid-rebuild.
+  #
+  # RE-ENABLE CONDITION: every per-candidate backfill issue is closed and its
+  # PR merged to main. Then uncomment the two `schedule` lines below and run
+  # the Phase 6 verification in the cleanup plan.
+  #
+  # schedule:
+  #   - cron: "0 12 * * *" # daily ~7am Central
   workflow_dispatch:
 
 permissions:
@@ -28,12 +37,22 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python -m pipeline discover --pr-body-out pr_body.md
+      # One branch per run. A FIXED branch name here was a silent data-loss bug:
+      # create-pull-request force-rebuilds its branch as a single commit on base,
+      # so while a discovery PR sat unreviewed every following run REPLACED the
+      # previous run's evidence and stance files. A month of extracted statements
+      # was discovered, transcribed, reviewed and then overwritten. Include the
+      # run number, not just the date — a manual dispatch on the same UTC day as
+      # the schedule would otherwise collide and reintroduce the bug.
+      - name: Branch name
+        id: bn
+        run: echo "name=discovery/$(date -u +%Y-%m-%d)-${{ github.run_number }}" >> "$GITHUB_OUTPUT"
       - name: Open PR with findings
         uses: peter-evans/create-pull-request@v6
         with:
           # PAT (not GITHUB_TOKEN) so the review workflow fires on this PR.
           token: ${{ secrets.PIPELINE_PAT }}
-          branch: discovery/auto
+          branch: ${{ steps.bn.outputs.name }}
           delete-branch: true
           title: "Discovery: new candidate housing statements"
           body-path: pr_body.md

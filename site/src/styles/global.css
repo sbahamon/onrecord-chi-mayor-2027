@@ -127,6 +127,11 @@ table.matrix td { padding: 0; min-width: 160px; }
 .cand-head a:hover { text-decoration: underline; }
 .cand-head .status { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
 .status.example { color: var(--mixed-fg); }
+/* A withdrawn candidate stays on the site (the record they built is still the
+   record) but must never read as an active campaign. */
+.status.withdrawn { color: var(--oppose-fg); font-weight: 700; }
+.cand-head.is-withdrawn a { opacity: 0.65; }
+.status-note { margin: 6px 0 0; font-size: 0.88rem; color: var(--muted); }
 
 /* --- profile & feed --- */
 .position { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin: 14px 0; }
@@ -140,3 +145,10 @@ table.matrix td { padding: 0; min-width: 160px; }
 .tag { font-size: 0.74rem; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; color: var(--muted); }
 .prose { max-width: 68ch; }
 .prose h2 { font-family: var(--serif); }
+
+/* --- officeholder record: what they did, including what they failed to do --- */
+.record { margin: 12px 0 4px; padding-top: 10px; border-top: 1px dashed var(--border); }
+.record h4 { margin: 0 0 8px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.record ul { list-style: none; margin: 0; padding: 0; }
+.record li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin: 0 0 6px; }
+.record .action { flex: 1 1 12rem; }

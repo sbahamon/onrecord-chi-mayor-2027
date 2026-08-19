@@ -48,7 +48,7 @@ const legend = [
           <th>Housing issue</th>
           {candidates.map((c) => (
             <th>
-              <span class="cand-head">
+              <span class={"cand-head" + (c.status === "withdrawn" ? " is-withdrawn" : "")}>
                 <a href={base + "candidates/" + c.slug}>{c.name}</a>
                 <span class={"status " + c.status}>{c.status}</span>
               </span>

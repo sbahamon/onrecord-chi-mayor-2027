@@ -1,6 +1,6 @@
 # Gemini URL-based YouTube transcription — feasibility research (issue #36)
 
-> **⚠️ RESOLVED 2026-07-10 — see [`gemini-transcription-eval-log.md`](./gemini-transcription-eval-log.md).**
+> **⚠️ RESOLVED 2026-07-10 — see [`gemini-transcription-eval-log.md`](../gemini-transcription-eval-log.md).**
 > The conditional GO/NO-GO below was settled by a live eval (Phase 1 OpenRouter + Phase 2 native
 > SDK low-res). **Verdict: NO-GO as a general path** — Gemini's long-form transcription is
 > non-reproducible/runaway (the 88-min forum gave 54k vs 290k chars on identical runs; low-res

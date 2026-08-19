@@ -27,7 +27,8 @@
           "photo": { "type": ["string", "null"] },
           "bio": { "type": ["string", "null"] },
           "tracked": { "type": "boolean" },
-          "drop_reason": { "type": ["string", "null"] }
+          "drop_reason": { "type": ["string", "null"] },
+          "status_note": { "type": ["string", "null"] }
         }
       }
     }

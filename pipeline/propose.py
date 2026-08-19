@@ -112,9 +112,25 @@ def write_evidence(evidence: dict, data_dir) -> Path:
 
 
 def write_stance(stance: dict, data_dir) -> Path:
+    """Write a stance cell, preserving any `record` already on disk.
+
+    A stance is the candidate's *position*; `record` is what they actually did in
+    office, and only the per-candidate backfill produces it. Daily discovery
+    proposes positions and carries no `record`, so a wholesale rewrite would
+    silently erase the backfilled record the first time discovery touched that
+    cell. An explicit `record` in ``stance`` still wins, so the backfill can edit
+    its own work.
+    """
     path = _safe_join(
         Path(data_dir) / "stances", stance["candidate"], f"{stance['topic']}.json"
     )
     path.parent.mkdir(parents=True, exist_ok=True)
+    if "record" not in stance and path.exists():
+        try:
+            existing = json.loads(path.read_text())
+        except (json.JSONDecodeError, OSError):
+            existing = {}
+        if existing.get("record"):
+            stance = {**stance, "record": existing["record"]}
     path.write_text(json.dumps(stance, indent=2) + "\n")
     return path

@@ -7,7 +7,7 @@ kept for reproducibility and in case the short-clip fallback is ever needed.
 **Verdict + full results:** [`../../docs/gemini-transcription-eval-log.md`](../../docs/gemini-transcription-eval-log.md)
 (NO-GO as a general path — long-form transcription is non-reproducible/runaway; Gemini is a viable
 *short-clip* fallback only if #32 fails). Feasibility background:
-[`../../docs/gemini-youtube-transcription-research.md`](../../docs/gemini-youtube-transcription-research.md).
+[`../../docs/archive/gemini-youtube-transcription-research.md`](../../docs/archive/gemini-youtube-transcription-research.md).
 
 ## Run
 ```bash
