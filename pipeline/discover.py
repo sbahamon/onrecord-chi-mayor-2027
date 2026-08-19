@@ -167,8 +167,11 @@ def run_discovery(feeds, *, ledger, item_fetcher, triage_fn, process_fn,
 
     Ledger policy (the key hardening): an item is marked *seen* when it is
     processed successfully **or** definitively triaged out — but **not** when
-    ``process_fn`` raises, so a transient failure (a blocked fetch, the YouTube
-    bot-gate) retries next run instead of being burned forever. A global
+    ``triage_fn`` or ``process_fn`` raises, so a transient failure (a blocked
+    fetch, the YouTube bot-gate, a non-JSON model refusal) retries next run
+    instead of being burned forever. Both calls are LLM/network-bound and must
+    fail per-item: an exception escaping this loop aborts the run *and* skips
+    the ``ledger.save()`` below, losing every mark the run earned. A global
     ``max_items`` bounds cost/PR size; an optional ``max_items_per_feed`` keeps
     one noisy feed from starving later high-signal feeds (podcasts, Bluesky).
     """
@@ -200,7 +203,17 @@ def run_discovery(feeds, *, ledger, item_fetcher, triage_fn, process_fn,
                 log(f"feed {feed_id}: hit per-feed cap {max_items_per_feed}; "
                     f"remaining items deferred to next run")
                 break
-            if not triage_fn(item["title"]):
+            try:
+                relevant = triage_fn(item["title"])
+            except Exception as e:  # noqa: BLE001 — transient; leave un-marked to retry
+                # Triage is an LLM call and fails the same transient ways ingest
+                # does: the model intermittently answers with a non-JSON refusal.
+                # Unguarded, that killed the entire run mid-loop (and `ledger.save()`
+                # below never ran), discarding completed transcription work.
+                res.skipped += 1
+                log(f"skip item {item['url']}: triage failed: {e}")
+                continue
+            if not relevant:
                 ledger.mark(item["url"])  # decided not relevant — don't re-triage daily
                 res.triaged_out += 1
                 continue
