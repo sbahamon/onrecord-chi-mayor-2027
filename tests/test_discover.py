@@ -81,14 +81,6 @@ def test_ledger_dedupe_filters_seen_urls(tmp_path):
     assert second == []
 
 
-def test_website_changed_detects_content_change():
-    cache = {}
-    url = "https://example.com/politics"
-    assert discover.website_changed(url, "<p>v1</p>", cache) is True
-    assert discover.website_changed(url, "<p>v1</p>", cache) is False  # unchanged
-    assert discover.website_changed(url, "<p>v2</p>", cache) is True   # changed
-
-
 class FakeLLM:
     def __init__(self, verdict):
         self.verdict = verdict

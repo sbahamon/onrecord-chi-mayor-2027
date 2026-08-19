@@ -12,7 +12,7 @@ full transcripts (copyright; golden rule #4). The throwaway eval harness is pres
 [`evals/gemini_transcription/`](../evals/gemini_transcription/) so any of this is re-runnable.
 
 Follows the feasibility research in
-[`gemini-youtube-transcription-research.md`](./gemini-youtube-transcription-research.md).
+[`gemini-youtube-transcription-research.md`](./archive/gemini-youtube-transcription-research.md).
 Issues: #36 (this idea), #32 (YouTube bot-gate — the fallback we now recommend).
 
 ---

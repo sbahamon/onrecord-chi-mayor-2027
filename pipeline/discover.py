@@ -2,12 +2,10 @@
 
 * ``parse_feed`` — RSS/Atom -> list of items (feedparser).
 * ``Ledger`` — remembers URLs already processed so each item is handled once.
-* ``website_changed`` — content-hash diff for pages without a feed.
 * ``triage`` — one cheap LLM call: is this item worth ingesting at all?
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import sys
 from dataclasses import dataclass, field
@@ -84,22 +82,6 @@ class Ledger:
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.path.write_text(json.dumps({"seen": sorted(self._seen)}, indent=2))
-
-
-def _hash(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-
-def website_changed(url: str, html: str, cache: dict) -> bool:
-    """True if the page content differs from the last time we saw it.
-
-    ``cache`` maps url -> content hash and is mutated in place. First sighting
-    counts as changed (new content to consider).
-    """
-    digest = _hash(html)
-    changed = cache.get(url) != digest
-    cache[url] = digest
-    return changed
 
 
 def triage(headline_or_summary: str, *, llm, model: str) -> bool:
