@@ -202,11 +202,11 @@ stance) in the proposed PR. This matters more as discovery-expansion widens the 
 > `workflow_dispatch` still works. **Re-enable condition:** every per-candidate backfill
 > issue closed and its PR merged to `main`. Until then each daily run would just re-triage
 > the same ~200 items (main's ledger only advances when a discovery PR merges) and open PRs
-> against a matrix that is mid-rebuild. The #42 direct-RSS fix is **validated** in
-> production (#47 closed) — the freeze that guarded that measurement is over.
+> against a matrix that is mid-rebuild. Tracked in **#50**. The #42 direct-RSS fix is
+> **validated** in production (#47 closed) — the freeze that guarded it is over.
 
-**The active piece of work is the per-candidate backfill track** — one GitHub issue per
-tracked candidate, each rebuilding that candidate's housing positions *and* (for sitting
+**The active piece of work is the per-candidate backfill track (#50)** — one GitHub issue per
+tracked candidate (#51–#60), each rebuilding that candidate's housing positions *and* (for sitting
 officeholders) their `record`: what they did in office, including what they tried and
 failed to do. Each issue drives a workflow — Fable orchestrating, Sonnet agents searching,
 Opus agents verifying quotes and attribution — but all output funnels through the existing
@@ -221,8 +221,9 @@ CI-dispatchable) and **#44** (length-capped Gemini YouTube path, blocked by #43)
 untouched for a month, park or schedule them deliberately; **#45** (weekly scheduled-Claude
 discovery session) — never built, and its absence is exactly why a month of silent failure
 went unnoticed; **#41** (Block Club / Reader article-page 429s, degraded not blocking);
-**#30** (live headless fetcher). #46 (Johnson incumbency backfill) folded into his
-backfill-track issue.
+**#30** (live headless fetcher); **#61** (discovery re-triages the same ~200 items daily
+while a PR sits unreviewed — the ledger on `main` only advances on merge). #46 (Johnson
+incumbency backfill) folded into #51. #47 closed: RSS validated.
 
 - **Backfill** — [`docs/archive/backfill-plan.md`](./docs/archive/backfill-plan.md). One-time
   historical seed (candidate platform pages + prior press). The `backfill` CLI mode
