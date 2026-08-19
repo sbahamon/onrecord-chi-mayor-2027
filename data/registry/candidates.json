@@ -13,16 +13,40 @@
       "bio": "Mayor of Chicago since May 2023; incumbent for the 2027 election."
     },
     {
-      "slug": "alexi-giannoulias",
-      "name": "Alexi Giannoulias",
+      "slug": "matthew-brewer",
+      "name": "Matthew Brewer",
       "status": "declared",
       "party": null,
-      "website": null,
+      "website": "https://mattbrewer.com/",
+      "bluesky": null,
+      "youtube_channel": "UCGPx_hjXUfYs5jtxzTgry2A",
+      "google_news_rss": "https://news.google.com/rss/search?q=%22Matthew%20Brewer%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
+      "photo": null,
+      "bio": "Attorney and Chicago Housing Authority board commissioner. Announced June 2026."
+    },
+    {
+      "slug": "toni-brooks",
+      "name": "Toni Brooks",
+      "status": "declared",
+      "party": null,
+      "website": "https://www.brooksforchicago.com/",
       "bluesky": null,
       "youtube_channel": null,
-      "google_news_rss": "https://news.google.com/rss/search?q=%22Alexi%20Giannoulias%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
+      "google_news_rss": "https://news.google.com/rss/search?q=%22Toni%20Brooks%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
       "photo": null,
-      "bio": "Illinois Secretary of State; former Illinois State Treasurer. Announced his campaign for mayor 2026-08-02."
+      "bio": "LaTonia \"Toni\" Brooks — Rescue 8 board member and Toni Brooks Foundation leader."
+    },
+    {
+      "slug": "george-cardenas",
+      "name": "George Cárdenas",
+      "status": "declared",
+      "party": null,
+      "website": "https://cardenas4chicago.com/",
+      "bluesky": null,
+      "youtube_channel": null,
+      "google_news_rss": "https://news.google.com/rss/search?q=%22George%20Cardenas%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
+      "photo": null,
+      "bio": "Cook County Board of Review commissioner and former 12th Ward alderman. Announced June 2026."
     },
     {
       "slug": "danielle-carter-walters",
@@ -36,19 +60,19 @@
       "photo": null,
       "bio": "Small business owner and cofounder of Chicago Flips Red.",
       "tracked": false,
-      "drop_reason": "Not actively tracked \u2014 a long-shot candidate with no media-sourced housing position on the record. Will revisit if that changes."
+      "drop_reason": "Not actively tracked — a long-shot candidate with no media-sourced housing position on the record. Will revisit if that changes."
     },
     {
-      "slug": "george-cardenas",
-      "name": "George C\u00e1rdenas",
+      "slug": "alexi-giannoulias",
+      "name": "Alexi Giannoulias",
       "status": "declared",
       "party": null,
-      "website": "https://cardenas4chicago.com/",
+      "website": null,
       "bluesky": null,
       "youtube_channel": null,
-      "google_news_rss": "https://news.google.com/rss/search?q=%22George%20Cardenas%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
+      "google_news_rss": "https://news.google.com/rss/search?q=%22Alexi%20Giannoulias%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
       "photo": null,
-      "bio": "Cook County Board of Review commissioner and former 12th Ward alderman. Announced June 2026."
+      "bio": "Illinois Secretary of State; former Illinois State Treasurer. Announced his campaign for mayor 2026-08-02."
     },
     {
       "slug": "joe-holberg",
@@ -63,17 +87,16 @@
       "bio": "Business leader and former Teach for America member. Announced October 2025."
     },
     {
-      "slug": "liam-stanton",
-      "name": "Liam Stanton",
-      "status": "withdrawn",
+      "slug": "susana-mendoza",
+      "name": "Susana Mendoza",
+      "status": "declared",
       "party": null,
-      "website": "https://www.stantonforchicago.com/",
-      "bluesky": null,
-      "youtube_channel": "UCloUhmNmH6qb25npRUJOmLQ",
-      "google_news_rss": "https://news.google.com/rss/search?q=%22Liam%20Stanton%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
+      "website": "https://susanamendoza.com/",
+      "bluesky": "susanamendoza10.bsky.social",
+      "youtube_channel": "UCeDE54QaFheeU4X3-0NXm0g",
+      "google_news_rss": "https://news.google.com/rss/search?q=%22Susana%20Mendoza%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
       "photo": null,
-      "bio": "Serial entrepreneur and founder of the Chicago Style Project.",
-      "status_note": "Withdrew from the race 2026-08-10 and endorsed Alexi Giannoulias. Positions already on the record are kept as history; he is excluded from further discovery."
+      "bio": "Illinois Comptroller; former state representative and Chicago city clerk."
     },
     {
       "slug": "lisa-nee",
@@ -100,18 +123,6 @@
       "bio": "Cook County Treasurer since 1998. Announced intent to run (contingent on election results)."
     },
     {
-      "slug": "matthew-brewer",
-      "name": "Matthew Brewer",
-      "status": "declared",
-      "party": null,
-      "website": "https://mattbrewer.com/",
-      "bluesky": null,
-      "youtube_channel": "UCGPx_hjXUfYs5jtxzTgry2A",
-      "google_news_rss": "https://news.google.com/rss/search?q=%22Matthew%20Brewer%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
-      "photo": null,
-      "bio": "Attorney and Chicago Housing Authority board commissioner. Announced June 2026."
-    },
-    {
       "slug": "mike-quigley",
       "name": "Mike Quigley",
       "status": "declared",
@@ -124,28 +135,17 @@
       "bio": "U.S. Representative; former Cook County commissioner. Announced June 2026."
     },
     {
-      "slug": "susana-mendoza",
-      "name": "Susana Mendoza",
-      "status": "declared",
+      "slug": "liam-stanton",
+      "name": "Liam Stanton",
+      "status": "withdrawn",
       "party": null,
-      "website": "https://susanamendoza.com/",
-      "bluesky": "susanamendoza10.bsky.social",
-      "youtube_channel": "UCeDE54QaFheeU4X3-0NXm0g",
-      "google_news_rss": "https://news.google.com/rss/search?q=%22Susana%20Mendoza%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
-      "photo": null,
-      "bio": "Illinois Comptroller; former state representative and Chicago city clerk."
-    },
-    {
-      "slug": "toni-brooks",
-      "name": "Toni Brooks",
-      "status": "declared",
-      "party": null,
-      "website": "https://www.brooksforchicago.com/",
+      "website": "https://www.stantonforchicago.com/",
       "bluesky": null,
-      "youtube_channel": null,
-      "google_news_rss": "https://news.google.com/rss/search?q=%22Toni%20Brooks%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
+      "youtube_channel": "UCloUhmNmH6qb25npRUJOmLQ",
+      "google_news_rss": "https://news.google.com/rss/search?q=%22Liam%20Stanton%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
       "photo": null,
-      "bio": "LaTonia \"Toni\" Brooks \u2014 Rescue 8 board member and Toni Brooks Foundation leader."
+      "bio": "Serial entrepreneur and founder of the Chicago Style Project.",
+      "status_note": "Withdrew from the race 2026-08-10 and endorsed Alexi Giannoulias. Positions already on the record are kept as history; he is excluded from further discovery."
     }
   ]
 }
