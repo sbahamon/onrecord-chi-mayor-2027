@@ -20,6 +20,7 @@ const { candidate, positions, timeline } = profile;
       {candidate.website && <> · <a href={candidate.website}>Campaign / office</a></>}
     </p>
     {candidate.bio && <p>{candidate.bio}</p>}
+    {candidate.status_note && <p class="status-note">{candidate.status_note}</p>}
   </section>
 
   <h2 style="font-family:var(--serif)">Positions</h2>

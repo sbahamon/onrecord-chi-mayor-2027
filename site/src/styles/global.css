@@ -127,6 +127,11 @@ table.matrix td { padding: 0; min-width: 160px; }
 .cand-head a:hover { text-decoration: underline; }
 .cand-head .status { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
 .status.example { color: var(--mixed-fg); }
+/* A withdrawn candidate stays on the site (the record they built is still the
+   record) but must never read as an active campaign. */
+.status.withdrawn { color: var(--oppose-fg); font-weight: 700; }
+.cand-head.is-withdrawn a { opacity: 0.65; }
+.status-note { margin: 6px 0 0; font-size: 0.88rem; color: var(--muted); }
 
 /* --- profile & feed --- */
 .position { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin: 14px 0; }
