@@ -95,6 +95,57 @@ def test_stance_requires_at_least_one_citation():
         schemas.validate(record, "stance")
 
 
+# --- stance `record`: what an officeholder actually DID ----------------------
+# The stance enum captures position only. "Johnson championed Bring Chicago Home
+# and voters rejected it" is a fact about his record, and his stance on it is
+# still `supports` — both true, and without `record` the model can hold only one.
+
+
+def stance_with_record():
+    stance = valid_stance()
+    stance["record"] = [
+        {
+            "action": "Bring Chicago Home transfer-tax referendum",
+            "outcome": "failed",
+            "date": "2024-03-19",
+            "citations": ["2026-07-06-example-podcast-doe#0"],
+        }
+    ]
+    return stance
+
+
+def test_stance_with_a_record_entry_passes():
+    schemas.validate(stance_with_record(), "stance")
+
+
+def test_stance_record_is_optional():
+    schemas.validate(valid_stance(), "stance")  # absent `record` stays valid
+
+
+def test_stance_record_rejects_an_unknown_outcome():
+    # The vocabulary is closed on purpose: a free-text outcome would let the
+    # backfill workflow report only wins, which is the whole point of the field.
+    bad = stance_with_record()
+    bad["record"][0]["outcome"] = "went-okay"
+    with pytest.raises(ValidationError):
+        schemas.validate(bad, "stance")
+
+
+def test_stance_record_entry_requires_a_citation():
+    # A record entry is held to the same sourcing discipline as a stance.
+    bad = stance_with_record()
+    bad["record"][0]["citations"] = []
+    with pytest.raises(ValidationError):
+        schemas.validate(bad, "stance")
+
+
+def test_stance_record_entry_rejects_unknown_fields():
+    bad = stance_with_record()
+    bad["record"][0]["editorialising"] = "he blew it"
+    with pytest.raises(ValidationError):
+        schemas.validate(bad, "stance")
+
+
 # --- unknown schema name ----------------------------------------------------
 
 def test_unknown_schema_name_raises():

@@ -145,3 +145,10 @@ table.matrix td { padding: 0; min-width: 160px; }
 .tag { font-size: 0.74rem; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; color: var(--muted); }
 .prose { max-width: 68ch; }
 .prose h2 { font-family: var(--serif); }
+
+/* --- officeholder record: what they did, including what they failed to do --- */
+.record { margin: 12px 0 4px; padding-top: 10px; border-top: 1px dashed var(--border); }
+.record h4 { margin: 0 0 8px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.record ul { list-style: none; margin: 0; padding: 0; }
+.record li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin: 0 0 6px; }
+.record .action { flex: 1 1 12rem; }

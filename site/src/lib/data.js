@@ -24,6 +24,16 @@ function walkJson(dir) {
   return out;
 }
 
+// How a record entry's outcome is labelled and coloured. A defeat is as much a
+// part of an officeholder's record as a win, so `failed` is shown, not hidden.
+export const OUTCOME_META = {
+  enacted: { label: "Enacted", tone: "support" },
+  failed: { label: "Failed", tone: "oppose" },
+  stalled: { label: "Stalled", tone: "mixed" },
+  pending: { label: "Pending", tone: "none" },
+  withdrawn: { label: "Withdrawn", tone: "none" },
+};
+
 export function loadCandidates() {
   return readJson(join(DATA_DIR, "registry", "candidates.json")).candidates;
 }

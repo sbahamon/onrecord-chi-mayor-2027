@@ -65,3 +65,8 @@ def test_every_committed_stance_citation_resolves():
         doc = json.loads(path.read_text())
         for citation in doc["citations"]:
             resolve_citation(citation, evidence_index)  # raises if dangling
+        # `record` entries cite evidence the same way and get the same guarantee:
+        # a record item that cites nothing real must fail CI, not reach the site.
+        for entry in doc.get("record", []):
+            for citation in entry["citations"]:
+                resolve_citation(citation, evidence_index)

@@ -3,9 +3,11 @@
 // is caught here too.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 
 import {
   loadCandidates,
+  OUTCOME_META,
   loadTrackedCandidates,
   loadDroppedCandidates,
   loadTopics,
@@ -79,4 +81,23 @@ test("feed is sorted newest first", () => {
 
 test("resolveCitation returns null for a dangling citation", () => {
   assert.equal(resolveCitation("nope#0", evidenceIndex()), null);
+});
+
+test("every record outcome in the schema has a site label", () => {
+  // The stance schema's outcome enum and the site's label map must not drift:
+  // an unmapped outcome would silently render as a bare slug on a public page.
+  const schema = JSON.parse(
+    readFileSync(new URL("../../../schemas/stance.schema.json", import.meta.url)),
+  );
+  const outcomes = schema.properties.record.items.properties.outcome.enum;
+  for (const o of outcomes) {
+    assert.ok(OUTCOME_META[o], `no OUTCOME_META entry for outcome "${o}"`);
+    assert.ok(OUTCOME_META[o].label && OUTCOME_META[o].tone);
+  }
+  assert.deepEqual(Object.keys(OUTCOME_META).sort(), [...outcomes].sort());
+});
+
+test("a defeat is renderable, not hidden", () => {
+  // Guards the point of the field: failures are part of the record.
+  assert.equal(OUTCOME_META.failed.label, "Failed");
 });
