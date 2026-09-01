@@ -142,6 +142,33 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
   the relevant `data/stances/<candidate>/<topic>.json`, with an `outcome` from the enum and a
   citation resolving to a committed media hit. Don't restate it under every related topic —
   file it under the one that matches its purpose.
+- **Start a per-candidate backfill (#51, #53-#60) — do one candidate per session.**
+  Research context for one candidate is useless for the next, and a long session degrades
+  judgement; each issue produces one independently reviewed PR. Read the issue first — it
+  carries the mechanism bar and the record requirement.
+
+  **Step 1 is authoring the row list**, which does not exist yet for eight of the nine:
+  only `data/backfill/alexi-giannoulias.json` is written. Create
+  `data/backfill/<slug>.json` in the same shape (no schema enforces it — it is convention,
+  and `run_backfill` reads `{candidate_slug, url, type?, outlet?, date?, title?}` per row):
+
+  ```json
+  {
+    "phase": "candidate:<slug>",
+    "description": "Why these rows: what was searched, what exists, what does not.",
+    "rows": [
+      {"candidate_slug": "<slug>", "url": "https://…", "type": "article",
+       "outlet": "WTTW News", "date": "2026-08-02", "title": "…"}
+    ]
+  }
+  ```
+
+  `type` is `article` / `website` / `podcast` / `youtube`; `website` is right for a campaign
+  platform page. **Source quality decides the outcome** — the migration baseline is the
+  argument: johnson was seeded from a platform page and is 9/9 specific, giannoulias from
+  launch-day press and is 0/1. Prefer platform pages, policy interviews, forums and
+  questionnaires over announcement coverage. Never a URL you have not fetched and read.
+
 - **Run a backfill locally (required for outlets that block datacenter IPs):**
   ```
   set -a && . ./.env && set +a
