@@ -214,3 +214,72 @@ def test_write_stance_replaces_a_citation_from_the_same_evidence_file(tmp_path):
 
     assert json.loads(path.read_text())["citations"] == ["cbs-hit#0"], \
         "the stale index from the same evidence file must not survive"
+
+
+# --- mechanism-first stance selection ---------------------------------------
+
+def _evidence(statements):
+    return {
+        "id": "hit", "url": "https://example.com/a", "outlet": "O",
+        "media_type": "article", "title": "T", "published_date": "2026-08-02",
+        "discovered_date": "2026-08-02", "transcript_ref": None,
+        "statements": statements,
+    }
+
+
+def _stmt(**over):
+    base = {"candidate": "example-candidate-a", "topic": "zoning-reform",
+            "stance": "supports", "summary": "s", "quote": "q",
+            "confidence": 0.9, "is_housing": True, "attribution_flag": False}
+    return {**base, **over}
+
+
+def test_stance_prefers_a_mechanism_over_higher_confidence():
+    """A confident platitude must not outrank a concrete proposal.
+
+    Without this the matrix stays vague even once the data improves: the
+    extractor is reliably confident about "we need more housing".
+    """
+    stances = propose.propose_stance_updates(_evidence([
+        _stmt(summary="Wants more housing.", quote="We need more housing.",
+              confidence=0.95, mechanism=None),
+        _stmt(summary="Would end apartment bans.", quote="I will end apartment bans.",
+              confidence=0.70, mechanism="End apartment bans"),
+    ]), today="2026-09-01")
+
+    assert len(stances) == 1
+    assert stances[0]["mechanism"] == "End apartment bans"
+    assert stances[0]["citations"] == ["hit#1"], "cites the specific statement"
+    assert stances[0]["summary"] == "Would end apartment bans."
+
+
+def test_confidence_still_decides_between_two_mechanisms():
+    stances = propose.propose_stance_updates(_evidence([
+        _stmt(summary="A.", quote="qa", confidence=0.60,
+              mechanism="Upzone transit corridors"),
+        _stmt(summary="B.", quote="qb", confidence=0.90,
+              mechanism="End apartment bans"),
+    ]), today="2026-09-01")
+
+    assert stances[0]["mechanism"] == "End apartment bans"
+
+
+def test_a_null_mechanism_still_produces_a_cell_carrying_null():
+    """Record and mark, never drop — the vague marker has to reach the site."""
+    stances = propose.propose_stance_updates(_evidence([
+        _stmt(mechanism=None),
+    ]), today="2026-09-01")
+
+    assert len(stances) == 1
+    assert stances[0]["mechanism"] is None
+
+
+def test_a_statement_with_no_mechanism_key_produces_a_cell_without_one():
+    """Pre-migration data must not gain a spurious null.
+
+    Absent means "not assessed"; null means "assessed, none offered". Copying a
+    key that isn't there would mark every un-migrated cell as vague.
+    """
+    stances = propose.propose_stance_updates(_evidence([_stmt()]), today="2026-09-01")
+
+    assert "mechanism" not in stances[0]
