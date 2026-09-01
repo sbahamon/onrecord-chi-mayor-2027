@@ -11,8 +11,14 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+import shutil
 import tempfile
 from pathlib import Path
+
+# Prefix for the scratch dir holding a download, its downsample and any chunks.
+# `ingest` deletes dirs with this prefix after transcribing and refuses to touch
+# anything else, so the marker is the safety guard as well as the label.
+MEDIA_TMP_PREFIX = "onrecord-media-"
 
 GROQ_ENDPOINT = "https://api.groq.com/openai/v1/audio/transcriptions"
 
@@ -37,7 +43,7 @@ def download_media(url: str, *, dest_dir: str | None = None) -> str:
     """
     import yt_dlp
 
-    dest_dir = dest_dir or tempfile.mkdtemp(prefix="httrack-")
+    dest_dir = dest_dir or tempfile.mkdtemp(prefix=MEDIA_TMP_PREFIX)
     outtmpl = str(Path(dest_dir) / "%(id)s.%(ext)s")
     opts = {
         "format": "bestaudio/best",
@@ -53,6 +59,26 @@ def download_media(url: str, *, dest_dir: str | None = None) -> str:
     return _downsample_for_whisper(raw_path)
 
 
+def _quiet_unlink(path) -> None:
+    """Delete a scratch file, never failing the run over cleanup."""
+    try:
+        os.unlink(path)
+    except OSError:
+        pass
+
+
+def remove_media_tmp_dir(path) -> None:
+    """Remove the scratch dir containing ``path`` — only if we created it.
+
+    Downloads are transient, but the path can come from an injected downloader
+    or a caller-supplied ``dest_dir``, so deleting a parent unconditionally could
+    destroy a directory the pipeline does not own. The prefix is the guard.
+    """
+    parent = Path(path).parent
+    if parent.name.startswith(MEDIA_TMP_PREFIX):
+        shutil.rmtree(parent, ignore_errors=True)
+
+
 def _downsample_for_whisper(raw_path: str) -> str:
     """Re-encode audio to 16 kHz mono ~32 kbps MP3 (Whisper-friendly, compact)."""
     compact_path = str(Path(raw_path).with_suffix(".16k.mp3"))
@@ -66,6 +92,10 @@ def _downsample_for_whisper(raw_path: str) -> str:
             f"ffmpeg downsample failed (exit {result.returncode}): "
             f"{result.stderr[-500:]}"
         )
+    # The yt-dlp original is the largest artifact and is dead once re-encoded.
+    # Dropping it here keeps peak disk at the downsample's size rather than the
+    # sum of both — the difference is ~100 MB on a long podcast.
+    _quiet_unlink(raw_path)
     return compact_path
 
 
@@ -101,7 +131,12 @@ def transcribe_audio(path: str, *, model: str = "whisper-large-v3-turbo",
         f"split into {len(chunks)} chunk(s)",
         file=sys.stderr,
     )
-    parts = [poster(chunk, model=model, api_key=api_key) for chunk in chunks]
+    try:
+        parts = [poster(chunk, model=model, api_key=api_key) for chunk in chunks]
+    finally:
+        # Segments are scratch either way: a failed row must not also leak them.
+        for chunk in chunks:
+            _quiet_unlink(chunk)
     return _stitch_transcripts(parts)
 
 

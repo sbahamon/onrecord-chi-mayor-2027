@@ -5,6 +5,9 @@ Groq's transcription endpoint caps upload size (~25 MB), so audio longer than th
 rather than 413ing. These tests exercise the chunking *decision* offline by
 injecting fake split/upload seams; the real ffmpeg and Groq calls stay behind them.
 """
+import os
+import subprocess
+
 import pytest
 
 from pipeline import transcribe
@@ -80,3 +83,56 @@ def test_stitch_transcripts_joins_parts_with_single_space():
 def test_chunk_target_stays_under_the_hard_cap():
     # Segments must land comfortably below the upload limit, not right at it.
     assert transcribe.CHUNK_TARGET_BYTES < transcribe.GROQ_MAX_UPLOAD_BYTES
+
+
+def test_chunks_are_deleted_after_stitching(tmp_path, monkeypatch):
+    """Segments are scratch. Left behind they accumulate per long-audio row.
+
+    On an ephemeral CI runner that is invisible; run locally — which is now the
+    path for outlets that block datacenter IPs — it fills the maintainer's disk.
+    """
+    monkeypatch.setattr(transcribe, "GROQ_MAX_UPLOAD_BYTES", 512)
+    audio = _write_file(tmp_path / "ep.16k.mp3", 4096)
+    chunks = [_write_file(tmp_path / f"ep.part{i:03d}.mp3", 256) for i in range(3)]
+
+    transcribe.transcribe_audio(
+        audio, api_key="k",
+        splitter=lambda p: chunks,
+        poster=lambda p, *, model, api_key: "part",
+    )
+
+    for c in chunks:
+        assert not os.path.exists(c), f"chunk left on disk: {c}"
+
+
+def test_chunks_are_deleted_even_when_an_upload_fails(tmp_path, monkeypatch):
+    """A failed row must not be a row that also leaks its scratch files."""
+    monkeypatch.setattr(transcribe, "GROQ_MAX_UPLOAD_BYTES", 512)
+    audio = _write_file(tmp_path / "ep.16k.mp3", 4096)
+    chunks = [_write_file(tmp_path / f"ep.part{i:03d}.mp3", 256) for i in range(2)]
+
+    def boom(path, *, model, api_key):
+        raise RuntimeError("groq 500")
+
+    with pytest.raises(RuntimeError):
+        transcribe.transcribe_audio(audio, api_key="k",
+                                    splitter=lambda p: chunks, poster=boom)
+
+    for c in chunks:
+        assert not os.path.exists(c), f"chunk left on disk after failure: {c}"
+
+
+def test_downsample_removes_the_original_download(tmp_path, monkeypatch):
+    """The yt-dlp original is the biggest artifact and is dead once re-encoded."""
+    raw = _write_file(tmp_path / "ep.m4a", 2048)
+
+    def fake_run(cmd, **kw):
+        # Stand in for ffmpeg: produce the output file it would have written.
+        _write_file(cmd[-1], 128)
+        return subprocess.CompletedProcess(cmd, 0, "", "")
+
+    monkeypatch.setattr(transcribe.subprocess, "run", fake_run)
+    out = transcribe._downsample_for_whisper(raw)
+
+    assert os.path.exists(out)
+    assert not os.path.exists(raw), "original download left on disk"

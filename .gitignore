@@ -15,7 +15,8 @@ site/dist/
 site/.astro/
 
 # Media files must NEVER be committed (large; git keeps history forever).
-# The pipeline downloads media to a temp dir, transcribes, then discards it.
+# The pipeline downloads media to a temp dir, transcribes, then deletes it
+# (transcribe.MEDIA_TMP_PREFIX marks the dir; ingest removes it in a finally).
 *.mp3
 *.mp4
 *.m4a
