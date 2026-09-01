@@ -101,3 +101,48 @@ test("a defeat is renderable, not hidden", () => {
   // Guards the point of the field: failures are part of the record.
   assert.equal(OUTCOME_META.failed.label, "Failed");
 });
+
+// --- mechanism: policy specificity ------------------------------------------
+// "Supports affordable housing" is not a position. A cell whose cited statement
+// named no mechanism must be distinguishable from one that named a real one, and
+// from one not yet assessed — three states, not two.
+
+test("matrix cells carry the mechanism, and it is a string or null when assessed", () => {
+  const cells = buildMatrix()
+    .rows.flatMap((r) => r.cells)
+    .filter((c) => c.stance && "mechanism" in c.stance);
+
+  assert.ok(cells.length > 0, "migration has run, so cells should be assessed");
+  for (const c of cells) {
+    const m = c.stance.mechanism;
+    assert.ok(
+      m === null || (typeof m === "string" && m.length > 0),
+      `mechanism must be a non-empty string or null, got ${JSON.stringify(m)}`
+    );
+  }
+});
+
+test("the matrix distinguishes specific positions from vague ones", () => {
+  const cells = buildMatrix()
+    .rows.flatMap((r) => r.cells)
+    .filter((c) => c.stance && "mechanism" in c.stance);
+  const specific = cells.filter((c) => c.stance.mechanism !== null);
+  const vague = cells.filter((c) => c.stance.mechanism === null);
+
+  // Both groups must be non-empty or the rendering has nothing to distinguish —
+  // and a bug that collapsed every cell into one bucket would pass a weaker test.
+  assert.ok(specific.length > 0, "expected some cells to name a mechanism");
+  assert.ok(vague.length > 0, "expected some cells to name none");
+});
+
+test("candidate profiles expose the mechanism for each position", () => {
+  const profile = buildCandidateProfile("brandon-johnson");
+  const assessed = profile.positions.filter((p) => "mechanism" in p.stance);
+
+  assert.ok(assessed.length > 0);
+  // The incumbent has a published platform: every one of his cells is specific.
+  // If this ever goes null the migration prompt has regressed, not the data.
+  for (const p of assessed) {
+    assert.equal(typeof p.stance.mechanism, "string", `${p.topic.slug} lost its mechanism`);
+  }
+});

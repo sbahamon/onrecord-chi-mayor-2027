@@ -36,6 +36,16 @@ const { candidate, positions, timeline } = profile;
           <span class="lbl">{meta.label}</span>
         </span>
         <p>{p.stance.summary}</p>
+        {/* Only the ABSENCE is shown. When a mechanism exists the summary is
+            drawn from the same quote and restates it almost verbatim ("Will
+            waive fees for new affordable housing buildings..." vs "waive fees
+            for new affordable housing buildings..."), with the quote itself
+            directly below — three copies of one sentence. The field still earns
+            its place: it marks the matrix, and it decides which statement a cell
+            cites. */}
+        {"mechanism" in p.stance && p.stance.mechanism === null && (
+          <p class="mechanism none">No specific mechanism stated.</p>
+        )}
         {p.stance.record && p.stance.record.length > 0 && (
           <div class="record">
             <h4>In office</h4>
