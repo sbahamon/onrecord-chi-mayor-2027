@@ -1,0 +1,22 @@
+{
+  "phase": "candidate:alexi-giannoulias",
+  "description": "Per-candidate backfill rows for #52 (track #50). Giannoulias announced 2026-08-02 and his campaign site (alexiforchi.com) has NO issues/platform page — only About / News / Contact / Volunteer — so unlike the phase-1 candidates there is no first-person platform page to seed from. Rows are launch-day press instead, both inside the 2016-01-01 recency cutoff. Two rows on purpose: WTTW is a known-good direct-RSS outlet, CBS is the one confirmed to carry first-person housing quotes, and a two-row file exercises the partial-failure path (a dead row must not discard the other row's extraction).",
+  "rows": [
+    {
+      "candidate_slug": "alexi-giannoulias",
+      "url": "https://news.wttw.com/2026/08/02/backed-trade-unions-alexi-giannoulias-launches-campaign-chicago-mayor",
+      "type": "article",
+      "outlet": "WTTW News",
+      "date": "2026-08-02",
+      "title": "Backed by Trade Unions, Alexi Giannoulias Launches Campaign for Chicago Mayor"
+    },
+    {
+      "candidate_slug": "alexi-giannoulias",
+      "url": "https://www.cbsnews.com/chicago/news/illinois-secretary-of-state-alexi-giannoulias-campaign-chicago-mayor/",
+      "type": "article",
+      "outlet": "CBS News Chicago",
+      "date": "2026-08-02",
+      "title": "Illinois Secretary of State Alexi Giannoulias announces campaign for Chicago mayor"
+    }
+  ]
+}
