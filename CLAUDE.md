@@ -398,14 +398,22 @@ full Groq transcription).
   nothing here because `main` has **no branch protection**. The chosen answer was to run the
   fetch as a **local CLI with no runner attached to the repo at all** — the residential IP
   without the attack surface. Registration and `~/actions-runner` were removed the same day.
-- **Datacenter vs residential IP is the whole story for blocked outlets — and it's cheap to
-  prove.** CBS News returns **406** to a GitHub runner carrying a full browser User-Agent, and
+- **Datacenter vs residential IP is the whole story for blocked outlets — but the block is
+  INTERMITTENT, not universal.** CBS News returned **406** to a GitHub runner carrying a full
+  browser User-Agent (backfill run 33531560146, which lost the row), and
   **200** to a residential IP carrying *no* User-Agent at all. That asymmetry is the tell: when
   a plain `curl` with no UA succeeds from your machine but a well-formed request fails from CI,
   it's IP reputation, not request shape, and **no amount of header or headless-browser work
   will fix it** (a headless Chrome from the same runner has the same IP — see #30, which
   unblocks JS-rendered pages and nothing else). Proven end-to-end 2026-09-01: the CBS row that
-  406'd in run 33531560146 ingested locally and yielded 2 housing statements. Extraction costs
+  406'd in run 33531560146 ingested locally and yielded 2 housing statements. **But a later
+  hosted `review.yml` run (33556390371) re-fetched that same CBS URL without trouble and
+  verified all three statements.** So GitHub's IP pool is not uniformly blocked — some runners
+  get through, some don't, and which one you land on is luck. Do not write CI off for an outlet
+  after one 406, and do not trust it either: the argument for the local path is
+  **determinism**, not that CI can never fetch. It also means a hosted run can lose a row on
+  Monday and succeed on Tuesday, which is a nastier failure mode than a consistent block.
+  Extraction costs
   ~**$0.0006/row** (deepseek-v3.2 on a news article), so re-running a row to be sure is
   cheaper than the thinking required to avoid it. Note OpenRouter's `/api/v1/key` reports that
   *key's* spend cap while `/api/v1/credits` reports the account balance — the key cap binds
