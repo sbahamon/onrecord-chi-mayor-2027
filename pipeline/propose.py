@@ -133,7 +133,7 @@ def write_evidence(evidence: dict, data_dir) -> Path:
 def write_stance(stance: dict, data_dir) -> Path:
     """Write a stance cell, merging with what is already on disk.
 
-    Two fields survive a rewrite; everything else comes from the new proposal.
+    Some fields survive a rewrite; everything else comes from the new proposal.
 
     ``record`` — what the officeholder actually did, written only by the
     per-candidate backfill. A stance is their *position*; daily discovery
@@ -159,6 +159,12 @@ def write_stance(stance: dict, data_dir) -> Path:
     Consequence worth knowing: citations from *different* sources only accumulate.
     A cell whose position genuinely changed keeps citing the sources for the old
     one, and correcting that is a manual edit.
+
+    ``stance`` + ``summary`` + ``mechanism`` — normally the newest proposal owns
+    the position, but a proposal naming **no** mechanism cannot overwrite a cell
+    that names one (#90). The three move as a unit because they describe a single
+    statement. See the comment on the guard below for why order alone made this
+    unsafe.
     """
     path = _safe_join(
         Path(data_dir) / "stances", stance["candidate"], f"{stance['topic']}.json"
@@ -173,6 +179,27 @@ def write_stance(stance: dict, data_dir) -> Path:
 
     if "record" not in stance and existing.get("record"):
         stance = {**stance, "record": existing["record"]}
+
+    # A proposal that names no mechanism must not overwrite one that does (#90).
+    # `stance`/`summary`/`mechanism` used to come from whichever evidence file was
+    # written last, and processing order is arbitrary — alphabetical inside a
+    # backfill, discovery order in the cron. So a weak source silently replaced a
+    # strong one: seen live, a launch-day article replaced "supports a millionaire's
+    # tax" + a named 3% rate with an off-topic school-funding line and no mechanism,
+    # while still citing the statement that named the rate. Nothing failed — schemas
+    # passed and the citation resolved — the cell just stopped matching its evidence.
+    #
+    # The three fields move together because they describe one statement: keeping a
+    # summary while taking a new stance would caption support with "opposes". The
+    # guard is deliberately one-way — an incoming mechanism still wins, so better
+    # sourcing can always improve a cell — and it does not rank two named mechanisms
+    # against each other, which is a judgment this code can't make; that case stays
+    # last-write-wins. An absent `mechanism` key counts as no mechanism: it means
+    # "not yet assessed", which is even weaker ground to overwrite from than null.
+    if existing.get("mechanism") and not stance.get("mechanism"):
+        stance = {**stance,
+                  **{k: existing[k] for k in ("stance", "summary", "mechanism")
+                     if k in existing}}
 
     # Union the citations rather than replacing them. `propose_stance_updates`
     # runs per evidence file and cites only that file's best statement, so a cell
