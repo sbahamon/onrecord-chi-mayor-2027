@@ -143,3 +143,48 @@ def test_write_stance_lets_an_explicit_record_win(tmp_path):
     path = propose.write_stance(second, tmp_path)
 
     assert json.loads(path.read_text())["record"] == second["record"]
+
+
+def test_write_stance_unions_citations_with_an_existing_cell(tmp_path):
+    """Two sources supporting one position must both stay cited.
+
+    `propose_stance_updates` runs per evidence file and cites only that file's
+    best statement, so a candidate+topic backed by several media hits is written
+    one file at a time. Replacing `citations` on each write means the cell ends up
+    citing whichever file happened to be processed last — the earlier source is
+    silently dropped even though its evidence record is still committed. Found
+    completing the giannoulias backfill (#70): a WTTW citation already merged to
+    main disappeared the moment the CBS row was processed.
+    """
+    first = {
+        "candidate": "example-candidate-a", "topic": "zoning-reform",
+        "stance": "supports", "summary": "from wttw", "citations": ["wttw-hit#0"],
+        "updated_date": "2026-08-02",
+    }
+    propose.write_stance(first, tmp_path)
+
+    second = {
+        "candidate": "example-candidate-a", "topic": "zoning-reform",
+        "stance": "supports", "summary": "from cbs", "citations": ["cbs-hit#0"],
+        "updated_date": "2026-09-01",
+    }
+    path = propose.write_stance(second, tmp_path)
+
+    written = json.loads(path.read_text())
+    assert written["citations"] == ["wttw-hit#0", "cbs-hit#0"], "both sources cited, oldest first"
+    # The newest proposal still owns the position itself.
+    assert written["summary"] == "from cbs"
+    assert written["updated_date"] == "2026-09-01"
+
+
+def test_write_stance_does_not_duplicate_a_citation_on_re_run(tmp_path):
+    """Re-running a row is routine (~$0.0006); it must be idempotent."""
+    stance = {
+        "candidate": "example-candidate-a", "topic": "zoning-reform",
+        "stance": "supports", "summary": "s", "citations": ["wttw-hit#0"],
+        "updated_date": "2026-08-02",
+    }
+    propose.write_stance(stance, tmp_path)
+    path = propose.write_stance(dict(stance, updated_date="2026-09-01"), tmp_path)
+
+    assert json.loads(path.read_text())["citations"] == ["wttw-hit#0"]
