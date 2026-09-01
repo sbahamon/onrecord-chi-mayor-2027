@@ -1,6 +1,6 @@
 {
   "phase": "candidate:alexi-giannoulias",
-  "description": "Per-candidate backfill rows for #52 (track #50). Giannoulias announced 2026-08-02 and his campaign site (alexiforchi.com) has NO issues/platform page — only About / News / Contact / Volunteer — so unlike the phase-1 candidates there is no first-person platform page to seed from. Rows are launch-day press instead, both inside the 2016-01-01 recency cutoff. Two rows on purpose: WTTW is a known-good direct-RSS outlet, CBS is the one confirmed to carry first-person housing quotes, and a two-row file exercises the partial-failure path (a dead row must not discard the other row's extraction).",
+  "description": "Per-candidate backfill rows for #52 (track #50). Searched 2026-09-01 for material where Giannoulias says HOW, per the mechanism bar. What exists: his campaign site (alexiforchi.com) still has NO issues/platform page (About / News / Contact / Volunteer only) and its News page links only Secretary of State press clips - car insurance, libraries, e-bike safety, license plates - with zero housing content; the three podcast feeds in sources.json were pulled and grepped, as were the City Club / WTTW / WGN YouTube feeds; no candidate forum or housing questionnaire exists yet, a month into the race. The one untapped first-person source is row 3, his full Fran Spielman Show interview (recorded 07-31), and it is the only row here that carries policy mechanisms. What is excluded and why: Crain's and WGN 403 the fetcher; ABC7's 'trade jabs' piece has housing sentences that belong to the reporter and a campaign spokesperson, not to him (the #49 attribution trap); and the Sun-Times writeup of the same Spielman interview was run and then dropped - its extraction produced a fragment of the reporter's own sentence quoted as his ('universal pre-K, property tax reform and raising the minimum wage'), a CPS-funding line mis-flagged as housing, and a remark about CHA going a year without a leader, which is a governance complaint rather than a housing position. Record: one targeted pass found nothing. Secretary of State (2023-) does not intersect housing and the Treasurer years fall outside the 2016-01-01 recency cutoff, so an empty record array is the honest outcome, not a failed backfill. Rows 1-2 are the launch-day press already merged in #66/#73, kept as the row list of record; only row 3 was run for this PR (write_stance unions citations across sources since #72, so re-running 1-2 was unnecessary and would risk superseding verified statements with a non-deterministic re-extraction).",
   "rows": [
     {
       "candidate_slug": "alexi-giannoulias",
@@ -17,6 +17,14 @@
       "outlet": "CBS News Chicago",
       "date": "2026-08-02",
       "title": "Illinois Secretary of State Alexi Giannoulias announces campaign for Chicago mayor"
+    },
+    {
+      "candidate_slug": "alexi-giannoulias",
+      "url": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/7b722975-4253-4028-bf31-398a6398c69a/0731_Fran_Show_Alexi_Giannoulias_mixdown.mp3",
+      "type": "podcast",
+      "outlet": "The Fran Spielman Show",
+      "date": "2026-08-02",
+      "title": "Alexi Giannoulias"
     }
   ]
 }

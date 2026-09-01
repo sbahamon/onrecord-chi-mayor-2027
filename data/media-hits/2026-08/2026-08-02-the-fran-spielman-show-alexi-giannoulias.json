@@ -1,0 +1,48 @@
+{
+  "id": "2026-08-02-the-fran-spielman-show-alexi-giannoulias",
+  "url": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/7b722975-4253-4028-bf31-398a6398c69a/0731_Fran_Show_Alexi_Giannoulias_mixdown.mp3",
+  "outlet": "The Fran Spielman Show",
+  "media_type": "podcast",
+  "title": "Alexi Giannoulias",
+  "published_date": "2026-08-02",
+  "discovered_date": "2026-09-01",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports a millionaire's tax to generate revenue for pensions and prevent property tax increases.",
+      "quote": "we will partner with Springfield on a millionaire's tax that would ask our wealthiest citizens to pay just a little more. The 3% tax on incomes above a million dollars, for example, to help stabilize our pensions and prevent future across the board property tax increases.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "3% tax on incomes above a million dollars"
+    },
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports taxing high-value second homes to generate revenue.",
+      "quote": "We can also work with Springfield on other solutions like potentially taxing second homes with values above a few million dollars, similar to what was done in New York City, and getting our fair share.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "tax on second homes with values above a few million dollars"
+    },
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "zoning-reform",
+      "stance": "supports",
+      "summary": "Supports reducing building code requirements to lower housing costs.",
+      "quote": "Let's reduce costly building code requirements that drive up the cost of building homes, including requiring buildings with three stories or more to have two separate stairways, establishing a series of, you know, pre-approved architectural plans for apartments and single family homes that developers could choose.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "reduce requirement for two stairways in buildings three stories or more; establish pre-approved architectural plans"
+    }
+  ]
+}
