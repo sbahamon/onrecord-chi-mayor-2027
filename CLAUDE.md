@@ -57,8 +57,8 @@ implementations; tests pass fakes.
 | `bluesky.py` | `fetch_author_feed` — public `getAuthorFeed` (injected HTTP); a candidate's original text posts as items (skips reposts + media-only) |
 | `llm.py` | `OpenRouterLLM.complete_json` — OpenAI-compatible, injectable `post`, retries |
 | `extract.py` | LLM → statements; **quote-in-transcript**, housing/other routing; **drops** individual schema-invalid statements (keeps valid siblings); asks for a **`mechanism`** (the named instrument, or `null` — "supports affordable housing" is not a position) |
-| `propose.py` | Build evidence record + stance cells + PR body; write files. `propose_stance_updates` cites the **most specific** statement (`_rank`: mechanism first, then confidence). `write_stance` **preserves an existing `record`** and **unions citations across sources**, superseding within one (#70/#72) |
-| `review.py` | Deterministic quote check + model judgment on faithfulness, attribution, and whether a **claimed `mechanism` is actually in the transcript**; a source it cannot re-fetch degrades to **`unverifiable`** rather than aborting the run (#69); label + auto-merge gate |
+| `propose.py` | Build evidence record + stance cells + PR body; write files. `propose_stance_updates` cites the **most specific** statement (`_rank`: mechanism first, then confidence). `write_stance` **preserves an existing `record`**, **unions citations across sources** (superseding within one, #70/#72), and **refuses to let a mechanism-less proposal overwrite a cell that names one** (#90) |
+| `review.py` | Deterministic quote check + model judgment on faithfulness, attribution, and whether a **claimed `mechanism` is actually in the transcript**; a source it cannot re-fetch degrades to **`unverifiable`** rather than aborting the run (#69); for **audio only**, a quote that isn't verbatim is **located** (`best_matching_passage`) and handed to the reviewer to judge as the same statement — verdict `quote_match: exact\|reconciled\|none` (#92); label + auto-merge gate |
 | `config.py` | Load registries; `candidate_slugs`, `topic_slugs`, `discovery_feeds` (shared outlet RSS + per-candidate Google News [gated off by default] / YouTube / Bluesky) |
 | `run.py` | `process_source`: ingest→extract→propose; **retries extract** (`extract_attempts`) reusing the transcript; `ProcessResult.transcript_chars` (length only, for discovery logs) |
 | `__main__.py` | CLI: `ingest-url`, `discover` (routes by feed media-type; Bluesky via `bluesky.py`), `review`, `backfill` |
@@ -90,7 +90,10 @@ Stance enum: `supports | supports-with-conditions | opposes | mixed | no-positio
   not. `propose_stance_updates` cites the most *specific* statement, not merely the most
   confident (`_rank`), or the matrix would stay vague even once the data improved. Baseline
   after the 2026-09-01 migration: johnson 9/9 specific, cardenas 2/5, brooks 2/2,
-  mendoza 1/2, and giannoulias, holberg, brewer, quigley all 0.
+  mendoza 1/2, and giannoulias, holberg, brewer, quigley all 0. Giannoulias has since
+  moved to **1** (#52): a policy interview yielded single-stair reform and pre-approved
+  plans where launch-day press had yielded nothing — the clearest evidence that source
+  type, not the candidate, decided that baseline.
 
 - **Record** (optional `record` array on a stance) — what an officeholder actually *did* on
   that topic, wins and losses alike. Separate from `stance`, which is their *position*: a
@@ -166,14 +169,21 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
   `type` is `article` / `website` / `podcast` / `youtube`; `website` is right for a campaign
   platform page. **Source quality decides the outcome** — the migration baseline is the
   argument: johnson was seeded from a platform page and is 9/9 specific, giannoulias from
-  launch-day press and is 0/1. Prefer platform pages, policy interviews, forums and
-  questionnaires over announcement coverage. Never a URL you have not fetched and read.
+  launch-day press and was 0/1 — until one **podcast interview** (Fran Spielman) took him to
+  1/1 on a new row with a real instrument. **Grep the podcast feeds in `sources.json` for the
+  candidate before settling for press**: `curl -sL <feed> | grep -i <name>`. An hour of
+  first-person answers beats any amount of announcement coverage. Prefer platform pages,
+  policy interviews, forums and questionnaires over announcement coverage. Never a URL you
+  have not fetched and read.
 
 - **Run a backfill locally (required for outlets that block datacenter IPs):**
   ```
   set -a && . ./.env && set +a
   .venv/bin/python -m pipeline backfill --input data/backfill/<slug>.json --only <slug>
   ```
+  **Podcast/YouTube rows need the `live` extra — it is NOT installed by default** and the
+  failure is a bare `ModuleNotFoundError: yt_dlp` partway through a run:
+  `.venv/bin/pip install -e '.[live]'` (plus `brew install ffmpeg`).
   Then branch, commit `data/`, and `gh pr create --label pipeline` — a PR you author yourself
   triggers `review.yml` without `PIPELINE_PAT` (that secret exists because *Actions*-created
   PRs don't fire workflows). To rehearse without touching the repo, copy `data/registry` into
@@ -303,21 +313,39 @@ Opus agents verifying quotes and attribution — but all output funnels through 
 `backfill` CLI, so it's still one PR per candidate with the quote-in-transcript guard and
 `review.yml` intact. The daily cron stays paused until every one of those PRs is merged.
 
+**Progress (2026-09-01): #52 alexi-giannoulias is the first closed** (PR #89). Nine remain:
+#51, #53–#60. Two lessons from running the first one, worth applying to the rest. **One:
+check the podcast feeds before accepting that a candidate has said nothing specific** — his
+matrix went from 0 mechanisms to 1 on a single Fran Spielman episode that press coverage of
+the same week did not contain. **Two: a thin result can be the correct answer and should be
+recorded as such.** Six of his nine topics have no cell and his `record` is empty, because no
+platform page, forum or questionnaire exists and Secretary of State does not intersect
+housing — that is coverage-limited, not un-run, and the issue was closed saying so rather
+than left open implying work remained. Suggested running order for the rest, heaviest records
+first while the process is fresh: **#51 johnson** (incumbent; positions already 9/9, so it is
+almost purely the 2023–2027 record), then #54 quigley, #53 mendoza, #57 brewer, #56 cardenas,
+then the thin ones (#55 pappas, #58 holberg, #59 nee, #60 brooks) last.
+
 **Start with [`docs/architecture-review-2026-07-15.md`](./docs/architecture-review-2026-07-15.md)**
 — the full-project audit (what actually worked in production vs. not, root cause = runner
 IP reputation, decision log). Note it predates the 2026-08-19 cleanup, so its "next steps"
 are partly superseded. Still-open issues: **#43** (Gemini short-clip calibration eval,
 CI-dispatchable) and **#44** (length-capped Gemini YouTube path, blocked by #43) — both
-untouched for a month, park or schedule them deliberately; **#45** (weekly scheduled-Claude
+parked. **Decide these at cron un-pause, not before:** they exist only to route around the
+YouTube bot-gate *in CI* (#32), and backfills now run locally where yt-dlp reaches YouTube
+fine. **If the cron ends up running locally too, close both.** #44's item 4 (the fuzzy quote
+matcher) was split out and shipped as **#92** — it was needed for the Groq path that is live
+today, not for a future Gemini one; **#45** (weekly scheduled-Claude
 discovery session) — never built, and its absence is exactly why a month of silent failure
 went unnoticed; **#41** (Block Club / Reader article-page 429s, degraded not blocking);
 **#30** (live headless fetcher — note it unblocks JS-rendered pages *only*, and cannot help
 with any IP-reputation block); **#61** (discovery re-triages the same ~200 items daily
 while a PR sits unreviewed — the ledger on `main` only advances on merge). #70 closed (stance citations now
 union across sources and supersede within one, #72). #46 (Johnson incumbency backfill) folded into #51. #47 closed:
-RSS validated. **#63 is satisfied** — `backfill.yml` was restored, parameterized, and verified
-live on 2026-09-01 (run 33531560146 opened a reviewed PR and the partial-failure path held);
-close it.
+RSS validated. #63 closed — `backfill.yml` was restored, parameterized, and verified
+live on 2026-09-01 (run 33531560146 opened a reviewed PR and the partial-failure path held).
+#90 closed (a vague proposal can no longer overwrite a specific cell) and #92 closed
+(drifted audio quotes are reconciled rather than failed).
 
 - **Backfill** — [`docs/archive/backfill-plan.md`](./docs/archive/backfill-plan.md). One-time
   historical seed (candidate platform pages + prior press). The `backfill` CLI mode
@@ -426,6 +454,48 @@ full Groq transcription).
   That second half is required, not tidiness: a citation pins a statement *index*, so pure
   accumulation would strand `hit#2` after a re-run that produced two statements, and a dangling
   citation fails the integrity tests.
+  **And `summary`/`stance`/`mechanism` were the third instance of the same bug — fixed the same
+  day (#90).** Fixing citations left those three still taking whichever evidence file was written
+  last, and *"last"* is arbitrary: alphabetical inside a backfill, discovery order in the cron. A
+  launch-day article processed after a policy interview replaced "supports a millionaire's tax" and
+  its named 3% rate with an off-topic school-funding line and `mechanism: null` — **while still
+  citing the statement that named the rate**. Nothing failed. `write_stance` now refuses to let a
+  mechanism-less proposal overwrite a cell that names one; the guard is one-way, so better sourcing
+  can still improve a cell, and two named mechanisms stay last-write-wins because ranking them is a
+  judgment the code can't make. **The generalisable part: this bug has now recurred three times on
+  the same function** (`record`, then `citations`, then the position fields). Any new stance field
+  is guilty until a test proves otherwise, and the failure is always silent — schemas pass,
+  citations resolve, only reading the written file catches it.
+
+- **A verified quote can fail its own verification, and it is the *encoder*, not the model
+  (found + fixed 2026-09-01, #92).** Every podcast row was landing `ai-flagged` with "quote NOT
+  found in transcript", on quotes that were real. Transcripts aren't stored (copyright), so
+  `review.yml` re-transcribes to verify — and does not get identical text back. What was measured,
+  in this order, because the obvious suspects were all wrong: Groq Whisper returned **byte-identical
+  transcripts across three runs on identical input** (so not model nondeterminism; `temperature=0`
+  is accepted and changes nothing), the raw download was **byte-identical across requests** (so not
+  dynamic ad-insertion, a real possibility on a dovetail/PRX enclosure), and local ffmpeg was
+  byte-deterministic — but an **Ubuntu-container encode of the same file with the same flags came
+  out a different size** than the macOS one. Different bytes reach Whisper, so its 30-second
+  windowing shifts and a mid-episode sentence transcribes slightly differently. Pinning ffmpeg is a
+  brittle mitigation; any environment drift breaks quotes again.
+  **The fix is a design lesson, not a threshold.** A similarity cutoff cannot work here, and that
+  is measured, not assumed: against the real quote a **negated** version ("not reduce … could not
+  choose") scores **0.979** while the genuine re-transcription scores **0.969** — inverting a
+  position changes two short words out of forty-five, so the lie is *more* similar than the truth.
+  Adding "numbers and negations must match" rejects that pair but waves through `will`→`could`,
+  `reduce`→`review`, an inserted `some` and `more`→`fewer`, all above 0.94; a blocklist only ever
+  catches the attacks someone thought of. So the string ratio only **locates** the passage and the
+  **reviewer model judges** whether it is the same statement — no semantics in the code, and
+  DeepSeek still extracts while Kimi still judges. Audio only (articles re-fetch deterministically,
+  so a near-miss there is a real problem) and review only (`extract.py` matches against the very
+  transcript the model was handed, where a miss means paraphrase and the statement *should* drop).
+  The verdict says **`reconciled`**, never "verified", and carries the ratio and the passage.
+  **Two lessons that generalise beyond this bug:** a label that is always red is a label nobody
+  reads — the same silent-failure shape as a month of green cron runs that published nothing; and
+  when a string check disagrees with a model that says the text is there, **check the published
+  source** (the Sun-Times posts its own transcript of every episode) before instrumenting anything.
+  That took seconds and settled it.
 
 - **Extraction is NOT reproducible, even at `temperature: 0` — one run is not a measurement.**
   The same CBS article, same prompt, same model, yielded **0, 2 and 3** housing statements
