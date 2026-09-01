@@ -1,0 +1,140 @@
+{
+  "id": "2026-08-02-the-fran-spielman-show-alexi-giannoulias",
+  "url": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/7b722975-4253-4028-bf31-398a6398c69a/0731_Fran_Show_Alexi_Giannoulias_mixdown.mp3",
+  "outlet": "The Fran Spielman Show",
+  "published_date": "2026-08-02",
+  "statements": [
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports a millionaire's tax to generate revenue for pensions and prevent property tax increases.",
+      "quote": "we will partner with Springfield on a millionaire's tax that would ask our wealthiest citizens to pay just a little more. The 3% tax on incomes above a million dollars, for example, to help stabilize our pensions and prevent future across the board property tax increases.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": false,
+      "attribution_flag": false,
+      "mechanism": "3% tax on incomes above a million dollars"
+    },
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports taxing high-value second homes to generate revenue.",
+      "quote": "We can also work with Springfield on other solutions like potentially taxing second homes with values above a few million dollars, similar to what was done in New York City, and getting our fair share.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": false,
+      "attribution_flag": false,
+      "mechanism": "tax on second homes with values above a few million dollars"
+    },
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports increasing the local share of state income tax revenue for the city.",
+      "quote": "And this is important of what the state collects in income tax. In 2011, Illinois cut the share that local governments like Chicago received from 10% to 6%. We need to try to bring it back closer to where it was.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": false,
+      "attribution_flag": false,
+      "mechanism": "increase local government share of state income tax from 6% back towards 10%"
+    },
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "affordable-housing-funding",
+      "stance": "opposes",
+      "summary": "Opposes a corporate head tax.",
+      "quote": "I am against a head tax. I want to be unequivocal about that.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": false,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Supports fully implementing existing city revenue sources like augmented reality advertising.",
+      "quote": "At the city level, we should ensure that the city is fully implementing the revenue sources that the city council has established, that this administration has been slow to implement, like augmented reality advertising or making bad actors pay their debts toward the city.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": false,
+      "attribution_flag": false,
+      "mechanism": "implement augmented reality advertising revenue source"
+    },
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "affordable-housing-funding",
+      "stance": "mixed",
+      "summary": "Open to considering video gaming as a revenue source, but emphasizes need for cuts and efficiency.",
+      "quote": "What about video gaming? They may slow walk that one. And I think everything's on the table. Everything needs to be on the table. But also it has to be a combination of a few things. It can't just be revenue. We can't continue to ask people to pay more without showing that we're finding ways to make cuts to do more with less.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": false,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports centralizing city procurement to achieve savings.",
+      "quote": "As mayor, if I'm fortunate enough to get elected, I want to modernize the city's contracting system, centralize spending to get a better deal, achieving potentially more than $50 million in annual savings once the reforms are implemented by 2031.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": false,
+      "attribution_flag": false,
+      "mechanism": "centralize city procurement spending"
+    },
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports reducing middle management positions to save money.",
+      "quote": "So a few things as laid out in an independent report from Ernst & Young. We can save tens of millions in taxpayer dollars by reducing middle management positions.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": false,
+      "attribution_flag": false,
+      "mechanism": "reduce middle management positions"
+    },
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports reforming management of city buildings and vehicles to save money.",
+      "quote": "We should reform how we manage the city's buildings and its vehicles. For example, we have 33% more office space than employees to fill it across city government's 10 largest buildings. And city vehicles are driven only a third of the miles driven by official vehicles in other cities.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": false,
+      "attribution_flag": false,
+      "mechanism": "reform management of city buildings and vehicles"
+    },
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports consolidating city pension funds and offering voluntary buyouts.",
+      "quote": "So I would look at things like consolidating the city's four pension funds. We would offer voluntary pension buyouts.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": false,
+      "attribution_flag": false,
+      "mechanism": "consolidate city's four pension funds; offer voluntary pension buyouts"
+    },
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports codifying early pension payments and making supplemental payments.",
+      "quote": "We need to codify making pension payments at the beginning of the budget year and even making supplemental payments on top of what is required by law.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": false,
+      "attribution_flag": false,
+      "mechanism": "codify pension payments at start of budget year; make supplemental payments"
+    }
+  ]
+}

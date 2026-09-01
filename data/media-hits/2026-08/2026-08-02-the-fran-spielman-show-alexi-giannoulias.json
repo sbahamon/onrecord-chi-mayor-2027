@@ -1,0 +1,24 @@
+{
+  "id": "2026-08-02-the-fran-spielman-show-alexi-giannoulias",
+  "url": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/7b722975-4253-4028-bf31-398a6398c69a/0731_Fran_Show_Alexi_Giannoulias_mixdown.mp3",
+  "outlet": "The Fran Spielman Show",
+  "media_type": "podcast",
+  "title": "Alexi Giannoulias",
+  "published_date": "2026-08-02",
+  "discovered_date": "2026-09-01",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "zoning-reform",
+      "stance": "supports",
+      "summary": "Supports reducing building code requirements to lower housing costs.",
+      "quote": "Let's reduce costly building code requirements that drive up the cost of building homes, including requiring buildings with three stories or more to have two separate stairways, establishing a series of, you know, pre-approved architectural plans for apartments and single family homes that developers could choose.",
+      "locator": null,
+      "confidence": 1,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "reduce requirement for two stairways in buildings three stories or more; establish pre-approved architectural plans"
+    }
+  ]
+}
