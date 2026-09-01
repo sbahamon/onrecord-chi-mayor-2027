@@ -10,30 +10,6 @@
   "statements": [
     {
       "candidate": "alexi-giannoulias",
-      "topic": "affordable-housing-funding",
-      "stance": "supports",
-      "summary": "Supports a millionaire's tax to generate revenue for pensions and prevent property tax increases.",
-      "quote": "we will partner with Springfield on a millionaire's tax that would ask our wealthiest citizens to pay just a little more. The 3% tax on incomes above a million dollars, for example, to help stabilize our pensions and prevent future across the board property tax increases.",
-      "locator": null,
-      "confidence": 1,
-      "is_housing": true,
-      "attribution_flag": false,
-      "mechanism": "3% tax on incomes above a million dollars"
-    },
-    {
-      "candidate": "alexi-giannoulias",
-      "topic": "affordable-housing-funding",
-      "stance": "supports",
-      "summary": "Supports taxing high-value second homes to generate revenue.",
-      "quote": "We can also work with Springfield on other solutions like potentially taxing second homes with values above a few million dollars, similar to what was done in New York City, and getting our fair share.",
-      "locator": null,
-      "confidence": 1,
-      "is_housing": true,
-      "attribution_flag": false,
-      "mechanism": "tax on second homes with values above a few million dollars"
-    },
-    {
-      "candidate": "alexi-giannoulias",
       "topic": "zoning-reform",
       "stance": "supports",
       "summary": "Supports reducing building code requirements to lower housing costs.",
