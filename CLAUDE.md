@@ -52,13 +52,13 @@ implementations; tests pass fakes.
 | `data_integrity.py` | Walk `data/`, map each file to its schema |
 | `citations.py` | Resolve `"<evidence-id>#<index>"` → statement |
 | `discover.py` | RSS parse (`parse_feed`, `prefer_enclosure` for podcasts), `media_type_for_feed`, `active_media_feeds` (poll-time type filter + `google_news_enabled` gate), `Ledger` dedup, LLM triage, **`run_discovery`** (the whole daily loop: dedup→triage→process, mark-after-success **on both the triage and process calls**, global+per-feed caps, per-item logging — injected seams, offline-testable like `run_backfill`) |
-| `ingest.py` | Article text (trafilatura, browser-UA + injected `headless_fetcher` seam); **`EmptyTranscriptError`** if a fetched article yields `< MIN_ARTICLE_CHARS` (a redirect/JS-shell/blocked page — fail loud, don't return empty); audio→transcript, pre-supplied `text` passthrough (social); `domain_of`, title |
-| `transcribe.py` | yt-dlp download → **ffmpeg 16 kHz-mono downsample** → Groq Whisper (the only heavy external step; downsample keeps long audio under Groq's size cap) |
+| `ingest.py` | Article text (trafilatura, browser-UA + injected `headless_fetcher` seam); **`EmptyTranscriptError`** if a fetched article yields `< MIN_ARTICLE_CHARS` (a redirect/JS-shell/blocked page — fail loud, don't return empty); audio→transcript then **deletes the media scratch dir in a `finally`** (prefix-guarded, never a dir it didn't create); pre-supplied `text` passthrough (social); `domain_of`, title |
+| `transcribe.py` | yt-dlp download → **ffmpeg 16 kHz-mono downsample** → Groq Whisper (the only heavy external step; downsample keeps long audio under Groq's size cap). Cleans up after itself: the original is unlinked once re-encoded, chunks in a `finally`; `MEDIA_TMP_PREFIX` marks the scratch dir for `ingest` to remove |
 | `bluesky.py` | `fetch_author_feed` — public `getAuthorFeed` (injected HTTP); a candidate's original text posts as items (skips reposts + media-only) |
 | `llm.py` | `OpenRouterLLM.complete_json` — OpenAI-compatible, injectable `post`, retries |
-| `extract.py` | LLM → statements; **quote-in-transcript**, housing/other routing; **drops** individual schema-invalid statements (keeps valid siblings) |
-| `propose.py` | Build evidence record + stance cells + PR body; write files; `write_stance` **preserves an existing `record`** so discovery can't erase backfilled history |
-| `review.py` | Deterministic quote check + model judgment; label + auto-merge gate |
+| `extract.py` | LLM → statements; **quote-in-transcript**, housing/other routing; **drops** individual schema-invalid statements (keeps valid siblings); asks for a **`mechanism`** (the named instrument, or `null` — "supports affordable housing" is not a position) |
+| `propose.py` | Build evidence record + stance cells + PR body; write files. `propose_stance_updates` cites the **most specific** statement (`_rank`: mechanism first, then confidence). `write_stance` **preserves an existing `record`** and **unions citations across sources**, superseding within one (#70/#72) |
+| `review.py` | Deterministic quote check + model judgment on faithfulness, attribution, and whether a **claimed `mechanism` is actually in the transcript**; a source it cannot re-fetch degrades to **`unverifiable`** rather than aborting the run (#69); label + auto-merge gate |
 | `config.py` | Load registries; `candidate_slugs`, `topic_slugs`, `discovery_feeds` (shared outlet RSS + per-candidate Google News [gated off by default] / YouTube / Bluesky) |
 | `run.py` | `process_source`: ingest→extract→propose; **retries extract** (`extract_attempts`) reusing the transcript; `ProcessResult.transcript_chars` (length only, for discovery logs) |
 | `__main__.py` | CLI: `ingest-url`, `discover` (routes by feed media-type; Bluesky via `bluesky.py`), `review`, `backfill` |
@@ -197,6 +197,9 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
   one 429'd URL (#41) would bin a whole candidate's paid extraction, and `--skip-ledger`
   means the re-run pays again. Contract pinned offline by `tests/test_workflows.py`.
 - `review.yml` — on pipeline PRs: re-ingest + verify → comment + `ai-verified`/`ai-flagged` label.
+  Updates its own last comment rather than appending, and a `concurrency` group cancels a
+  superseded run — every push is a `synchronize`, and each run re-fetches every source, which
+  aimed repeat traffic at the outlets that rate-limit runner IPs (#41).
 
 Secrets: `OPENROUTER_API_KEY`, `GROQ_API_KEY`, and `PIPELINE_PAT` (a PAT is required so
 pipeline PRs *trigger* the review workflow — `GITHUB_TOKEN`-created PRs don't fire workflows).
@@ -292,9 +295,12 @@ close it.
 - **Backfill** — [`docs/archive/backfill-plan.md`](./docs/archive/backfill-plan.md). One-time
   historical seed (candidate platform pages + prior press). The `backfill` CLI mode
   (`pipeline/backfill.py`, **one PR per candidate**) is **built + merged
-  — 8/11 candidates seeded** (incl. george-cardenas from his platform housing pillar).
-  danielle-carter-walters is dropped (`tracked: false`); lisa-nee and maria-pappas have no
-  position yet (a property-tax-only quote does NOT count as housing). `backfill.yml` was
+  — 8 of the 10 tracked candidates seeded** (incl. george-cardenas from his platform
+  housing pillar). Two candidates are dropped (`tracked: false`): danielle-carter-walters
+  (long-shot, no sourced position) and liam-stanton (withdrew 2026-08-10 — note `status:
+  withdrawn` alone does NOT remove someone from the site; `loadTrackedCandidates()` filters
+  on `tracked`). lisa-nee and maria-pappas have no position yet (a property-tax-only quote
+  does NOT count as housing). `backfill.yml` was
   removed 2026-07-15 (its only 2 recorded runs failed) and **restored + parameterized
   2026-08-24 (#63)**, then **verified live 2026-09-01** (a real dispatch opened a reviewed PR,
   and the partial-failure path held: one row 406'd, the other still shipped). Superseded
