@@ -1,10 +1,12 @@
 """Contract tests for `.github/workflows/backfill.yml` (#63).
 
-The backfill workflow is the *only* way to run a backfill with credentials: the
-CLI needs OPENROUTER_API_KEY (and GROQ_API_KEY for audio rows), a cloud Claude
-session has no secrets store, and this repo is public so keys can never live in
-it. That makes the workflow's CLI invocation and its slug-planning heredoc
-load-bearing — the previous version's only two recorded runs both failed and it
+The backfill workflow is how a backfill runs with credentials in CI: the CLI needs
+OPENROUTER_API_KEY (and GROQ_API_KEY for audio rows), a cloud Claude session has
+no secrets store, and this repo is public so keys can never live in it. (Since
+2026-09-01 it is no longer the only path — the same CLI also runs locally against
+a gitignored .env, which is required for outlets that block datacenter IPs. That
+path bypasses this workflow entirely, so these tests still pin the CI one.) That
+makes the workflow's CLI invocation and its slug-planning heredoc load-bearing — the previous version's only two recorded runs both failed and it
 was deleted, so pin its contract here instead of rediscovering it live.
 
 These are offline checks: YAML shape, flags that must exist in the `backfill`

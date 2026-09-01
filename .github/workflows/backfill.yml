@@ -4,10 +4,15 @@ name: backfill
 # each auto-reviewed by review.yml (it fires on the `pipeline` label, which needs
 # the PR to be created with PIPELINE_PAT — a GITHUB_TOKEN PR triggers nothing).
 #
-# This is the ONLY way to run a backfill with credentials. `python -m pipeline
-# backfill` needs OPENROUTER_API_KEY (and GROQ_API_KEY for any audio row); a cloud
-# Claude session has no secrets store and this repo is public, so the keys live in
-# GitHub Actions secrets and nowhere else. Same posture as cron/intake/review. (#63)
+# One of two ways to run a backfill with credentials. `python -m pipeline backfill`
+# needs OPENROUTER_API_KEY (and GROQ_API_KEY for any audio row); a *cloud* Claude
+# session has no secrets store, so for that context the keys live in Actions secrets
+# and nowhere else. Same posture as cron/intake/review. (#63)
+#
+# The other way, and the right one for outlets that block datacenter IPs (CBS, Block
+# Club, Reader all 406/429 GitHub's ranges): run the same CLI locally against a
+# gitignored .env, from a residential IP. See "Running a backfill locally" in
+# CLAUDE.md. Keys still never live in the repo either way.
 #
 # The row list is in-repo (data/backfill/*.json). The dispatch inputs that select
 # *which* file and *which* slugs are still treated as untrusted: they enter only as

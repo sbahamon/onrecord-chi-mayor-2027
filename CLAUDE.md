@@ -125,6 +125,20 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
   the relevant `data/stances/<candidate>/<topic>.json`, with an `outcome` from the enum and a
   citation resolving to a committed media hit. Don't restate it under every related topic —
   file it under the one that matches its purpose.
+- **Run a backfill locally (required for outlets that block datacenter IPs):**
+  ```
+  set -a && . ./.env && set +a
+  .venv/bin/python -m pipeline backfill --input data/backfill/<slug>.json --only <slug>
+  ```
+  Then branch, commit `data/`, and `gh pr create --label pipeline` — a PR you author yourself
+  triggers `review.yml` without `PIPELINE_PAT` (that secret exists because *Actions*-created
+  PRs don't fire workflows). To rehearse without touching the repo, copy `data/registry` into
+  a scratch dir and pass `--data-dir <scratch>`. Cost is ~$0.0006/row, so re-running a row is
+  cheaper than reasoning about whether you need to.
+  **Verify locally too, before opening the PR:** `python -m pipeline review <evidence.json>`.
+  The hosted reviewer re-fetches from a datacenter IP, so for exactly the sources you went
+  local to get, it returns `unverifiable` and never machine-checks them (see #69). Running the
+  reviewer where the fetch works restores the two-model guarantee for those rows.
 - **Change a model or discovery cap:** `data/registry/config.json`.
 - **Change what the extractor/reviewer looks for:** the prompts are `SYSTEM_PROMPT` in
   `extract.py` and `REVIEW_SYSTEM` in `review.py`. Add a test if behavior changes.
@@ -215,6 +229,18 @@ stance) in the proposed PR. This matters more as discovery-expansion widens the 
 > the same ~200 items (main's ledger only advances when a discovery PR merges) and open PRs
 > against a matrix that is mid-rebuild. Tracked in **#50**. The #42 direct-RSS fix is
 > **validated** in production (#47 closed) — the freeze that guarded it is over.
+>
+> **Update 2026-09-01 — how backfills now run, and an open decision for the cron.** Backfill
+> rows are run **locally** (`.env` + the CLI, see Common changes), not via `backfill.yml`,
+> because several outlets 406/429 GitHub's datacenter IPs and a residential IP fetches them
+> fine. A self-hosted runner was evaluated for this and **rejected on security grounds** — see
+> the lesson below; do not revisit it without reading that first. `review.yml` deliberately
+> stays on GitHub-hosted runners, which is what keeps that decision safe, and all three Actions
+> secrets are still required (`review.yml` needs both API keys; `PIPELINE_PAT` still matters
+> for Actions-authored PRs). **Undecided:** when the cron is un-paused, whether it runs hosted
+> (accepting the ~20-25% article-fetch loss and no YouTube) or as a local scheduled job. Decide
+> that at un-pause time; a local job makes **#45**'s zero-yield alarm materially more important,
+> because a launchd job that stops firing is silent in a way a red CI run is not.
 
 **The active piece of work is the per-candidate backfill track (#50)** — one GitHub issue per
 tracked candidate (#51–#60), each rebuilding that candidate's housing positions *and* (for sitting
@@ -232,9 +258,14 @@ CI-dispatchable) and **#44** (length-capped Gemini YouTube path, blocked by #43)
 untouched for a month, park or schedule them deliberately; **#45** (weekly scheduled-Claude
 discovery session) — never built, and its absence is exactly why a month of silent failure
 went unnoticed; **#41** (Block Club / Reader article-page 429s, degraded not blocking);
-**#30** (live headless fetcher); **#61** (discovery re-triages the same ~200 items daily
-while a PR sits unreviewed — the ledger on `main` only advances on merge). #46 (Johnson
-incumbency backfill) folded into #51. #47 closed: RSS validated.
+**#30** (live headless fetcher — note it unblocks JS-rendered pages *only*, and cannot help
+with any IP-reputation block); **#61** (discovery re-triages the same ~200 items daily
+while a PR sits unreviewed — the ledger on `main` only advances on merge); **#70**
+(`write_stance` overwrites a cell's citations wholesale — run every row for a candidate+topic
+in one pass until it's fixed). #46 (Johnson incumbency backfill) folded into #51. #47 closed:
+RSS validated. **#63 is satisfied** — `backfill.yml` was restored, parameterized, and verified
+live on 2026-09-01 (run 33531560146 opened a reviewed PR and the partial-failure path held);
+close it.
 
 - **Backfill** — [`docs/archive/backfill-plan.md`](./docs/archive/backfill-plan.md). One-time
   historical seed (candidate platform pages + prior press). The `backfill` CLI mode
@@ -243,10 +274,19 @@ incumbency backfill) folded into #51. #47 closed: RSS validated.
   danielle-carter-walters is dropped (`tracked: false`); lisa-nee and maria-pappas have no
   position yet (a property-tax-only quote does NOT count as housing). `backfill.yml` was
   removed 2026-07-15 (its only 2 recorded runs failed) and **restored + parameterized
-  2026-08-24 (#63)** — it is the only way to run a backfill with credentials, since a cloud
-  Claude session has no secrets store and this repo is public, so the keys stay in Actions
-  secrets. Superseded 2026-08-19 by the per-candidate backfill track described above, which
-  uses the same CLI but covers officeholder records too.
+  2026-08-24 (#63)**, then **verified live 2026-09-01** (a real dispatch opened a reviewed PR,
+  and the partial-failure path held: one row 406'd, the other still shipped). Superseded
+  2026-08-19 by the per-candidate backfill track described above, which uses the same CLI but
+  covers officeholder records too.
+
+  **As of 2026-09-01 the workflow is no longer the only way to run a backfill with
+  credentials, and for blocked outlets it is the wrong one.** A gitignored local `.env`
+  (`OPENROUTER_API_KEY`, `GROQ_API_KEY`) plus `set -a && . ./.env && set +a` runs the same CLI
+  from a residential IP — which is the only way to fetch the outlets that 406/429 GitHub's
+  datacenter ranges. See "Running a backfill locally" under Common changes. The old claim was
+  written for a *cloud* Claude session, which genuinely has no secrets store; a local session
+  on the maintainer's machine does. Keys still never live in the repo — `.env` is
+  `.gitignore`d and the Actions secrets remain the source for every hosted workflow.
 - **Discovery expansion** — [`docs/archive/discovery-expansion-plan.md`](./docs/archive/discovery-expansion-plan.md).
   **Done (2026-07-09).** The daily cron now discovers **articles, YouTube** (per-candidate
   campaign channels + standing WTTW/WGN/City Club), **podcasts** (Ben Joravsky / Fran Spielman /
@@ -320,7 +360,39 @@ full Groq transcription).
   It now preserves an existing `record`, and there's a test pinning that. Any *future*
   field on a stance needs the same treatment — this is the same failure shape as the PR
   clobber above, just one layer down.
+  **`citations` is still overwritten wholesale, and that one bites today (#70).** Running a
+  backfill row whose topic already has a cell replaces that cell's citations with only the new
+  run's. Practical consequence: **run every row for a candidate+topic in one pass** rather than
+  one row at a time, or the second run silently drops the first one's citation. Hit while
+  completing giannoulias — the CBS row and the WTTW row both land in
+  `affordable-housing-funding`.
 
+- **Never attach a self-hosted runner to this public repo — the trigger on your workflows is
+  irrelevant.** Considered and rejected 2026-09-01, after getting as far as a registered
+  runner. The reasoning that nearly shipped it was: "`backfill.yml` is `workflow_dispatch`-only,
+  so no untrusted actor can reach it." That is **wrong**. For a `pull_request` event GitHub runs
+  the workflow file *from the PR head*, so a fork authors its own workflow and picks any
+  `runs-on` label it likes. Once a runner is attached to a public repo it is reachable from any
+  fork PR, no matter what the existing workflows are triggered by. The `if: contains(labels,
+  'pipeline')` gate doesn't help either — the attacker's file doesn't have to contain it. Two
+  further traps found while evaluating mitigations: `--ephemeral` doesn't compose with `svc.sh`
+  (an ephemeral runner de-registers after one job and needs a fresh registration token, which
+  suits an autoscaling controller, not a launchd service), and a CODEOWNERS rule enforces
+  nothing here because `main` has **no branch protection**. The chosen answer was to run the
+  fetch as a **local CLI with no runner attached to the repo at all** — the residential IP
+  without the attack surface. Registration and `~/actions-runner` were removed the same day.
+- **Datacenter vs residential IP is the whole story for blocked outlets — and it's cheap to
+  prove.** CBS News returns **406** to a GitHub runner carrying a full browser User-Agent, and
+  **200** to a residential IP carrying *no* User-Agent at all. That asymmetry is the tell: when
+  a plain `curl` with no UA succeeds from your machine but a well-formed request fails from CI,
+  it's IP reputation, not request shape, and **no amount of header or headless-browser work
+  will fix it** (a headless Chrome from the same runner has the same IP — see #30, which
+  unblocks JS-rendered pages and nothing else). Proven end-to-end 2026-09-01: the CBS row that
+  406'd in run 33531560146 ingested locally and yielded 2 housing statements. Extraction costs
+  ~**$0.0006/row** (deepseek-v3.2 on a news article), so re-running a row to be sure is
+  cheaper than the thinking required to avoid it. Note OpenRouter's `/api/v1/key` reports that
+  *key's* spend cap while `/api/v1/credits` reports the account balance — the key cap binds
+  first and they are easy to confuse.
 - **Always send an explicit `max_tokens`; and a bare `raise_for_status()` hides the only
   useful part of an OpenRouter error.** The first live backfill review (#66) died with
   `LLMError: request failed after 3 attempts: 400 Client Error: Bad Request` and nothing
