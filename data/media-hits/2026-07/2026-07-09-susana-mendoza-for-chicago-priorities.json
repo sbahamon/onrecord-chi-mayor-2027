@@ -17,7 +17,8 @@
       "locator": null,
       "confidence": 0.9,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "TIF funds"
     },
     {
       "candidate": "susana-mendoza",
@@ -28,7 +29,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "White Glove Service"
     },
     {
       "candidate": "susana-mendoza",
@@ -39,7 +41,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": null
     }
   ]
 }

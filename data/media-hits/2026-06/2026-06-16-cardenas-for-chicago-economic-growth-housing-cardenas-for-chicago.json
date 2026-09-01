@@ -17,7 +17,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "as-of-right housing near CTA/Metra, bus corridors, and commercial districts"
     },
     {
       "candidate": "george-cardenas",
@@ -28,7 +29,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "neighborhood typologies"
     },
     {
       "candidate": "george-cardenas",
@@ -39,7 +41,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": null
     },
     {
       "candidate": "george-cardenas",
@@ -50,7 +53,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": null
     },
     {
       "candidate": "george-cardenas",
@@ -61,7 +65,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "legal aid, rental help, and preservation funds"
     },
     {
       "candidate": "george-cardenas",
@@ -72,7 +77,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": null
     },
     {
       "candidate": "george-cardenas",
@@ -83,7 +89,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": null
     }
   ]
 }

@@ -17,7 +17,8 @@
       "locator": null,
       "confidence": 0.95,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": null
     },
     {
       "candidate": "matthew-brewer",
@@ -28,7 +29,8 @@
       "locator": null,
       "confidence": 0.9,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": null
     }
   ]
 }
