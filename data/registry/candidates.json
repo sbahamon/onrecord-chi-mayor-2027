@@ -34,11 +34,11 @@
       "youtube_channel": null,
       "google_news_rss": "https://news.google.com/rss/search?q=%22Toni%20Brooks%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
       "photo": null,
-      "bio": "LaTonia \"Toni\" Brooks — Rescue 8 board member and Toni Brooks Foundation leader."
+      "bio": "LaTonia \"Toni\" Brooks \u2014 Rescue 8 board member and Toni Brooks Foundation leader."
     },
     {
       "slug": "george-cardenas",
-      "name": "George Cárdenas",
+      "name": "George C\u00e1rdenas",
       "status": "declared",
       "party": null,
       "website": "https://cardenas4chicago.com/",
@@ -60,7 +60,7 @@
       "photo": null,
       "bio": "Small business owner and cofounder of Chicago Flips Red.",
       "tracked": false,
-      "drop_reason": "Not actively tracked — a long-shot candidate with no media-sourced housing position on the record. Will revisit if that changes."
+      "drop_reason": "Not actively tracked \u2014 a long-shot candidate with no media-sourced housing position on the record. Will revisit if that changes."
     },
     {
       "slug": "alexi-giannoulias",
@@ -145,7 +145,9 @@
       "google_news_rss": "https://news.google.com/rss/search?q=%22Liam%20Stanton%22%20Chicago%20mayor&hl=en-US&gl=US&ceid=US:en",
       "photo": null,
       "bio": "Serial entrepreneur and founder of the Chicago Style Project.",
-      "status_note": "Withdrew from the race 2026-08-10 and endorsed Alexi Giannoulias. Positions already on the record are kept as history; he is excluded from further discovery."
+      "status_note": "Withdrew from the race 2026-08-10 and endorsed Alexi Giannoulias. Excluded from discovery, and from 2026-09-01 also from the site (`tracked: false`) \u2014 he is not a candidate voters are choosing between. His media hits stay committed as sourcing.",
+      "tracked": false,
+      "drop_reason": "Withdrew from the race 2026-08-10 and endorsed Alexi Giannoulias. `status: withdrawn` alone does not remove a candidate from the site \u2014 loadTrackedCandidates() filters on `tracked`, not `status` \u2014 so this flag is what actually takes him off the matrix and profiles. His media hits stay committed as history."
     }
   ]
 }
