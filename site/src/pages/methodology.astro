@@ -117,7 +117,16 @@ const dropped = loadDroppedCandidates();
       <li><strong>Propose</strong> writes the evidence and a draft position and
         opens a pull request.</li>
       <li><strong>Review</strong> — a second, different-family model re-fetches the
-        source, re-verifies every quote, and labels the PR verified or flagged.</li>
+        source, re-verifies every quote, and labels the PR verified or flagged.
+        For audio there is a wrinkle worth stating plainly: we don't store
+        transcripts, so the reviewer re-transcribes the recording, and two
+        transcriptions of the same audio are never quite identical — filler words,
+        hyphens and trailing clauses move. When a quote isn't word-for-word in the
+        new transcription, we show the reviewer the closest passage and ask
+        whether it is the same statement: same numbers, same polarity, same
+        promise-versus-possibility. That verdict is labelled
+        <em>reconciled</em> rather than verified, and the PR shows the passage and
+        a similarity score so the human deciding can see exactly what differed.</li>
       <li><strong>Human approval</strong> — nothing publishes automatically; a
         person merges the PR, which rebuilds and redeploys the site.</li>
     </ol>
@@ -137,7 +146,10 @@ const dropped = loadDroppedCandidates();
       config file and can change. The extractor is trusted only to <em>draft</em>:
       a wrong or fabricated quote has to get past a verbatim-quote check, a
       different-family reviewer, and a human before it can reach this site — and
-      the auto-publish switch ships off.
+      the auto-publish switch ships off. The verbatim check is never relaxed at
+      extraction: a quote that isn't literally in the transcript the model read is
+      dropped, always. The reconciliation described above applies only to the
+      reviewer's second, independent transcription of audio.
     </p>
 
     {dropped.length > 0 && (
