@@ -19,11 +19,32 @@ class LLMError(RuntimeError):
     pass
 
 
+class HTTPStatusError(Exception):
+    """A non-2xx response, carrying the body OpenRouter put the reason in."""
+
+    def __init__(self, status: int, body: str = ""):
+        self.status = status
+        self.body = body
+        super().__init__(f"HTTP {status}: {body[:_BODY_CHARS]}" if body else f"HTTP {status}")
+
+
+# 4xx codes that are worth another attempt; every other 4xx fails identically
+# on retry (bad model slug, unsupported response_format, rejected key).
+_RETRYABLE_STATUSES = {408, 409, 425, 429}
+_BODY_CHARS = 500
+
+
+def _check_status(resp) -> None:
+    """raise_for_status() reports only the status line; the reason is in the body."""
+    if resp.status_code >= 400:
+        raise HTTPStatusError(resp.status_code, (getattr(resp, "text", "") or "").strip())
+
+
 def _real_post(*, url, headers, json_body, timeout):
     import requests
 
     resp = requests.post(url, headers=headers, json=json_body, timeout=timeout)
-    resp.raise_for_status()
+    _check_status(resp)
     return resp.json()
 
 
@@ -76,6 +97,10 @@ class OpenRouterLLM:
                 raise
             except Exception as e:  # network / transient
                 last = e
+                status = getattr(e, "status", None)
+                if status is not None and 400 <= status < 500 and status not in _RETRYABLE_STATUSES:
+                    # Permanent: retrying only hides the reason behind a count.
+                    raise LLMError(f"request rejected: {e}") from e
                 if attempt < self.max_retries - 1 and self.retry_sleep:
                     time.sleep(self.retry_sleep * (attempt + 1))
         raise LLMError(f"request failed after {self.max_retries} attempts: {last}")
