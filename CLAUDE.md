@@ -260,9 +260,8 @@ discovery session) — never built, and its absence is exactly why a month of si
 went unnoticed; **#41** (Block Club / Reader article-page 429s, degraded not blocking);
 **#30** (live headless fetcher — note it unblocks JS-rendered pages *only*, and cannot help
 with any IP-reputation block); **#61** (discovery re-triages the same ~200 items daily
-while a PR sits unreviewed — the ledger on `main` only advances on merge); **#70**
-(`write_stance` overwrites a cell's citations wholesale — run every row for a candidate+topic
-in one pass until it's fixed). #46 (Johnson incumbency backfill) folded into #51. #47 closed:
+while a PR sits unreviewed — the ledger on `main` only advances on merge). #70 closed (stance citations now
+union across sources and supersede within one, #72). #46 (Johnson incumbency backfill) folded into #51. #47 closed:
 RSS validated. **#63 is satisfied** — `backfill.yml` was restored, parameterized, and verified
 live on 2026-09-01 (run 33531560146 opened a reviewed PR and the partial-failure path held);
 close it.
@@ -360,13 +359,31 @@ full Groq transcription).
   It now preserves an existing `record`, and there's a test pinning that. Any *future*
   field on a stance needs the same treatment — this is the same failure shape as the PR
   clobber above, just one layer down.
-  **`citations` is still overwritten wholesale, and that one bites today (#70).** Running a
-  backfill row whose topic already has a cell replaces that cell's citations with only the new
-  run's. Practical consequence: **run every row for a candidate+topic in one pass** rather than
-  one row at a time, or the second run silently drops the first one's citation. Hit while
-  completing giannoulias — the CBS row and the WTTW row both land in
-  `affordable-housing-funding`.
+  **`citations` had the same bug and it was worse — fixed 2026-09-01 (#70/#72).**
+  `propose_stance_updates` runs *per evidence file* and cites only that file's strongest
+  statement, so a position backed by several media hits is written one file at a time. With a
+  wholesale rewrite the cell ended up citing whichever file was processed last. An earlier
+  version of this note claimed the workaround was to "run every row in one pass" — **that was
+  wrong**, and only running it revealed why: the rows are still separate evidence files written
+  in sequence, so the last one still won. `write_stance` now unions citations **across**
+  evidence files while a new citation **supersedes** any existing one with the same evidence id.
+  That second half is required, not tidiness: a citation pins a statement *index*, so pure
+  accumulation would strand `hit#2` after a re-run that produced two statements, and a dangling
+  citation fails the integrity tests.
 
+- **Extraction is NOT reproducible, even at `temperature: 0` — one run is not a measurement.**
+  The same CBS article, same prompt, same model, yielded **0, 2 and 3** housing statements
+  across four consecutive runs (2026-09-01), and the topic assignment moved too (a
+  `property-taxes-tif` statement appeared in some runs and not others). One run returned
+  *zero*, which in isolation reads exactly like "this source has no housing content" — the same
+  false negative that the Google News redirect bug produced for a week. Consequences worth
+  holding onto: (1) **don't conclude a source is empty from a single run**; (2) a citation pins
+  a statement *index*, so re-running a source can invalidate an index cited earlier — which is
+  why `write_stance` supersedes same-source citations rather than accumulating them (#72);
+  (3) seeding a candidate from one run means whatever that run happened to extract is what
+  reaches the site, and re-running does not accumulate coverage (last run wins per source).
+  Not yet addressed: whether backfill should sample a source more than once. Decide it
+  deliberately rather than at candidate seven.
 - **Never attach a self-hosted runner to this public repo — the trigger on your workflows is
   irrelevant.** Considered and rejected 2026-09-01, after getting as far as a registered
   runner. The reasoning that nearly shipped it was: "`backfill.yml` is `workflow_dispatch`-only,
@@ -381,14 +398,22 @@ full Groq transcription).
   nothing here because `main` has **no branch protection**. The chosen answer was to run the
   fetch as a **local CLI with no runner attached to the repo at all** — the residential IP
   without the attack surface. Registration and `~/actions-runner` were removed the same day.
-- **Datacenter vs residential IP is the whole story for blocked outlets — and it's cheap to
-  prove.** CBS News returns **406** to a GitHub runner carrying a full browser User-Agent, and
+- **Datacenter vs residential IP is the whole story for blocked outlets — but the block is
+  INTERMITTENT, not universal.** CBS News returned **406** to a GitHub runner carrying a full
+  browser User-Agent (backfill run 33531560146, which lost the row), and
   **200** to a residential IP carrying *no* User-Agent at all. That asymmetry is the tell: when
   a plain `curl` with no UA succeeds from your machine but a well-formed request fails from CI,
   it's IP reputation, not request shape, and **no amount of header or headless-browser work
   will fix it** (a headless Chrome from the same runner has the same IP — see #30, which
   unblocks JS-rendered pages and nothing else). Proven end-to-end 2026-09-01: the CBS row that
-  406'd in run 33531560146 ingested locally and yielded 2 housing statements. Extraction costs
+  406'd in run 33531560146 ingested locally and yielded 2 housing statements. **But a later
+  hosted `review.yml` run (33556390371) re-fetched that same CBS URL without trouble and
+  verified all three statements.** So GitHub's IP pool is not uniformly blocked — some runners
+  get through, some don't, and which one you land on is luck. Do not write CI off for an outlet
+  after one 406, and do not trust it either: the argument for the local path is
+  **determinism**, not that CI can never fetch. It also means a hosted run can lose a row on
+  Monday and succeed on Tuesday, which is a nastier failure mode than a consistent block.
+  Extraction costs
   ~**$0.0006/row** (deepseek-v3.2 on a news article), so re-running a row to be sure is
   cheaper than the thinking required to avoid it. Note OpenRouter's `/api/v1/key` reports that
   *key's* spend cap while `/api/v1/credits` reports the account balance — the key cap binds
