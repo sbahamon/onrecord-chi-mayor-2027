@@ -34,3 +34,11 @@ site/.astro/
 
 # Transcripts are never committed (copyright); reviewer re-ingests to verify.
 data/transcripts/
+
+# Pipeline run artifacts written to the repo root by the CLI (`--pr-body-out`,
+# `--out-dir`). Committed once by accident in #71; every local backfill or
+# ingest-url run rewrites them, which shows up as a spurious diff.
+pr_body.md
+review_comment.md
+changed_files.txt
+/*.md.tmp
