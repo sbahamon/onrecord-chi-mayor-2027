@@ -321,6 +321,22 @@ full Groq transcription).
   field on a stance needs the same treatment — this is the same failure shape as the PR
   clobber above, just one layer down.
 
+- **Always send an explicit `max_tokens`; and a bare `raise_for_status()` hides the only
+  useful part of an OpenRouter error.** The first live backfill review (#66) died with
+  `LLMError: request failed after 3 attempts: 400 Client Error: Bad Request` and nothing
+  else — undiagnosable, and the obvious suspects were all wrong (the slug
+  `moonshotai/kimi-k2-0905` exists, `response_format` is in its `supported_parameters`, and
+  its 262k context dwarfed a short article). OpenRouter puts the reason **only in the
+  response body**, which `raise_for_status()` discards. Surfacing it named the real cause
+  immediately: `max_tokens: 100352 exceeds maximum 98304 ... provider_name: "Novita"`. We
+  never set `max_tokens` at all — **unset, OpenRouter substitutes its own default, which can
+  exceed the output cap of whichever provider it happens to route to**, so the same model
+  slug works or 400s depending on routing you don't control. Fix is `llm.MAX_TOKENS = 8192`
+  sent on every request (ample for an extraction's statements list, far under any provider's
+  cap). Two lessons: size your own requests rather than inheriting a gateway default, and
+  when an HTTP client wraps an API, **log the body** — a status line alone reproduces exactly
+  the silent-failure shape this pipeline keeps getting burned by. Permanent 4xx now also
+  fails on the first attempt (retrying a malformed request just hides the cause behind a count).
 - Only live runs catch: wrong model slugs, Pages base-path link breakage, `add-paths`
   glob-miss, ugly URL-slug IDs. After nontrivial changes, do a real run, not just tests.
 - **Google News RSS links are unreadable redirects — they silently zeroed discovery for

@@ -33,6 +33,14 @@ class HTTPStatusError(Exception):
 _RETRYABLE_STATUSES = {408, 409, 425, 429}
 _BODY_CHARS = 500
 
+# Sent explicitly on every request. Left unset, OpenRouter substitutes its own
+# default, which can exceed the output cap of whichever provider it routes to
+# (live: kimi-k2-0905 -> Novita, "max_tokens: 100352 exceeds maximum 98304").
+# 8192 is ample for the largest caller — an extraction's statements list; the
+# triage and review verdicts are a few hundred tokens — and sits far under every
+# provider's cap, so routing changes can't reintroduce that 400.
+MAX_TOKENS = 8192
+
 
 def _check_status(resp) -> None:
     """raise_for_status() reports only the status line; the reason is in the body."""
@@ -86,6 +94,7 @@ class OpenRouterLLM:
             ],
             "response_format": {"type": "json_object"},
             "temperature": 0,
+            "max_tokens": MAX_TOKENS,
         }
         last = None
         for attempt in range(self.max_retries):
