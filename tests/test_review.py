@@ -107,3 +107,58 @@ def test_review_comment_lists_each_verdict():
     body = review.render_review_comment(verdicts)
     assert "zoning-reform" in body and "adus" in body
     assert "confirmed" in body.lower() and "flagged" in body.lower()
+
+
+class Boom(RuntimeError):
+    """Stands in for a 406/429 the reviewer's re-ingest can't get past."""
+
+
+def raising_ingest(source):
+    raise Boom(f"406 Client Error: Not Acceptable for url: {source['url']}")
+
+
+EVIDENCE = {
+    "url": "https://www.cbsnews.com/chicago/news/example/",
+    "outlet": "CBS News Chicago", "media_type": "article",
+    "title": "Example", "published_date": "2026-08-02",
+    "statements": [STMT, dict(STMT, topic="affordable-housing-funding")],
+}
+
+
+def test_unverifiable_when_source_cannot_be_reingested():
+    """A source the reviewer can't re-fetch must not kill the whole review.
+
+    The reviewer re-ingests every URL to verify quotes. If that fetch fails
+    (an outlet 406/429s this egress), an unguarded raise takes down the run —
+    including verdicts for sources that would have verified.
+    """
+    verdicts = review.review_evidence(
+        EVIDENCE, llm=good_model(), model="m", ingest_fn=raising_ingest
+    )
+
+    assert len(verdicts) == 2, "one verdict per statement, not an abort"
+    for v in verdicts:
+        assert v["verdict"] == "unverifiable"
+        assert v["quote_verified"] is False
+        assert "406" in v["notes"]
+
+
+def test_unverifiable_never_verifies_and_never_auto_merges():
+    verdicts = review.review_evidence(
+        EVIDENCE, llm=good_model(), model="m", ingest_fn=raising_ingest
+    )
+    cfg = {"auto_merge_enabled": True, "auto_merge_min_confidence": 0.5}
+
+    assert review.decide_label(verdicts) == "ai-flagged"
+    assert review.should_auto_merge(verdicts, cfg) is False
+
+
+def test_review_comment_distinguishes_unverifiable_from_a_missing_quote():
+    """'quote NOT found' would be a lie — we never got a transcript to look in."""
+    body = review.render_review_comment(
+        review.review_evidence(
+            EVIDENCE, llm=good_model(), model="m", ingest_fn=raising_ingest
+        )
+    )
+    assert "quote NOT found" not in body
+    assert "could not be re-fetched" in body

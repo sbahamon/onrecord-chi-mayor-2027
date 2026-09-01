@@ -52,6 +52,25 @@ def verify_statement(statement: dict, transcript: str, *, llm, model: str) -> di
     }
 
 
+def _unverifiable(statement: dict, error: Exception) -> dict:
+    """A verdict for a statement whose source could not be re-fetched.
+
+    Deliberately not ``flagged``: flagged means the reviewer looked and had a
+    concern, whereas here it never got to look. Only ``confirmed`` passes the
+    label and auto-merge gates, so this is safe by construction either way.
+    """
+    return {
+        "candidate": statement["candidate"],
+        "topic": statement["topic"],
+        "confidence": statement.get("confidence", 0.0),
+        "quote_verified": False,
+        "faithful": False,
+        "attribution_ok": False,
+        "verdict": "unverifiable",
+        "notes": f"source could not be re-fetched, so nothing was verified: {error}",
+    }
+
+
 def review_evidence(evidence: dict, *, llm, model: str, ingest_fn) -> list[dict]:
     """Re-ingest the evidence's source and verify each statement against it.
 
@@ -66,7 +85,15 @@ def review_evidence(evidence: dict, *, llm, model: str, ingest_fn) -> list[dict]
         "title": evidence["title"],
         "published_date": evidence["published_date"],
     }
-    transcript = ingest_fn(source).get("transcript", "")
+    try:
+        transcript = ingest_fn(source).get("transcript", "")
+    except Exception as e:
+        # The source is unreachable from *this* egress (an outlet 406/429s it,
+        # a page moved). Without a transcript there is nothing to verify — but
+        # an unguarded raise would abort the whole review, discarding verdicts
+        # for every other source in the PR. Degrade to "unverifiable" so a human
+        # checks these by hand; they can never read as confirmed.
+        return [_unverifiable(stmt, e) for stmt in evidence["statements"]]
     return [
         verify_statement(stmt, transcript, llm=llm, model=model)
         for stmt in evidence["statements"]
@@ -102,7 +129,14 @@ def render_review_comment(verdicts: list[dict]) -> str:
     ]
     for v in verdicts:
         icon = "✅" if v["verdict"] == "confirmed" else "⚠️"
-        quote_note = "quote verified" if v.get("quote_verified") else "**quote NOT found in transcript**"
+        if v["verdict"] == "unverifiable":
+            # Never say the quote is missing here — no transcript was fetched
+            # to look in, so that would assert something we did not check.
+            quote_note = "**source could not be re-fetched; verify by hand**"
+        elif v.get("quote_verified"):
+            quote_note = "quote verified"
+        else:
+            quote_note = "**quote NOT found in transcript**"
         lines.append(
             f"- {icon} **{v['candidate']} / {v['topic']}** — {v['verdict']} "
             f"({quote_note}). {v.get('notes', '')}"
