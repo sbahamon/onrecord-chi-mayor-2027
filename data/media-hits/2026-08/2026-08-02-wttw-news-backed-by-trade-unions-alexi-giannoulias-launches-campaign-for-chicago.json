@@ -1,0 +1,23 @@
+{
+  "id": "2026-08-02-wttw-news-backed-by-trade-unions-alexi-giannoulias-launches-campaign-for-chicago",
+  "url": "https://news.wttw.com/2026/08/02/backed-trade-unions-alexi-giannoulias-launches-campaign-chicago-mayor",
+  "outlet": "WTTW News",
+  "media_type": "article",
+  "title": "Backed by Trade Unions, Alexi Giannoulias Launches Campaign for Chicago Mayor",
+  "published_date": "2026-08-02",
+  "discovered_date": "2026-09-01",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "alexi-giannoulias",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Promises to expand affordable housing.",
+      "quote": "Giannoulias\u2019 video and speech were light on specific policy proposals, although he promised to implement universal pre kindergarten, raise the minimum wage and expand affordable housing.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false
+    }
+  ]
+}
