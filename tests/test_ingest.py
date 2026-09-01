@@ -6,6 +6,8 @@ for the network/transcription so no keys or downloads are needed.
 """
 from pathlib import Path
 
+import pytest
+
 from pipeline import ingest
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -284,3 +286,70 @@ def test_ingest_social_uses_supplied_text_without_fetch_or_download():
     assert doc["transcript"] == source["text"]
     assert doc["media_type"] == "social"
     assert doc["title"] == source["title"]
+
+
+def test_audio_temp_dir_is_removed_after_transcription(tmp_path):
+    """Downloaded media is scratch — it must not survive the run.
+
+    `transcribe.download_media` creates a temp dir and nothing ever deleted it,
+    so every audio row left the yt-dlp original, the downsampled copy and any
+    chunks on disk forever. Invisible on an ephemeral runner; locally it fills
+    the disk one podcast at a time.
+    """
+    media_dir = tmp_path / f"{ingest.MEDIA_TMP_PREFIX}abc123"
+    media_dir.mkdir()
+    audio = media_dir / "ep.16k.mp3"
+    audio.write_bytes(b"\0" * 32)
+
+    source = {"url": "https://example.com/ep.mp3", "outlet": "Pod",
+              "media_type": "podcast", "title": "Ep 1",
+              "published_date": "2026-08-02"}
+
+    doc = ingest.ingest(source,
+                        downloader=lambda url: str(audio),
+                        transcriber=lambda p: "a transcript of the episode")
+
+    assert doc["transcript"] == "a transcript of the episode"
+    assert not media_dir.exists(), "downloaded media left on disk"
+
+
+def test_audio_temp_dir_is_removed_even_when_transcription_fails(tmp_path):
+    media_dir = tmp_path / f"{ingest.MEDIA_TMP_PREFIX}def456"
+    media_dir.mkdir()
+    audio = media_dir / "ep.16k.mp3"
+    audio.write_bytes(b"\0" * 32)
+
+    source = {"url": "https://example.com/ep.mp3", "outlet": "Pod",
+              "media_type": "podcast", "title": "Ep 1",
+              "published_date": "2026-08-02"}
+
+    def boom(path):
+        raise RuntimeError("groq exploded")
+
+    with pytest.raises(RuntimeError):
+        ingest.ingest(source, downloader=lambda url: str(audio), transcriber=boom)
+
+    assert not media_dir.exists(), "media left on disk after a failed transcription"
+
+
+def test_a_directory_we_did_not_create_is_never_deleted(tmp_path):
+    """The guard: only our own prefixed temp dirs are removable.
+
+    An injected downloader (or a future caller passing its own dest_dir) can
+    return a path anywhere. Deleting its parent unconditionally would destroy
+    a directory the pipeline does not own.
+    """
+    user_dir = tmp_path / "my-podcast-archive"
+    user_dir.mkdir()
+    audio = user_dir / "ep.mp3"
+    audio.write_bytes(b"\0" * 32)
+
+    source = {"url": "https://example.com/ep.mp3", "outlet": "Pod",
+              "media_type": "podcast", "title": "Ep 1",
+              "published_date": "2026-08-02"}
+
+    ingest.ingest(source, downloader=lambda url: str(audio),
+                  transcriber=lambda p: "a transcript of the episode")
+
+    assert user_dir.exists(), "deleted a directory the pipeline did not create"
+    assert audio.exists()

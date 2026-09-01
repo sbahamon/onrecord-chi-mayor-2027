@@ -494,6 +494,20 @@ full Groq transcription).
   `python -m pipeline --data-dir <scratch> discover` (routing) or `ingest-url` (media path).
   Live runs catch what fixtures can't: the podcast 413, the intake-retry gap, and the Bluesky
   mis-attribution below were all found this way, never by the offline suite.
+- **Downloaded media is scratch and is now actually deleted — it wasn't before
+  (fixed 2026-09-01).** `download_media` created a temp dir with `tempfile.mkdtemp` and
+  *nothing ever removed it*, so every audio row left the yt-dlp original, the downsampled
+  copy and any chunk segments on disk permanently — despite `.gitignore` claiming the
+  pipeline "discards it". Invisible for a year because it only ever ran on ephemeral CI
+  runners. It became real the moment backfills moved to a local machine. Three cleanups,
+  each in the function that creates the artifact: `_downsample_for_whisper` unlinks the
+  original once re-encoded (peak disk drops from the sum of both to just the downsample,
+  ~100 MB on a long podcast), `transcribe_audio` deletes chunks in a `finally` so a failed
+  row doesn't leak them either, and `ingest` removes the whole scratch dir in a `finally`.
+  The dir is guarded by `transcribe.MEDIA_TMP_PREFIX`: a path from an injected downloader
+  or a caller-supplied `dest_dir` is never deleted, because the pipeline didn't create it.
+  General lesson: **"it runs on a fresh runner" hides every resource leak**, and the bill
+  arrives when the same code runs somewhere persistent.
 - **Audio transcription requires ffmpeg + a downsample.** Groq's transcription endpoint caps
   upload size (~25 MB); a full podcast episode 413s. `transcribe.download_media` re-encodes to
   16 kHz mono ~32 kbps via ffmpeg (`_downsample_for_whisper`) before upload — CI installs

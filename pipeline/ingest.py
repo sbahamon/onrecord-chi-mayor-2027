@@ -15,6 +15,8 @@ from __future__ import annotations
 
 import re
 
+from pipeline.transcribe import MEDIA_TMP_PREFIX, remove_media_tmp_dir
+
 # Present a real browser UA: some campaign/outlet sites 403 non-browser agents
 # (seen on dannicformayor.com). The reviewer re-ingests the same URL to verify
 # quotes, so ingest and review must fetch identically — keep this the single source.
@@ -154,7 +156,15 @@ def ingest(source: dict, *, fetcher=None, downloader=None, transcriber=None,
 
             downloader = downloader or download_media
             transcriber = transcriber or transcribe_audio
-        transcript = transcriber(downloader(source["url"]))
+        audio_path = downloader(source["url"])
+        try:
+            transcript = transcriber(audio_path)
+        finally:
+            # Media is scratch: only the extracted quotes are ever kept (copyright),
+            # and nothing downstream reads the file. Left behind it accumulates one
+            # podcast at a time — invisible on an ephemeral runner, but backfills now
+            # run locally for outlets that block datacenter IPs.
+            remove_media_tmp_dir(audio_path)
     else:
         raise ValueError(f"unknown media_type: {media_type!r}")
 
