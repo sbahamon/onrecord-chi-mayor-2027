@@ -75,6 +75,23 @@ implementations; tests pass fakes.
 
 Stance enum: `supports | supports-with-conditions | opposes | mixed | no-position`.
 
+- **Mechanism** (optional `mechanism` on a statement and on a stance) — the concrete
+  instrument the candidate named: a program, rule change, funding source, quantity, or
+  deadline, supported by the quote. **"Supports affordable housing" is not a position** —
+  every candidate says it, so the question the tracker asks is *how*. Three states, and the
+  difference matters: a string names an instrument, `null` means assessed and none offered
+  (the vague marker), and an **absent key means not yet assessed** — rendering absent as
+  vague would accuse a candidate of saying nothing when nobody has looked. Borderline
+  resolves to `null` ("streamline permitting" is null; "cut permit review to 30 days" is a
+  mechanism): understating specificity is recoverable, crediting someone with a plan they
+  never described is not. `review.py` verifies a claimed mechanism against the transcript
+  and flags it if absent — which is why the field captures the mechanism rather than
+  grading specificity, since a claim about the transcript is checkable and a 1-3 grade is
+  not. `propose_stance_updates` cites the most *specific* statement, not merely the most
+  confident (`_rank`), or the matrix would stay vague even once the data improved. Baseline
+  after the 2026-09-01 migration: johnson 9/9 specific, cardenas 2/5, brooks 2/2,
+  mendoza 1/2, and giannoulias, holberg, brewer, quigley all 0.
+
 - **Record** (optional `record` array on a stance) — what an officeholder actually *did* on
   that topic, wins and losses alike. Separate from `stance`, which is their *position*: a
   champion of a defeated measure still `supports` it. Entries are
@@ -135,6 +152,12 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
   PRs don't fire workflows). To rehearse without touching the repo, copy `data/registry` into
   a scratch dir and pass `--data-dir <scratch>`. Cost is ~$0.0006/row, so re-running a row is
   cheaper than reasoning about whether you need to.
+  **Check the mechanisms before opening the PR:**
+  `grep -o '"mechanism": [^,]*' data/media-hits/*/*.json`. A candidate whose rows all come
+  back `null` has genuinely said nothing specific — that is a finding, and the rows still
+  ship. But all-`null` for someone with a published platform means the wrong *sources* were
+  picked: launch-day press rarely contains mechanisms, policy interviews and platform pages
+  do.
   **Verify locally too, before opening the PR:** `python -m pipeline review <evidence.json>`.
   The hosted reviewer re-fetches from a datacenter IP, so for exactly the sources you went
   local to get, it returns `unverifiable` and never machine-checks them (see #69). Running the
