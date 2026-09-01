@@ -321,10 +321,20 @@ the same week did not contain. **Two: a thin result can be the correct answer an
 recorded as such.** Six of his nine topics have no cell and his `record` is empty, because no
 platform page, forum or questionnaire exists and Secretary of State does not intersect
 housing — that is coverage-limited, not un-run, and the issue was closed saying so rather
-than left open implying work remained. Suggested running order for the rest, heaviest records
-first while the process is fresh: **#51 johnson** (incumbent; positions already 9/9, so it is
-almost purely the 2023–2027 record), then #54 quigley, #53 mendoza, #57 brewer, #56 cardenas,
-then the thin ones (#55 pappas, #58 holberg, #59 nee, #60 brooks) last.
+than left open implying work remained. Running order for the rest, decided 2026-09-01 and
+**johnson LAST**: no stance file in the repo has a `record` array yet, so whoever does him
+first would be exercising that path for the very first time, on four years of incumbency and
+the most consequential row on the site. Prove the workflow on small records, then spend it
+there. **1. #57 brewer** — a CHA board commissioner's record is small, bounded and *directly*
+housing, with no judgment calls about whether an action counts, and he already has a Fran
+Spielman episode in the system (the one that verified the podcast path live). It is also the
+cheapest place to discover whether the record requirement is even satisfiable: a record entry
+cites `"<evidence-id>#<index>"` like any stance, so it needs a source where the candidate
+discusses the action **in his own words** — board minutes cannot cite it. **2.** the thin ones
+(#59 nee, #58 holberg, #60 brooks, #55 pappas — pappas likely thin on housing for the same
+reason giannoulias was: a property-tax record is not a housing record). **3.** the real
+multi-office records (#54 quigley, #53 mendoza, #56 cardenas). **4. #51 johnson**, by which
+point the record path has run eight times.
 
 **Start with [`docs/architecture-review-2026-07-15.md`](./docs/architecture-review-2026-07-15.md)**
 — the full-project audit (what actually worked in production vs. not, root cause = runner
