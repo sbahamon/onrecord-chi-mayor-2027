@@ -34,12 +34,26 @@ def build_evidence_record(ingest_doc: dict, housing_statements: list[dict],
     return record
 
 
+def _rank(stmt: dict) -> tuple[int, float]:
+    """Prefer a statement that names a mechanism, then higher confidence.
+
+    Without the first term a confident platitude ("we need more housing", 0.95)
+    outranks a concrete proposal ("end apartment bans", 0.70) and the cell stays
+    vague even when specific evidence sits in the same source. The extractor is
+    reliably confident about platitudes, so confidence alone selects for them.
+    """
+    return (1 if stmt.get("mechanism") else 0, stmt.get("confidence", 0.0))
+
+
 def propose_stance_updates(evidence: dict, *, today: str) -> list[dict]:
-    """One stance per (candidate, topic), citing the highest-confidence statement."""
+    """One stance per (candidate, topic), citing the most specific statement.
+
+    "Most specific" is a named mechanism first, confidence second — see ``_rank``.
+    """
     best: dict[tuple[str, str], tuple[int, dict]] = {}
     for i, stmt in enumerate(evidence["statements"]):
         key = (stmt["candidate"], stmt["topic"])
-        if key not in best or stmt["confidence"] > best[key][1]["confidence"]:
+        if key not in best or _rank(stmt) > _rank(best[key][1]):
             best[key] = (i, stmt)
 
     stances = []
@@ -52,6 +66,11 @@ def propose_stance_updates(evidence: dict, *, today: str) -> list[dict]:
             "citations": [f"{evidence['id']}#{idx}"],
             "updated_date": today,
         }
+        # Denormalized like `summary`, and only when the statement was assessed.
+        # Copying a key that isn't there would turn "not yet assessed" into
+        # "vague" and mark every un-migrated cell wrongly.
+        if "mechanism" in stmt:
+            stance["mechanism"] = stmt["mechanism"]
         schemas.validate(stance, "stance")
         stances.append(stance)
     return stances
