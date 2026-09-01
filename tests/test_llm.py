@@ -4,7 +4,7 @@ under the 'live' marker at the API-key checkpoint.
 """
 import pytest
 
-from pipeline.llm import OpenRouterLLM, LLMError
+from pipeline.llm import MAX_TOKENS, OpenRouterLLM, LLMError
 
 
 def chat_response(content):
@@ -109,3 +109,24 @@ def test_rate_limits_and_server_errors_are_still_retried():
         llm = OpenRouterLLM(api_key="x", post=flaky, max_retries=3)
         assert llm.complete_json(model="m", system="s", user="u") == {"ok": True}
         assert attempts["n"] == 2, f"{status} should have been retried"
+
+
+def test_complete_json_sends_an_explicit_max_tokens():
+    """Unset, OpenRouter fills in its own default, which a routed provider can reject.
+
+    Live: kimi-k2-0905 routed to Novita 400'd with `max_tokens: 100352 exceeds
+    maximum 98304` — a request we never sized. Send our own bound instead.
+    """
+    seen = {}
+
+    def capture(**kw):
+        seen.update(kw["json_body"])
+        return chat_response('{"ok": true}')
+
+    llm = OpenRouterLLM(api_key="x", post=capture)
+    llm.complete_json(model="m", system="s", user="u")
+
+    assert seen["max_tokens"] == MAX_TOKENS
+    # Ample for the largest caller (an extraction's statements list) while
+    # staying far under any provider's output cap.
+    assert 4096 <= MAX_TOKENS <= 32768
