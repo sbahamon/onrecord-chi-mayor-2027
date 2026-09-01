@@ -188,3 +188,29 @@ def test_write_stance_does_not_duplicate_a_citation_on_re_run(tmp_path):
     path = propose.write_stance(dict(stance, updated_date="2026-09-01"), tmp_path)
 
     assert json.loads(path.read_text())["citations"] == ["wttw-hit#0"]
+
+
+def test_write_stance_replaces_a_citation_from_the_same_evidence_file(tmp_path):
+    """Union across sources, replace within one — or a re-run can dangle.
+
+    Extraction is not reproducible run-to-run (observed live: the same article
+    yielded 0, 2 and 3 statements on separate runs at temperature 0), and a
+    citation pins a statement *index*. Accumulating indexes from the same
+    evidence id would keep `hit#2` after a re-run that produced only two
+    statements, and a dangling citation fails the data-integrity tests.
+    """
+    propose.write_stance({
+        "candidate": "example-candidate-a", "topic": "zoning-reform",
+        "stance": "supports", "summary": "first pass", "citations": ["cbs-hit#2"],
+        "updated_date": "2026-08-02",
+    }, tmp_path)
+
+    # A re-run of the same source now finds its best statement at index 0.
+    path = propose.write_stance({
+        "candidate": "example-candidate-a", "topic": "zoning-reform",
+        "stance": "supports", "summary": "re-run", "citations": ["cbs-hit#0"],
+        "updated_date": "2026-09-01",
+    }, tmp_path)
+
+    assert json.loads(path.read_text())["citations"] == ["cbs-hit#0"], \
+        "the stale index from the same evidence file must not survive"
