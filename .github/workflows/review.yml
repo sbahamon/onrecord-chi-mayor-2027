@@ -8,6 +8,15 @@ permissions:
   contents: read
   pull-requests: write
 
+# One review at a time per PR. Every push is a `synchronize`, so a branch that
+# gets three quick pushes started three overlapping reviews — each one re-fetching
+# every source URL to re-verify quotes. That is wasted spend, and it aims repeat
+# traffic at the outlets that already rate-limit runner IPs (#41): our own churn
+# feeds the blocking problem. Cancel the superseded run; only the tip matters.
+concurrency:
+  group: ai-review-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     # Only pipeline-generated PRs (labelled 'pipeline') get auto-reviewed.
@@ -57,7 +66,13 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           LABEL: ${{ steps.review.outputs.label }}
         run: |
-          gh pr comment "$PR_NUMBER" --body-file review_comment.md
+          # Update this workflow's own last comment rather than appending a new
+          # one. Appending left a PR carrying four near-identical verdicts whose
+          # wording differed slightly (extraction varies run to run), so they read
+          # as though they might disagree. On a project gated by human review,
+          # making the reviewer work out which verdict is current is a defect.
+          gh pr comment "$PR_NUMBER" --body-file review_comment.md --edit-last \
+            || gh pr comment "$PR_NUMBER" --body-file review_comment.md
           if [ -n "$LABEL" ]; then
             # Create the label on first use so add-label can't fail.
             gh label create "$LABEL" --color BFD4F2 2>/dev/null || true
