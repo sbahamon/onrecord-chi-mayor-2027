@@ -141,3 +141,62 @@ def test_topic_with_path_traversal_is_dropped():
     result = run([base_stmt(topic="../../ledger")])
     assert result.housing == [] and result.other == []
     assert result.dropped == 1
+
+
+# --- mechanism: the policy-specificity field --------------------------------
+
+MECH_TRANSCRIPT = "We should legalize apartments in every neighborhood."
+VAGUE_TRANSCRIPT = "Chicago needs more housing, and we have to do better."
+
+
+def test_mechanism_survives_extraction():
+    """The per-statement schema drop-path must not eat the new field."""
+    stmt = base_stmt(mechanism="Legalize apartments in every neighborhood")
+    result = extract(
+        MECH_TRANSCRIPT, candidates=["jane-doe"], topics=["zoning-reform"],
+        llm=FakeLLM({"statements": [stmt]}), model="m",
+    )
+    assert result.housing[0]["mechanism"] == "Legalize apartments in every neighborhood"
+
+
+def test_a_statement_with_a_null_mechanism_is_kept_not_dropped():
+    """Vague positions are recorded and marked, never dropped.
+
+    A blank cell cannot distinguish "no coverage found" from "talks constantly,
+    commits to nothing" — dropping would erase the comparison the field exists
+    to surface.
+    """
+    stmt = base_stmt(
+        summary="Says Chicago needs more housing.",
+        quote="Chicago needs more housing, and we have to do better.",
+        mechanism=None,
+    )
+    result = extract(
+        VAGUE_TRANSCRIPT, candidates=["jane-doe"], topics=["zoning-reform"],
+        llm=FakeLLM({"statements": [stmt]}), model="m",
+    )
+    assert len(result.housing) == 1
+    assert result.housing[0]["mechanism"] is None
+
+
+def test_a_statement_omitting_mechanism_entirely_still_extracts():
+    """Absence is valid — it means not assessed, and must not break extraction."""
+    result = extract(
+        MECH_TRANSCRIPT, candidates=["jane-doe"], topics=["zoning-reform"],
+        llm=FakeLLM({"statements": [base_stmt()]}), model="m",
+    )
+    assert len(result.housing) == 1
+    assert "mechanism" not in result.housing[0]
+
+
+def test_the_prompt_tells_the_model_what_counts_as_a_mechanism():
+    """Pin the contract: no unit test can check model behaviour, but it can
+    check we actually asked. The live check in the plan covers the rest."""
+    llm = FakeLLM({"statements": []})
+    extract(MECH_TRANSCRIPT, candidates=["jane-doe"],
+                    topics=["zoning-reform"], llm=llm, model="m")
+
+    system = llm.calls[0]["system"]
+    assert "mechanism" in system
+    for word in ("program", "funding source", "deadline", "null"):
+        assert word in system, f"prompt must define a mechanism in terms of {word!r}"
