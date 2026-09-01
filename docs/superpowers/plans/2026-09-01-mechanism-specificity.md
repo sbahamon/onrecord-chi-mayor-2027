@@ -25,9 +25,14 @@
 ### Task 1: Add the optional `mechanism` field to both schemas
 
 **Files:**
+- Modify: `schemas/statement.schema.json` (`properties`)
 - Modify: `schemas/evidence.schema.json` (`$defs.statement.properties`)
 - Modify: `schemas/stance.schema.json` (`properties`)
 - Test: `tests/test_schemas.py`
+
+**Three schema files, not two.** A standalone `statement.schema.json` exists alongside
+evidence's inline `$defs.statement`, and `test_statement_schema_matches_evidence_inline_definition`
+pins them against drift — update both or that test fails.
 
 **Interfaces:**
 - Consumes: nothing.
@@ -61,9 +66,9 @@ def test_stance_accepts_a_mechanism_string_null_or_absent():
     schemas.validate(base, "stance")  # absent
 ```
 
-If `tests/test_schemas.py` has no `statement` validation helper, validate a full evidence
-record containing the statement instead — check the file's existing patterns first and
-follow them rather than inventing a new entry point.
+`schemas.validate(record, "statement")` works directly. The file's existing helpers are
+`valid_evidence()` and `valid_stance()`; build test records from those rather than
+inlining literals.
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -72,7 +77,8 @@ Expected: FAIL — `additionalProperties` rejects `mechanism`.
 
 - [ ] **Step 3: Add the property to both schemas**
 
-In `schemas/evidence.schema.json`, inside `$defs.statement.properties`, after `attribution_flag`:
+In **both** `schemas/statement.schema.json` (`properties`) and
+`schemas/evidence.schema.json` (`$defs.statement.properties`), after `attribution_flag`:
 
 ```json
 "mechanism": {

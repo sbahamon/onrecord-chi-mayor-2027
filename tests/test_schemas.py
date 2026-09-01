@@ -185,3 +185,37 @@ def test_statement_schema_matches_evidence_inline_definition():
     inline = evidence["$defs"]["statement"]
     assert standalone["required"] == inline["required"]
     assert standalone["properties"] == inline["properties"]
+
+
+# --- mechanism: the policy-specificity field --------------------------------
+# Three distinct states, and the distinction is load-bearing. A string names an
+# instrument; null means assessed and none offered (the vague marker); an ABSENT
+# key means not yet assessed. Absent must never render as vague — the incumbent's
+# cells are all specific, and mislabelling them inverts the finding the field
+# exists to surface.
+
+def test_statement_accepts_a_mechanism_string_null_or_absent():
+    stmt = valid_evidence()["statements"][0]
+    schemas.validate({**stmt, "mechanism": "Legalize ADUs citywide"}, "statement")
+    schemas.validate({**stmt, "mechanism": None}, "statement")
+    schemas.validate(stmt, "statement")  # absent: ~50 committed statements
+
+
+def test_evidence_accepts_a_mechanism_on_its_inline_statement():
+    record = valid_evidence()
+    record["statements"][0]["mechanism"] = "Legalize ADUs citywide"
+    schemas.validate(record, "evidence")
+
+
+def test_stance_accepts_a_mechanism_string_null_or_absent():
+    schemas.validate({**valid_stance(), "mechanism": "Legalize ADUs citywide"}, "stance")
+    schemas.validate({**valid_stance(), "mechanism": None}, "stance")
+    schemas.validate(valid_stance(), "stance")  # absent: 25 committed cells
+
+
+def test_mechanism_rejects_a_non_string_non_null():
+    stmt = valid_evidence()["statements"][0]
+    with pytest.raises(ValidationError):
+        schemas.validate({**stmt, "mechanism": ["a", "list"]}, "statement")
+    with pytest.raises(ValidationError):
+        schemas.validate({**valid_stance(), "mechanism": 42}, "stance")

@@ -5,21 +5,65 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "candidate", "topic", "stance", "summary",
-    "quote", "confidence", "is_housing", "attribution_flag"
+    "candidate",
+    "topic",
+    "stance",
+    "summary",
+    "quote",
+    "confidence",
+    "is_housing",
+    "attribution_flag"
   ],
   "properties": {
-    "candidate": { "type": "string", "pattern": "^[a-z0-9-]+$" },
-    "topic": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "candidate": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "topic": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
     "stance": {
       "type": "string",
-      "enum": ["supports", "supports-with-conditions", "opposes", "mixed", "no-position"]
+      "enum": [
+        "supports",
+        "supports-with-conditions",
+        "opposes",
+        "mixed",
+        "no-position"
+      ]
     },
-    "summary": { "type": "string", "minLength": 1 },
-    "quote": { "type": "string", "minLength": 1 },
-    "locator": { "type": ["string", "null"] },
-    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
-    "is_housing": { "type": "boolean" },
-    "attribution_flag": { "type": "boolean" }
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "quote": {
+      "type": "string",
+      "minLength": 1
+    },
+    "locator": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "is_housing": {
+      "type": "boolean"
+    },
+    "attribution_flag": {
+      "type": "boolean"
+    },
+    "mechanism": {
+      "description": "The concrete instrument the candidate named \u2014 a program, rule change, funding source, quantity, or deadline \u2014 supported by `quote`. null when they expressed only a goal, value, or direction without saying how. An ABSENT key means not yet assessed, which is deliberately different from null: absent must never be rendered as vague.",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
   }
 }
