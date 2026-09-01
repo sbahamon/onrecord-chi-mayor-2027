@@ -24,6 +24,9 @@ const legend = [
       Every position below is drawn from a candidate's own public words — a
       podcast, interview, forum, or article — and links to the source. Blank
       cells mean the candidate hasn't addressed that issue on the record yet.
+      A <span class="no-mech">●</span> means they voiced support but named no
+      specific way to get there — everyone is for affordable housing, so the
+      question this tracker asks is <em>how</em>.
     </p>
   </section>
 
@@ -39,6 +42,7 @@ const legend = [
     {legend.map(([tone, label]) => (
       <span><i class={"swatch tone-" + tone} style={"background:var(--" + tone + "-bar)"}></i>{label}</span>
     ))}
+    <span><i class="swatch swatch-vague"></i>No specific mechanism stated</span>
   </div>
 
   <div class="matrix-scroll">
@@ -67,13 +71,21 @@ const legend = [
               const meta = cell.stance
                 ? STANCE_META[cell.stance.stance]
                 : STANCE_META["no-position"];
+              // Three states: a mechanism, an assessed-but-absent one (vague),
+              // or not yet assessed. Only the middle one gets the marker —
+              // treating "not assessed" as vague would be a false accusation.
+              const vague =
+                cell.stance && "mechanism" in cell.stance && cell.stance.mechanism === null;
               return (
                 <td>
                   <a
-                    class={"cell tone-" + meta.tone}
+                    class={"cell tone-" + meta.tone + (vague ? " is-vague" : "")}
                     href={base + "candidates/" + cell.candidate.slug + "#" + row.topic.slug}
                   >
-                    <span class="lbl">{meta.label}</span>
+                    <span class="lbl">
+                      {meta.label}
+                      {vague && <span class="no-mech" title="Supports the goal but named no specific policy mechanism">●</span>}
+                    </span>
                     {cell.stance && <span class="sum">{cell.stance.summary}</span>}
                   </a>
                 </td>

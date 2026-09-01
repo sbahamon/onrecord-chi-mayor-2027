@@ -117,6 +117,35 @@ table.matrix td { padding: 0; min-width: 160px; }
 .tone-none .lbl   { color: var(--none-fg); font-weight: 500; }
 
 /* --- legend --- */
+/* Policy specificity. A cell whose cited statement named no mechanism is muted
+   and marked: "supports affordable housing" is a sentiment, not a plan, and the
+   matrix should not present it as equivalent to a concrete commitment. */
+.cell.is-vague .sum { opacity: 0.62; font-style: italic; }
+.no-mech {
+  color: var(--none-fg);
+  font-weight: 700;
+  font-size: 0.7rem;
+  margin-left: 4px;
+  vertical-align: 1px;
+}
+.swatch-vague {
+  background: transparent;
+  border: 1px solid var(--none-fg);
+  position: relative;
+}
+.swatch-vague::after {
+  content: "●";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.55rem;
+  color: var(--none-fg);
+}
+.position .mechanism { margin: 4px 0 0; font-size: 0.92rem; }
+.position .mechanism b { font-weight: 600; opacity: 0.7; }
+.position .mechanism.none { color: var(--muted); font-style: italic; }
+
 .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 10px 0 0; font-size: 0.82rem; color: var(--muted); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .swatch { width: 13px; height: 13px; border-radius: 3px; display: inline-block; border: 1px solid rgba(0,0,0,.15); }
