@@ -112,25 +112,62 @@ def write_evidence(evidence: dict, data_dir) -> Path:
 
 
 def write_stance(stance: dict, data_dir) -> Path:
-    """Write a stance cell, preserving any `record` already on disk.
+    """Write a stance cell, merging with what is already on disk.
 
-    A stance is the candidate's *position*; `record` is what they actually did in
-    office, and only the per-candidate backfill produces it. Daily discovery
-    proposes positions and carries no `record`, so a wholesale rewrite would
+    Two fields survive a rewrite; everything else comes from the new proposal.
+
+    ``record`` — what the officeholder actually did, written only by the
+    per-candidate backfill. A stance is their *position*; daily discovery
+    proposes positions and carries no ``record``, so a wholesale rewrite would
     silently erase the backfilled record the first time discovery touched that
-    cell. An explicit `record` in ``stance`` still wins, so the backfill can edit
-    its own work.
+    cell. An explicit ``record`` in ``stance`` still wins, so the backfill can
+    edit its own work.
+
+    ``citations`` — unioned **across** evidence files, oldest first, but a new
+    citation **supersedes** any existing one from the same evidence id.
+    ``propose_stance_updates`` runs per evidence file and cites only that file's
+    strongest statement, so a position backed by several media hits is written one
+    file at a time; replacing outright would leave the cell citing whichever file
+    was processed last and drop the rest (#70).
+
+    Superseding within a source is not an optimisation — it is required. A
+    citation pins a statement *index*, and extraction is not reproducible run to
+    run (observed live: one article yielded 0, 2 and 3 statements on separate runs
+    at temperature 0). Accumulating indexes from the same file would leave
+    ``hit#2`` behind after a re-run that produced two statements, and a dangling
+    citation fails the data-integrity tests.
+
+    Consequence worth knowing: citations from *different* sources only accumulate.
+    A cell whose position genuinely changed keeps citing the sources for the old
+    one, and correcting that is a manual edit.
     """
     path = _safe_join(
         Path(data_dir) / "stances", stance["candidate"], f"{stance['topic']}.json"
     )
     path.parent.mkdir(parents=True, exist_ok=True)
-    if "record" not in stance and path.exists():
+    existing = {}
+    if path.exists():
         try:
             existing = json.loads(path.read_text())
         except (json.JSONDecodeError, OSError):
             existing = {}
-        if existing.get("record"):
-            stance = {**stance, "record": existing["record"]}
+
+    if "record" not in stance and existing.get("record"):
+        stance = {**stance, "record": existing["record"]}
+
+    # Union the citations rather than replacing them. `propose_stance_updates`
+    # runs per evidence file and cites only that file's best statement, so a cell
+    # backed by several media hits is written one file at a time — replacing would
+    # leave it citing whichever file was processed last and silently drop the rest
+    # (#70). The newest proposal still owns the position itself: stance, summary
+    # and updated_date all come from it.
+    incoming = list(stance.get("citations") or [])
+    superseded = {c.partition("#")[0] for c in incoming}
+    merged = [c for c in (existing.get("citations") or [])
+              if c.partition("#")[0] not in superseded]
+    merged += [c for c in incoming if c not in merged]
+    if merged:
+        stance = {**stance, "citations": merged}
+
     path.write_text(json.dumps(stance, indent=2) + "\n")
     return path
