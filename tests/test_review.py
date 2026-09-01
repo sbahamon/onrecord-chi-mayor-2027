@@ -21,8 +21,12 @@ STMT = {
 class FakeReviewer:
     def __init__(self, verdict):
         self.verdict = verdict
+        self.seen_system = ""
+        self.seen_user = ""
 
     def complete_json(self, *, model, system, user):
+        self.seen_system = system
+        self.seen_user = user
         return self.verdict
 
 
@@ -162,3 +166,75 @@ def test_review_comment_distinguishes_unverifiable_from_a_missing_quote():
     )
     assert "quote NOT found" not in body
     assert "could not be re-fetched" in body
+
+
+# --- mechanism verification -------------------------------------------------
+# The guard against the extractor inventing specificity to satisfy the new field.
+# This is why the design captures the mechanism rather than grading specificity:
+# "is this mechanism stated in the transcript?" is checkable, a 1-3 grade is not.
+
+def test_unsupported_mechanism_is_flagged():
+    stmt = dict(STMT, mechanism="Cut permit review to 30 days")
+    llm = FakeReviewer({"faithful": True, "attribution_ok": True,
+                        "mechanism_supported": False,
+                        "notes": "the transcript names no permit timeline"})
+    v = review.verify_statement(stmt, TRANSCRIPT, llm=llm, model="m")
+
+    assert v["mechanism_supported"] is False
+    assert v["verdict"] == "flagged", "an invented mechanism must not confirm"
+
+
+def test_supported_mechanism_confirms():
+    stmt = dict(STMT, mechanism="End apartment bans")
+    llm = FakeReviewer({"faithful": True, "attribution_ok": True,
+                        "mechanism_supported": True, "notes": "stated outright"})
+    v = review.verify_statement(stmt, TRANSCRIPT, llm=llm, model="m")
+
+    assert v["mechanism_supported"] is True
+    assert v["verdict"] == "confirmed"
+
+
+def test_a_null_mechanism_skips_the_check_and_can_still_confirm():
+    """Vague is not wrong — there is simply nothing to verify."""
+    stmt = dict(STMT, mechanism=None)
+    llm = FakeReviewer({"faithful": True, "attribution_ok": True, "notes": "ok"})
+    v = review.verify_statement(stmt, TRANSCRIPT, llm=llm, model="m")
+
+    assert v["mechanism_supported"] is True
+    assert v["verdict"] == "confirmed"
+
+
+def test_a_statement_with_no_mechanism_key_behaves_like_null():
+    """Pre-migration data has no key at all and must not be flagged for it."""
+    llm = FakeReviewer({"faithful": True, "attribution_ok": True, "notes": "ok"})
+    v = review.verify_statement(STMT, TRANSCRIPT, llm=llm, model="m")
+
+    assert v["mechanism_supported"] is True
+    assert v["verdict"] == "confirmed"
+
+
+def test_the_claimed_mechanism_is_put_in_front_of_the_reviewer():
+    """A check the model is never shown is not a check."""
+    stmt = dict(STMT, mechanism="End apartment bans")
+    llm = FakeReviewer({"faithful": True, "attribution_ok": True,
+                        "mechanism_supported": True, "notes": "ok"})
+    review.verify_statement(stmt, TRANSCRIPT, llm=llm, model="m")
+
+    assert "End apartment bans" in llm.seen_user
+    assert "mechanism" in llm.seen_system.lower()
+
+
+def test_unverifiable_verdicts_carry_the_mechanism_key():
+    """Every verdict dict must have one shape, or render/label code branches."""
+    verdicts = review.review_evidence(
+        EVIDENCE, llm=good_model(), model="m", ingest_fn=raising_ingest
+    )
+    assert all(v["mechanism_supported"] is False for v in verdicts)
+
+
+def test_review_comment_calls_out_an_invented_mechanism():
+    v = [{"candidate": "c", "topic": "t", "confidence": 0.9,
+          "quote_verified": True, "faithful": True, "attribution_ok": True,
+          "mechanism_supported": False, "verdict": "flagged", "notes": "n"}]
+    body = review.render_review_comment(v)
+    assert "mechanism not found in transcript" in body

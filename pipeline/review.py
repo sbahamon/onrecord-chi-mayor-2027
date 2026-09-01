@@ -14,16 +14,20 @@ from pipeline.extract import quote_in_transcript
 
 REVIEW_SYSTEM = (
     "You verify a claim extracted from a transcript. Given the transcript, the "
-    "candidate, the claimed stance/summary, and the quote, decide: is the summary "
-    "a faithful representation of what the candidate said (not overstated), and is "
-    "it correctly attributed to the candidate (not describing someone else's view "
-    "or a hypothetical)? Respond as JSON: "
-    '{"faithful": true|false, "attribution_ok": true|false, "notes": "..."}.'
+    "candidate, the claimed stance/summary, the quote, and any claimed policy "
+    "mechanism, decide: is the summary a faithful representation of what the "
+    "candidate said (not overstated), is it correctly attributed to the candidate "
+    "(not describing someone else's view or a hypothetical), and — when a "
+    "mechanism is claimed — is that mechanism actually stated in the transcript "
+    "rather than inferred, generalised, or invented? Respond as JSON: "
+    '{"faithful": true|false, "attribution_ok": true|false, '
+    '"mechanism_supported": true|false, "notes": "..."}.'
 )
 
 
 def verify_statement(statement: dict, transcript: str, *, llm, model: str) -> dict:
     quote_verified = quote_in_transcript(statement["quote"], transcript)
+    mechanism = statement.get("mechanism")
 
     judgment = llm.complete_json(
         model=model,
@@ -32,13 +36,20 @@ def verify_statement(statement: dict, transcript: str, *, llm, model: str) -> di
             f"Candidate: {statement['candidate']}\n"
             f"Stance: {statement['stance']}\n"
             f"Summary: {statement['summary']}\n"
-            f"Quote: {statement['quote']}\n\n"
+            f"Quote: {statement['quote']}\n"
+            f"Claimed mechanism: {mechanism if mechanism else '(none claimed)'}\n\n"
             f"Transcript:\n{transcript}"
         ),
     )
     faithful = bool(judgment.get("faithful"))
     attribution_ok = bool(judgment.get("attribution_ok"))
-    confirmed = quote_verified and faithful and attribution_ok
+    # Only a CLAIMED mechanism can fail this. A null one means the candidate
+    # offered no specifics, which is a finding rather than an error, and a
+    # statement predating the migration has no key at all — neither should be
+    # flagged for it. This check exists solely to stop the extractor inventing
+    # specificity to satisfy the field.
+    mechanism_supported = bool(judgment.get("mechanism_supported")) if mechanism else True
+    confirmed = quote_verified and faithful and attribution_ok and mechanism_supported
 
     return {
         "candidate": statement["candidate"],
@@ -47,6 +58,7 @@ def verify_statement(statement: dict, transcript: str, *, llm, model: str) -> di
         "quote_verified": quote_verified,
         "faithful": faithful,
         "attribution_ok": attribution_ok,
+        "mechanism_supported": mechanism_supported,
         "verdict": "confirmed" if confirmed else "flagged",
         "notes": judgment.get("notes", ""),
     }
@@ -66,6 +78,7 @@ def _unverifiable(statement: dict, error: Exception) -> dict:
         "quote_verified": False,
         "faithful": False,
         "attribution_ok": False,
+        "mechanism_supported": False,
         "verdict": "unverifiable",
         "notes": f"source could not be re-fetched, so nothing was verified: {error}",
     }
@@ -137,6 +150,8 @@ def render_review_comment(verdicts: list[dict]) -> str:
             quote_note = "quote verified"
         else:
             quote_note = "**quote NOT found in transcript**"
+        if v["verdict"] == "flagged" and not v.get("mechanism_supported", True):
+            quote_note += ", **claimed mechanism not found in transcript**"
         lines.append(
             f"- {icon} **{v['candidate']} / {v['topic']}** — {v['verdict']} "
             f"({quote_note}). {v.get('notes', '')}"
