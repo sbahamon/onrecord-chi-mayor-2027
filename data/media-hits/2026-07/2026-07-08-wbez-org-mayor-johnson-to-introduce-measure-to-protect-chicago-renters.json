@@ -17,7 +17,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": null
     },
     {
       "candidate": "brandon-johnson",
@@ -28,7 +29,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "rental registry and new administrative body"
     },
     {
       "candidate": "brandon-johnson",
@@ -39,7 +41,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "ban on hidden junk fees and requirement that charges reflect actual costs"
     },
     {
       "candidate": "brandon-johnson",
@@ -50,7 +53,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "disclosure of algorithmic pricing tools"
     },
     {
       "candidate": "brandon-johnson",
@@ -61,7 +65,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "rental registry"
     },
     {
       "candidate": "brandon-johnson",
@@ -72,7 +77,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "annual fee based on building size and owner occupancy, with exemptions for small owner-occupied buildings and nonprofits"
     },
     {
       "candidate": "brandon-johnson",
@@ -83,7 +89,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "annual fees from rental registry"
     },
     {
       "candidate": "brandon-johnson",
@@ -94,7 +101,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "establish Bureau of Rental Housing Services"
     }
   ]
 }

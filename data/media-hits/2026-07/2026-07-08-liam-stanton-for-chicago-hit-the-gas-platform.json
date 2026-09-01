@@ -17,7 +17,8 @@
       "locator": "\u201cHit the Gas\u201d Platform \u2014 Family-Sized Housing",
       "confidence": 0.9,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": null
     }
   ]
 }

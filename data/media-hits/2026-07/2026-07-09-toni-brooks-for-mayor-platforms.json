@@ -17,7 +17,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "property tax credit and housing credit"
     },
     {
       "candidate": "toni-brooks",
@@ -28,7 +29,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "matching housing credit"
     }
   ]
 }

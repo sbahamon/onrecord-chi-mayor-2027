@@ -17,7 +17,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "increase the real estate transfer tax on properties over $1 million"
     },
     {
       "candidate": "brandon-johnson",
@@ -28,7 +29,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "reform zoning ordinance to allow supportive housing and shelters by right"
     },
     {
       "candidate": "brandon-johnson",
@@ -39,7 +41,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "waive fees for new affordable housing buildings and fast-track zoning and building approvals"
     },
     {
       "candidate": "brandon-johnson",
@@ -50,7 +53,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "ongoing funding for SRO preservation"
     },
     {
       "candidate": "brandon-johnson",
@@ -61,7 +65,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "freeze on transfer of CHA land to non-housing uses"
     },
     {
       "candidate": "brandon-johnson",
@@ -72,7 +77,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "withhold funding for CHA projects not directly leading to housing"
     },
     {
       "candidate": "brandon-johnson",
@@ -83,7 +89,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "homeless preference at CHA"
     },
     {
       "candidate": "brandon-johnson",
@@ -94,7 +101,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "stop deferring to aldermanic privilege (veto power)"
     },
     {
       "candidate": "brandon-johnson",
@@ -105,7 +113,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "rent stabilization legislation and property tax abatements"
     },
     {
       "candidate": "brandon-johnson",
@@ -116,7 +125,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "Just Cause Eviction ordinance"
     },
     {
       "candidate": "brandon-johnson",
@@ -127,7 +137,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "funding fair housing testers"
     },
     {
       "candidate": "brandon-johnson",
@@ -138,7 +149,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "fully fund the Right to Counsel program"
     },
     {
       "candidate": "brandon-johnson",
@@ -149,7 +161,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "Additional Dwelling Unit pilot expansion to all areas of the city"
     },
     {
       "candidate": "brandon-johnson",
@@ -160,7 +173,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "Chicago Social Housing Pilot Program"
     },
     {
       "candidate": "brandon-johnson",
@@ -171,7 +185,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "property tax abatements"
     },
     {
       "candidate": "brandon-johnson",
@@ -182,7 +197,8 @@
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
-      "attribution_flag": false
+      "attribution_flag": false,
+      "mechanism": "review regulatory changes"
     }
   ]
 }
