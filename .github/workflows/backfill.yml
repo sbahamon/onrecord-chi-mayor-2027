@@ -1,0 +1,153 @@
+name: backfill
+
+# Hand-run historical seed, one PR per candidate (branch backfill/<slug>-<run>),
+# each auto-reviewed by review.yml (it fires on the `pipeline` label, which needs
+# the PR to be created with PIPELINE_PAT — a GITHUB_TOKEN PR triggers nothing).
+#
+# This is the ONLY way to run a backfill with credentials. `python -m pipeline
+# backfill` needs OPENROUTER_API_KEY (and GROQ_API_KEY for any audio row); a cloud
+# Claude session has no secrets store and this repo is public, so the keys live in
+# GitHub Actions secrets and nowhere else. Same posture as cron/intake/review. (#63)
+#
+# The row list is in-repo (data/backfill/*.json). The dispatch inputs that select
+# *which* file and *which* slugs are still treated as untrusted: they enter only as
+# env: vars and are parsed in a fixed Python heredoc, never interpolated into shell.
+
+on:
+  workflow_dispatch:
+    inputs:
+      phase_file:
+        description: "In-repo row list under data/backfill/ (one file per backfill issue)"
+        required: false
+        default: "data/backfill/phase1.json"
+      slugs:
+        description: "Comma-separated candidate slugs to run (blank = every row in the file)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      slugs: ${{ steps.slugs.outputs.slugs }}
+      phase_file: ${{ steps.slugs.outputs.phase_file }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compute candidate matrix from the row list
+        id: slugs
+        env:
+          # Dispatch input arrives only as an env var, parsed in Python below.
+          PHASE_FILE: ${{ inputs.phase_file }}
+          ONLY_SLUGS: ${{ inputs.slugs }}
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, re, sys
+          from pathlib import Path
+
+          # Confine phase_file to the in-repo row lists: it is dispatch input, and
+          # the matrix job feeds it straight to `backfill --input`.
+          base = Path("data/backfill").resolve()
+          raw_path = os.environ.get("PHASE_FILE") or "data/backfill/phase1.json"
+          phase = Path(raw_path).resolve()
+          if phase.parent != base or phase.suffix != ".json" or not phase.is_file():
+              sys.exit(f"phase_file must be an existing .json under data/backfill/: {raw_path!r}")
+
+          raw = json.loads(phase.read_text())
+          rows = raw["rows"] if isinstance(raw, dict) else raw
+          slugs = sorted({r["candidate_slug"] for r in rows})
+
+          only = [s for s in re.split(r"[,\s]+", os.environ.get("ONLY_SLUGS", "")) if s]
+          if only:
+              # Fail loudly: an empty matrix produces zero jobs and a green run.
+              unknown = [s for s in only if s not in slugs]
+              if unknown:
+                  sys.exit(f"slugs not present in {phase.name}: {', '.join(unknown)}")
+              slugs = [s for s in slugs if s in only]
+          if not slugs:
+              sys.exit(f"no rows in {phase.name}")
+
+          print("slugs=" + json.dumps(slugs))
+          print("phase_file=" + str(phase.relative_to(Path.cwd())))
+          PY
+
+  backfill:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      # One candidate at a time: credit-limited, and the agreed discipline for the
+      # per-candidate track (#50) is one PR merged before the next starts.
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        slug: ${{ fromJSON(needs.plan.outputs.slugs) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          # Audio rows downsample to 16 kHz mono with ffmpeg before upload to Groq.
+          ffmpeg -version >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+          python -m pip install --upgrade pip
+          pip install -e ".[live]"
+
+      - name: Backfill ${{ matrix.slug }}
+        id: backfill
+        # `backfill` exits non-zero if ANY row errored. Gating the PR step on that
+        # would throw away the evidence + stances the other rows already paid
+        # OpenRouter/Groq for, and --skip-ledger means a re-run re-pays for them.
+        # Keep going, open the PR with what worked, then fail the job below.
+        continue-on-error: true
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # Podcast enclosures are the richest source for this track, so the
+          # "phase 1 is HTML only" assumption behind omitting this no longer holds.
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          SLUG: ${{ matrix.slug }}
+          # Already validated by the plan job (confined to data/backfill/*.json).
+          PHASE_FILE: ${{ needs.plan.outputs.phase_file }}
+        run: |
+          python -m pipeline backfill --input "$PHASE_FILE" --only "$SLUG" --out-dir . --pr-body-out pr_body.md --skip-ledger
+
+      - name: Open PR for ${{ matrix.slug }}
+        uses: peter-evans/create-pull-request@v6
+        with:
+          # PAT (not GITHUB_TOKEN) so review.yml fires on this PR.
+          token: ${{ secrets.PIPELINE_PAT }}
+          # Per-run branch. create-pull-request force-rebuilds its branch as one
+          # commit on base, so a FIXED name would replace an earlier run's evidence
+          # and stance files while that PR sat unreviewed — the #62 clobber.
+          branch: backfill/${{ matrix.slug }}-${{ github.run_number }}
+          delete-branch: true
+          title: "Backfill: ${{ matrix.slug }} housing positions"
+          body-path: pr_body.md
+          labels: pipeline, needs-review
+          # Whole data/ dir: this isolated run only produced this candidate's files,
+          # and a glob fails the git add when a run makes no such subdir.
+          add-paths: data
+
+      # The partial work is captured above; now make the miss visible. A green
+      # run is not evidence the work was kept (#42) — and a dead row here is the
+      # expected case, not the edge one (#41 429s, #32 the YouTube bot-gate).
+      - name: Fail if any row errored
+        if: steps.backfill.outcome == 'failure'
+        env:
+          SLUG: ${{ matrix.slug }}
+        run: |
+          echo "::error::backfill reported failed rows for $SLUG; see the Backfill step log. Any rows that succeeded are on the PR above."
+          exit 1
+
+# No ledger-seeding job. The removed one marked every URL in the phase file seen
+# whether or not that candidate's PR ever merged — the same "burn a URL that was
+# never kept" hazard #42 exists to prevent. Backfill sources are platform pages and
+# older press that mostly fall outside the daily feeds' 7-day lookback anyway, and a
+# re-ingest would only re-propose a similar stance now that write_stance preserves
+# `record`. The ledger-advance question is owned by #61.

@@ -148,6 +148,17 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
 - `deploy.yml` — build + deploy to Pages on push to `main`.
 - `cron.yml` — daily `discover` → PR.
 - `intake.yml` — manual URL (issue form `add-media` or workflow_dispatch) → PR.
+- `backfill.yml` — hand-run (`workflow_dispatch`) `backfill` over an in-repo row list →
+  one PR per candidate. Inputs: `phase_file` (default `data/backfill/phase1.json`) and an
+  optional `slugs` filter; both enter only as `env:` vars parsed in a fixed Python heredoc,
+  and `phase_file` is confined to `data/backfill/*.json`. `max-parallel: 1` (credit-limited,
+  one candidate merged before the next). Branch is `backfill/<slug>-<run_number>` — a fixed
+  name would let a later run clobber an unreviewed PR's files. It seeds no ledger entries on
+  purpose (see #61). **A failed row does not discard the rows that succeeded:** the CLI
+  exits non-zero if *any* row errored, so the step is `continue-on-error` and the PR opens
+  with whatever worked; a trailing step re-raises so the job still reads red. Without that,
+  one 429'd URL (#41) would bin a whole candidate's paid extraction, and `--skip-ledger`
+  means the re-run pays again. Contract pinned offline by `tests/test_workflows.py`.
 - `review.yml` — on pipeline PRs: re-ingest + verify → comment + `ai-verified`/`ai-flagged` label.
 
 Secrets: `OPENROUTER_API_KEY`, `GROQ_API_KEY`, and `PIPELINE_PAT` (a PAT is required so
@@ -230,11 +241,12 @@ incumbency backfill) folded into #51. #47 closed: RSS validated.
   (`pipeline/backfill.py`, **one PR per candidate**) is **built + merged
   — 8/11 candidates seeded** (incl. george-cardenas from his platform housing pillar).
   danielle-carter-walters is dropped (`tracked: false`); lisa-nee and maria-pappas have no
-  position yet (a property-tax-only quote does NOT count as housing). The `backfill.yml`
-  workflow was **removed** (2026-07-15; its only 2 recorded runs failed) — backfills are
-  Claude-session-driven via the kept CLI (`ingest-url` per source, or `backfill` mode with a
-  phase file). Superseded 2026-08-19 by the per-candidate backfill track described above,
-  which uses the same CLI but covers officeholder records too.
+  position yet (a property-tax-only quote does NOT count as housing). `backfill.yml` was
+  removed 2026-07-15 (its only 2 recorded runs failed) and **restored + parameterized
+  2026-08-24 (#63)** — it is the only way to run a backfill with credentials, since a cloud
+  Claude session has no secrets store and this repo is public, so the keys stay in Actions
+  secrets. Superseded 2026-08-19 by the per-candidate backfill track described above, which
+  uses the same CLI but covers officeholder records too.
 - **Discovery expansion** — [`docs/archive/discovery-expansion-plan.md`](./docs/archive/discovery-expansion-plan.md).
   **Done (2026-07-09).** The daily cron now discovers **articles, YouTube** (per-candidate
   campaign channels + standing WTTW/WGN/City Club), **podcasts** (Ben Joravsky / Fran Spielman /
