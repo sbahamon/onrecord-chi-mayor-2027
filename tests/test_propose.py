@@ -283,3 +283,108 @@ def test_a_statement_with_no_mechanism_key_produces_a_cell_without_one():
     stances = propose.propose_stance_updates(_evidence([_stmt()]), today="2026-09-01")
 
     assert "mechanism" not in stances[0]
+
+
+# --- a weaker source must not quietly make a specific cell vague (#90) ---------
+
+def _cell(**over):
+    base = {
+        "candidate": "example-candidate-a", "topic": "zoning-reform",
+        "stance": "supports", "summary": "specific take",
+        "citations": ["podcast-hit#0"], "updated_date": "2026-08-02",
+        "mechanism": "cut permit review to 30 days",
+    }
+    base.update(over)
+    return base
+
+
+def test_write_stance_does_not_downgrade_a_specific_cell_to_vague(tmp_path):
+    """A mechanism-less proposal must not overwrite a mechanism-bearing cell (#90).
+
+    `citations` union across evidence files (#70/#72) but `stance`, `summary` and
+    `mechanism` came from whichever file was written last — and processing order
+    is arbitrary (alphabetical in a backfill, discovery order in the cron). So a
+    weaker source silently replaced a stronger one.
+
+    Seen live completing the giannoulias backfill: a Sun-Times row processed after
+    a policy interview replaced *"Supports a millionaire's tax…"* +
+    `mechanism: "3% tax on incomes above a million dollars"` with *"Will advocate
+    for more funding for Chicago Public Schools"* + `mechanism: null` — while still
+    citing the podcast statement that named the mechanism. The cell then told a
+    reader the opposite of what its own evidence said, and nothing failed: schemas
+    passed, citations resolved, the integrity tests were green.
+    """
+    propose.write_stance(_cell(), tmp_path)
+
+    path = propose.write_stance(_cell(
+        summary="vague take", stance="mixed", citations=["article-hit#0"],
+        updated_date="2026-09-01", mechanism=None,
+    ), tmp_path)
+
+    written = json.loads(path.read_text())
+    assert written["mechanism"] == "cut permit review to 30 days"
+    # stance and summary travel WITH the mechanism — they describe one statement.
+    # Keeping the summary while taking the new stance would caption support with
+    # "mixed", which is worse than either source alone.
+    assert written["summary"] == "specific take"
+    assert written["stance"] == "supports"
+    # The weaker source is still evidence for the position, so it is still cited,
+    # and the cell did change — its date advances.
+    assert written["citations"] == ["podcast-hit#0", "article-hit#0"]
+    assert written["updated_date"] == "2026-09-01"
+
+
+def test_write_stance_does_not_downgrade_when_the_proposal_omits_mechanism(tmp_path):
+    """An absent key means "not yet assessed" — even weaker grounds to overwrite.
+
+    Null at least says someone looked and found no specifics. Absent says nobody
+    looked, so it must never replace a mechanism somebody did find.
+    """
+    propose.write_stance(_cell(), tmp_path)
+
+    unassessed = _cell(summary="pre-migration take", citations=["old-hit#0"],
+                       updated_date="2026-09-01")
+    del unassessed["mechanism"]
+    path = propose.write_stance(unassessed, tmp_path)
+
+    written = json.loads(path.read_text())
+    assert written["mechanism"] == "cut permit review to 30 days"
+    assert written["summary"] == "specific take"
+
+
+def test_write_stance_accepts_an_upgrade_from_vague_to_specific(tmp_path):
+    """The guard is one-way: better evidence must still be able to win.
+
+    Otherwise the first source to touch a cell would own it forever, and the
+    matrix could never improve as sourcing improved — the failure the mechanism
+    ranking in `_rank` exists to prevent, one layer up.
+    """
+    propose.write_stance(_cell(summary="vague take", mechanism=None), tmp_path)
+
+    path = propose.write_stance(_cell(
+        summary="specific take", citations=["podcast-hit#0"],
+        updated_date="2026-09-01",
+    ), tmp_path)
+
+    written = json.loads(path.read_text())
+    assert written["mechanism"] == "cut permit review to 30 days"
+    assert written["summary"] == "specific take"
+
+
+def test_write_stance_lets_a_newer_mechanism_replace_an_older_one(tmp_path):
+    """Two specific sources stay last-write-wins, deliberately.
+
+    Ranking *which* of two named mechanisms is better is a judgment this code
+    cannot make, so the documented "newest proposal owns the position" behaviour
+    is left intact. Only the downgrade to vague is blocked.
+    """
+    propose.write_stance(_cell(), tmp_path)
+
+    path = propose.write_stance(_cell(
+        summary="newer specific take", citations=["newer-hit#0"],
+        updated_date="2026-09-01", mechanism="end single-family-only zoning",
+    ), tmp_path)
+
+    written = json.loads(path.read_text())
+    assert written["mechanism"] == "end single-family-only zoning"
+    assert written["summary"] == "newer specific take"
