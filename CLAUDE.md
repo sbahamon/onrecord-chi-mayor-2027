@@ -154,7 +154,11 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
   and `phase_file` is confined to `data/backfill/*.json`. `max-parallel: 1` (credit-limited,
   one candidate merged before the next). Branch is `backfill/<slug>-<run_number>` — a fixed
   name would let a later run clobber an unreviewed PR's files. It seeds no ledger entries on
-  purpose (see #61). Contract pinned offline by `tests/test_workflows.py`.
+  purpose (see #61). **A failed row does not discard the rows that succeeded:** the CLI
+  exits non-zero if *any* row errored, so the step is `continue-on-error` and the PR opens
+  with whatever worked; a trailing step re-raises so the job still reads red. Without that,
+  one 429'd URL (#41) would bin a whole candidate's paid extraction, and `--skip-ledger`
+  means the re-run pays again. Contract pinned offline by `tests/test_workflows.py`.
 - `review.yml` — on pipeline PRs: re-ingest + verify → comment + `ai-verified`/`ai-flagged` label.
 
 Secrets: `OPENROUTER_API_KEY`, `GROQ_API_KEY`, and `PIPELINE_PAT` (a PAT is required so

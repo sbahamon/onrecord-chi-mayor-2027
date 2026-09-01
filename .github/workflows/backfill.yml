@@ -100,6 +100,12 @@ jobs:
           pip install -e ".[live]"
 
       - name: Backfill ${{ matrix.slug }}
+        id: backfill
+        # `backfill` exits non-zero if ANY row errored. Gating the PR step on that
+        # would throw away the evidence + stances the other rows already paid
+        # OpenRouter/Groq for, and --skip-ledger means a re-run re-pays for them.
+        # Keep going, open the PR with what worked, then fail the job below.
+        continue-on-error: true
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           # Podcast enclosures are the richest source for this track, so the
@@ -127,6 +133,17 @@ jobs:
           # Whole data/ dir: this isolated run only produced this candidate's files,
           # and a glob fails the git add when a run makes no such subdir.
           add-paths: data
+
+      # The partial work is captured above; now make the miss visible. A green
+      # run is not evidence the work was kept (#42) — and a dead row here is the
+      # expected case, not the edge one (#41 429s, #32 the YouTube bot-gate).
+      - name: Fail if any row errored
+        if: steps.backfill.outcome == 'failure'
+        env:
+          SLUG: ${{ matrix.slug }}
+        run: |
+          echo "::error::backfill reported failed rows for $SLUG; see the Backfill step log. Any rows that succeeded are on the PR above."
+          exit 1
 
 # No ledger-seeding job. The removed one marked every URL in the phase file seen
 # whether or not that candidate's PR ever merged — the same "burn a URL that was

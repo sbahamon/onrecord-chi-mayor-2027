@@ -183,3 +183,45 @@ def test_pr_is_opened_with_the_pat_and_a_per_run_branch(wf):
     # A fixed branch + an unmerged PR = create-pull-request force-rebuilds and
     # destroys the previous run's files (the #62 clobber).
     assert "github.run_number" in branch
+
+
+def _backfill_step_id(wf: dict) -> str:
+    step = _step(wf["jobs"]["backfill"], contains="python -m pipeline backfill")
+    assert step.get("id"), "the backfill step needs an id so later steps can read its outcome"
+    return step["id"]
+
+
+def test_a_failed_row_does_not_discard_the_rows_that_succeeded(wf):
+    """`cmd_backfill` exits 1 if *any* row errored, so a bare `if: success()` on
+    the PR step throws away every file the other rows already paid for. Phase
+    files for the per-candidate track (#50) are multi-URL, and #41 (Block Club /
+    Reader 429s) plus #32 (the YouTube bot-gate) make one dead row the expected
+    case. `--skip-ledger` means nothing was marked, so a re-run re-pays for the
+    rows that already worked.
+    """
+    step_id = _backfill_step_id(wf)
+    step = _step(wf["jobs"]["backfill"], step_id=step_id)
+    assert step.get("continue-on-error") is True
+
+    pr = next(s for s in wf["jobs"]["backfill"]["steps"]
+              if "create-pull-request" in (s.get("uses") or ""))
+    # Ungated on purpose: create-pull-request no-ops on a zero diff, so a run
+    # where *every* row failed still opens nothing.
+    assert "if" not in pr, "the PR step must not be gated on the backfill step succeeding"
+
+
+def test_a_failed_row_still_fails_the_job(wf):
+    """Keeping the partial work must not make a broken row look green (#42's
+    lesson one layer down: a green run is not evidence the work was kept)."""
+    step_id = _backfill_step_id(wf)
+    steps = wf["jobs"]["backfill"]["steps"]
+    gate = next(
+        (s for s in steps if f"steps.{step_id}.outcome" in (s.get("if") or "")),
+        None,
+    )
+    assert gate is not None, "no step re-raises the backfill failure"
+    assert "failure" in gate["if"]
+    assert "exit 1" in (gate.get("run") or "")
+
+    pr_i = next(i for i, s in enumerate(steps) if "create-pull-request" in (s.get("uses") or ""))
+    assert steps.index(gate) > pr_i, "fail the job only after the partial work is captured"
