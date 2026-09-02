@@ -92,7 +92,10 @@ def test_backfill_cli_invocation_matches_the_subparser(wf):
     assert args.func is cmd_backfill
     assert args.input == str(PHASE1)
     assert args.only == "brandon-johnson"
-    assert args.skip_ledger is True, "matrix jobs must not race on data/ledger.json"
+    # Assert the OUTCOME, not the flag: `--skip-ledger` became a no-op when not
+    # seeding turned into the default (#101), so pinning the flag would keep passing
+    # while silently testing nothing. What must hold is that matrix jobs never seed.
+    assert args.seed_ledger is False, "matrix jobs must not race on data/ledger.json"
 
 
 def test_only_flag_matches_the_key_used_in_the_phase_files():

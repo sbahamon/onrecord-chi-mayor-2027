@@ -17,7 +17,7 @@ GitHub Pages.
 
 1. **TDD, always.** Every pipeline change starts with a failing test. Watch it fail,
    then implement. The suite runs offline on fixtures — no network, no keys.
-   `.venv/bin/pytest` (72+ tests). Live tests are `-m live` (need keys).
+   `.venv/bin/pytest` (235+ tests). Live tests are `-m live` (need keys).
 2. **Human review before publish.** `auto_merge_enabled` in `data/registry/config.json`
    ships `false`. There is a test (`test_review.py`) asserting auto-merge stays off
    regardless of verdicts. Do not casually flip this — it's a trust decision for the user.
@@ -237,9 +237,11 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
   purpose (see #61). **A failed row does not discard the rows that succeeded:** the CLI
   exits non-zero if *any* row errored, so the step is `continue-on-error` and the PR opens
   with whatever worked; a trailing step re-raises so the job still reads red. Without that,
-  one 429'd URL (#41) would bin a whole candidate's paid extraction, and `--skip-ledger`
-  means the re-run pays again. Contract pinned offline by `tests/test_workflows.py`.
-- `review.yml` — on pipeline PRs: re-ingest + verify → comment + `ai-verified`/`ai-flagged` label.
+  one 429'd URL (#41) would bin a whole candidate's paid extraction, and since a backfill
+  seeds no ledger entries (#61/#101) the re-run pays again. Contract pinned offline by `tests/test_workflows.py`.
+- `review.yml` — on pipeline PRs: re-ingest + verify → comment + an
+  `ai-verified`/`ai-unverifiable`/`ai-flagged` label (#100), clearing the other two first so a
+  re-reviewed PR never wears two verdicts.
   Triggers on `opened`, `synchronize` **and `labeled`**. The last one is load-bearing and was
   added 2026-09-01 after PR #96 opened un-reviewed: the verify job is gated on the `pipeline`
   label, but `gh pr create --label pipeline` attaches the label *after* the `opened` payload is
