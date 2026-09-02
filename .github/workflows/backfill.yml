@@ -108,7 +108,8 @@ jobs:
         id: backfill
         # `backfill` exits non-zero if ANY row errored. Gating the PR step on that
         # would throw away the evidence + stances the other rows already paid
-        # OpenRouter/Groq for, and --skip-ledger means a re-run re-pays for them.
+        # OpenRouter/Groq for, and a backfill seeds no ledger entries (#61/#101), so
+        # a re-run re-pays for them.
         # Keep going, open the PR with what worked, then fail the job below.
         continue-on-error: true
         env:
@@ -120,7 +121,7 @@ jobs:
           # Already validated by the plan job (confined to data/backfill/*.json).
           PHASE_FILE: ${{ needs.plan.outputs.phase_file }}
         run: |
-          python -m pipeline backfill --input "$PHASE_FILE" --only "$SLUG" --out-dir . --pr-body-out pr_body.md --skip-ledger
+          python -m pipeline backfill --input "$PHASE_FILE" --only "$SLUG" --out-dir . --pr-body-out pr_body.md
 
       - name: Open PR for ${{ matrix.slug }}
         uses: peter-evans/create-pull-request@v6
