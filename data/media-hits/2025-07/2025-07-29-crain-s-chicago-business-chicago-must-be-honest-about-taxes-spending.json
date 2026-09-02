@@ -1,0 +1,96 @@
+{
+  "id": "2025-07-29-crain-s-chicago-business-chicago-must-be-honest-about-taxes-spending",
+  "url": "https://www.chicagobusiness.com/opinion/chicago-must-be-honest-about-taxes-spending-cardenas-oped",
+  "outlet": "Crain's Chicago Business",
+  "media_type": "article",
+  "title": "Chicago must be honest about taxes, spending",
+  "published_date": "2025-07-29",
+  "discovered_date": "2026-09-02",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "george-cardenas",
+      "topic": "property-taxes-tif",
+      "stance": "opposes",
+      "summary": "Opposes raising property taxes, calling it a 'slow poison' and 'surrender'.",
+      "quote": "City Hall\u2019s latest flirtation with tax hikes, brought to light in Crain\u2019s July 25 editorial, is more than just political posturing \u2014 it\u2019s a red flag for every homeowner and business operator in this city.",
+      "locator": null,
+      "confidence": 0.95,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Supports cutting spending, including layoffs, agency cuts, and program trims, as an alternative to tax hikes.",
+      "quote": "If the mayor is ruling out property tax hikes, then layoffs, agency cuts, and program trims must be openly discussed.",
+      "locator": null,
+      "confidence": 0.95,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Supports fixing systemic issues like bloated contracts, opaque work rules, and unchecked overtime to avoid property tax hikes.",
+      "quote": "If we don\u2019t fix these systemic issues, property tax hikes will become the default solution.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Supports growing the tax base through real projects, bringing back cranes downtown, and reigniting manufacturing.",
+      "quote": "We need to grow the base \u2014 build real projects, bring back cranes downtown, reignite manufacturing on the South and West sides, and capture new value instead of recycling old pain.",
+      "locator": null,
+      "confidence": 0.95,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "permitting-reform",
+      "stance": "supports",
+      "summary": "Supports streamlining permitting to make the city investment-worthy.",
+      "quote": "That means streamlining permitting. Eliminating redundancies.",
+      "locator": null,
+      "confidence": 0.95,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Supports fixing broken property assessments that scare off capital.",
+      "quote": "Fixing the broken assessments that scare off capital.",
+      "locator": null,
+      "confidence": 0.95,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Supports moving toward income-based relief mechanisms like the circuit breaker for property tax equity.",
+      "quote": "There must be equity, and that means moving toward income-based relief mechanisms like the circuit breaker.",
+      "locator": null,
+      "confidence": 0.95,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "circuit breaker"
+    }
+  ]
+}
