@@ -57,7 +57,7 @@ implementations; tests pass fakes.
 | `bluesky.py` | `fetch_author_feed` — public `getAuthorFeed` (injected HTTP); a candidate's original text posts as items (skips reposts + media-only) |
 | `llm.py` | `OpenRouterLLM.complete_json` — OpenAI-compatible, injectable `post`, retries |
 | `extract.py` | LLM → statements; **quote-in-transcript**, housing/other routing; **drops** individual schema-invalid statements (keeps valid siblings); asks for a **`mechanism`** (the named instrument, or `null` — "supports affordable housing" is not a position) |
-| `propose.py` | Build evidence record + stance cells + PR body; write files. `propose_stance_updates` cites the **most specific** statement (`_rank`: mechanism first, then confidence). `write_stance` **preserves an existing `record`**, **unions citations across sources** (superseding within one, #70/#72), and **refuses to let a mechanism-less proposal overwrite a cell that names one** (#90) |
+| `propose.py` | Build evidence record + stance cells + PR body; write files. `propose_stance_updates` cites the **most specific** statement (`_rank`: mechanism first, then confidence). `write_stance` **preserves an existing `record`**, **unions citations across sources** (superseding within one, #70/#72), and **refuses to let a mechanism-less proposal overwrite a cell that names one** (#90) or **a proposal to invert a cell's polarity** between the supporting labels and `opposes` (#57) |
 | `review.py` | Deterministic quote check + model judgment on faithfulness, attribution, and whether a **claimed `mechanism` is actually in the transcript**; a source it cannot re-fetch degrades to **`unverifiable`** rather than aborting the run (#69); for **audio only**, a quote that isn't verbatim is **located** (`best_matching_passage`) and handed to the reviewer to judge as the same statement — verdict `quote_match: exact\|reconciled\|none` (#92); label + auto-merge gate |
 | `config.py` | Load registries; `candidate_slugs`, `topic_slugs`, `discovery_feeds` (shared outlet RSS + per-candidate Google News [gated off by default] / YouTube / Bluesky) |
 | `run.py` | `process_source`: ingest→extract→propose; **retries extract** (`extract_attempts`) reusing the transcript; `ProcessResult.transcript_chars` (length only, for discovery logs) |
@@ -313,7 +313,7 @@ Opus agents verifying quotes and attribution — but all output funnels through 
 `backfill` CLI, so it's still one PR per candidate with the quote-in-transcript guard and
 `review.yml` intact. The daily cron stays paused until every one of those PRs is merged.
 
-**Progress (2026-09-01): #52 alexi-giannoulias is the first closed** (PR #89). Nine remain:
+**Progress (2026-09-01): #52 alexi-giannoulias and #57 matthew-brewer are closed.** Eight remain:
 #51, #53–#60. Two lessons from running the first one, worth applying to the rest. **One:
 check the podcast feeds before accepting that a candidate has said nothing specific** — his
 matrix went from 0 mechanisms to 1 on a single Fran Spielman episode that press coverage of
@@ -322,7 +322,7 @@ recorded as such.** Six of his nine topics have no cell and his `record` is empt
 platform page, forum or questionnaire exists and Secretary of State does not intersect
 housing — that is coverage-limited, not un-run, and the issue was closed saying so rather
 than left open implying work remained. Running order for the rest, decided 2026-09-01 and
-**johnson LAST**: no stance file in the repo has a `record` array yet, so whoever does him
+**johnson LAST** (the record path has now run once, on brewer — see below): no stance file in the repo has a `record` array yet, so whoever does him
 first would be exercising that path for the very first time, on four years of incumbency and
 the most consequential row on the site. Prove the workflow on small records, then spend it
 there. **1. #57 brewer** — a CHA board commissioner's record is small, bounded and *directly*
@@ -335,6 +335,44 @@ discusses the action **in his own words** — board minutes cannot cite it. **2.
 reason giannoulias was: a property-tax record is not a housing record). **3.** the real
 multi-office records (#54 quigley, #53 mendoza, #56 cardenas). **4. #51 johnson**, by which
 point the record path has run eight times.
+
+**What #57 brewer settled (2026-09-01), for the seven candidates after it.**
+
+- **The `record` path works, and it is hand-curated on top of CLI output.** Nothing in
+  `pipeline/` writes a `record`; `propose.write_stance` only *preserves* one. So the issue's
+  "do not hand-write data files" governs evidence and positions — the record array itself is
+  authored by a human citing statements the CLI produced. Brewer's is the first in the repo:
+  four entries on `public-housing-cha`, outcomes `pending`/`withdrawn`/`enacted`.
+- **A record entry can only cite a statement the extractor marked `is_housing`.**
+  `build_evidence_record` rejects everything else, so a pure governance quote routes to
+  `data/positions/other/` and is **not citable at all**. Plan sources accordingly: the
+  chairmanship fight is only recordable where he discusses it in housing terms.
+- **The attribution bar that worked:** cite a quote only where the outlet names the candidate
+  as the speaker. Brewer's record rests on Sun-Times sentences of the form "Brewer said X",
+  which is him narrating his own agency — not the #49 trap of a spokesperson saying "the CHA
+  did X". A statement whose quote said "records show" was excluded, and **the reviewer
+  independently flagged that same statement for the same reason**. Two models agreeing on the
+  attribution line is the best signal available that it is drawn in the right place.
+- **A missing outcome is a finding, not a hole to fill.** His record carries no `failed`
+  entry. The obvious candidate — the CHA's HUD litigation — could not be sourced: two
+  extraction runs produced no statement for it, and the available quotes cover *why* the
+  agency sued, never how it ended. Writing the outcome anyway would have been a fact from
+  memory. Related caution paid for the same day: a single subordinate clause in one article
+  ("While the CHA lost its lawsuit") was nearly committed as settled fact, when contemporaneous
+  coverage shows the agency **seeking a temporary restraining order** with no reported ruling
+  on the merits. **Check an outcome before asserting one about a real organisation.**
+- **Questionnaires are the source class this track was missing.** The Real Deal published a
+  candidate Q&A series on 2026-09-01 covering **7 of the 9 declared candidates** (Giannoulias
+  and Willie Wilson declined; Johnson has not declared). Brewer's took him from 2 stance cells
+  to **6** — it is the only source that reached past CHA and affordable-housing-funding. The
+  **george-cardenas** Q&A is already live and feeds #56:
+  `therealdeal.com/chicago/2026/08/31/george-cardenas-would-redirect-tifs-as-chicago-mayor/`.
+  **Check that series before sourcing any remaining candidate.**
+- **Source type decides the outcome, but not always the way #52 predicted.** Giannoulias was
+  rescued by a policy interview. Brewer is the inverse: his hour-long Fran Spielman interview
+  returned **zero** mechanisms across two runs, and all three of his mechanisms came from
+  *operational reporting* about the agency he ran. A candidate's campaign talk and their
+  record are different sources with different yields — search both.
 
 **Start with [`docs/architecture-review-2026-07-15.md`](./docs/architecture-review-2026-07-15.md)**
 — the full-project audit (what actually worked in production vs. not, root cause = runner
@@ -354,7 +392,7 @@ while a PR sits unreviewed — the ledger on `main` only advances on merge). #70
 union across sources and supersede within one, #72). #46 (Johnson incumbency backfill) folded into #51. #47 closed:
 RSS validated. #63 closed — `backfill.yml` was restored, parameterized, and verified
 live on 2026-09-01 (run 33531560146 opened a reviewed PR and the partial-failure path held).
-#90 closed (a vague proposal can no longer overwrite a specific cell) and #92 closed
+#57 closed (matthew-brewer; it also shipped the polarity guard below). #90 closed (a vague proposal can no longer overwrite a specific cell) and #92 closed
 (drifted audio quotes are reconciled rather than failed).
 
 - **Backfill** — [`docs/archive/backfill-plan.md`](./docs/archive/backfill-plan.md). One-time
@@ -476,6 +514,35 @@ full Groq transcription).
   the same function** (`record`, then `citations`, then the position fields). Any new stance field
   is guilty until a test proves otherwise, and the failure is always silent — schemas pass,
   citations resolve, only reading the written file catches it.
+
+  **The fourth instance was a polarity inversion, and it is worse than the other three
+  (found + fixed 2026-09-01, #57).** Backfilling matthew-brewer, a Sun-Times article about
+  the CHA **suing HUD over anti-DEI grant conditions** extracted as
+  `topic: affordable-housing-funding, stance: opposes` at confidence 1.0. What he opposes is
+  HUD's *conditions*; the topic filing is simply wrong. It then outranked the existing 0.95
+  statement, named no mechanism so the #90 guard did not apply, and took the cell — so the
+  public matrix said a candidate who supports affordable-housing funding **opposes** it. The
+  first three instances lost information; this one asserted the opposite of a real person's
+  position, on a public accountability site. Nothing failed, again: schemas passed, citations
+  resolved, integrity stayed green, and the reviewer checks quote faithfulness and mechanism
+  presence but **not topic filing** — no layer in the pipeline reads a stance label against
+  its own evidence. `write_stance` now **refuses to invert a cell's polarity** — between the
+  supporting labels and `opposes` — because the code cannot tell a genuine reversal from a
+  mis-filed statement, and those need opposite responses; a real reversal is a human edit, the
+  standard `record` already gets. Deliberately narrow: `supports` → `mixed` still lands (an
+  existing test pins it), since adding nuance is what a second source should do. The refused
+  proposal's citation is **still unioned onto the cell**, so the disagreeing evidence is
+  visible to a reviewer rather than dropped, and its `mechanism` is discarded rather than kept
+  — pairing a named instrument with the opposite position is the mismatch being prevented.
+  **The guard does NOT cover the related hazard, so watch for it by hand:** a *same-polarity*
+  mis-file still wins, and if it carries a mechanism the #90 guard then **protects** it. Seen
+  live in the same session — a re-run moved a Dearborn-Homes security-budget statement from
+  `public-housing-cha` to `affordable-housing-funding`, where its mechanism outranked the
+  candidate's actual funding answer and took the cell; the cell then had a mechanism, so a
+  better mechanism-less proposal could no longer replace it. **A mis-filed mechanism is
+  sticky.** That cell was corrected by hand. The generalisable point: `_rank` treats "names a
+  mechanism" as strictly better, which is right within a topic and wrong across a mis-filed
+  one, and re-running a source can silently move a statement's topic *and* its index.
 
 - **A verified quote can fail its own verification, and it is the *encoder*, not the model
   (found + fixed 2026-09-01, #92).** Every podcast row was landing `ai-flagged` with "quote NOT
