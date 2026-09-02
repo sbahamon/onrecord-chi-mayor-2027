@@ -509,7 +509,11 @@ fine. **If the cron ends up running locally too, close both.** #44's item 4 (the
 matcher) was split out and shipped as **#92** — it was needed for the Groq path that is live
 today, not for a future Gemini one; **#45** (weekly scheduled-Claude
 discovery session) — never built, and its absence is exactly why a month of silent failure
-went unnoticed; **#41** (Block Club / Reader article-page 429s, degraded not blocking);
+went unnoticed; **#41** (outlets that block datacenter IPs — rewritten 2026-09-02 and now led by
+the half that survives any cron-location decision: `review.yml` stays hosted by design, so a source it
+cannot re-fetch is a merged statement the two-model design never checked. The discovery-throughput half
+is parked with #43/#44 for the un-pause decision. Current hard blocks are The Real Deal and Crain's,
+**not** Block Club, which re-verified fine on #97);
 **#30** (live headless fetcher — note it unblocks JS-rendered pages *only*, and cannot help
 with any IP-reputation block); **#61** (discovery re-triages the same ~200 items daily
 while a PR sits unreviewed — the ledger on `main` only advances on merge). #70 closed (stance citations now
