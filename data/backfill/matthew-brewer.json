@@ -1,0 +1,54 @@
+{
+  "phase": "candidate:matthew-brewer",
+  "description": "Per-candidate backfill rows for #57 (track #50). Researched 2026-09-01. He is NOT an elected official and never held elected office: thecha.org's board bio says the Chicago City Council APPROVED his appointment as a commissioner on 2013-11-13, and mattbrewer.com/about says 13 years as Commissioner, board chair and CEO of the CHA; he was board chair and temporary operating chairman through 2025 and stepped down as operating chair shortly before his 2026-06-25 launch, remaining a board member. Say appointed, never elected. Two intermediate titles that circulate in search summaries (vice chairman Nov 2021, interim chairman from 2024-10-31) are NOT on any page fetched here and are deliberately omitted rather than asserted. What exists: mattbrewer.com has NO platform page - nav is Meet Matt / Volunteer / Donate, and /issues, /platform, /housing, /priorities, /news plus six other guesses all return the 570819-byte homepage as a soft 404, so only /about is real and it is biography with zero policy. His registry youtube_channel (UCGPx_hjXUfYs5jtxzTgry2A) returns a feed with ZERO entries - probably a wrong id, worth re-checking. The three podcast feeds in sources.json were pulled and grepped: one real hit, row 1, an hour of first-person answers and the only untapped source likely to carry forward-looking mechanisms. The City Club / WTTW / WGN YouTube feeds carry only 15 recent entries each and cannot reach his June launch week, so their silence is not evidence of absence. Historical housing-action press WAS searched (2025 CHA coverage scoped to sun-times, block club, WTTW, Reader, TRiiBE), which is what produced row 2 - the single richest first-person source found anywhere, 14 Brewer attributions in 12403 chars, and the backbone of the record array: Dearborn Homes elevators (one per building, construction from 2027, estimated $40 million), a restructured property and asset management department plus a new internal audit department, a scrapped RFP for property managers covering thousands of units cited to HUD budget cuts, and the CHA's lawsuit against HUD over anti-DEI grant conditions WHICH THE AGENCY LOST. The last two are defeats and belong on the record exactly as much as the wins. What is excluded and why: the already-merged CBS launch row is not re-run (write_stance unions citations across sources since #72 and re-extraction is non-deterministic, so re-running risks superseding verified statements); the Sun-Times writeup OF row 1 was fetched and read in full and is deliberately NOT a row - biography plus governance, every Brewer quote about leadership style and City Hall dysfunction rather than housing, the same shape as the giannoulias writeup run and dropped in #52; WTTW's 2025-09-02 piece 403s even from a residential IP; Block Club's 2026-05-19 waitlist piece fetches at 13252 chars but does not quote Brewer once; thecha.org's board bio quotes him not at all. Rows 4-6 are governance rather than housing policy and are staged LAST on purpose: the existing public-housing-cha cell has mechanism null, so the #90 downgrade guard does NOT protect it, and a governance summary written after a housing one would silently take the cell. Run rows 1-3, inspect data/stances/matthew-brewer/, then decide on 4-6. The binding constraint discovered while sourcing this issue: a record entry cites \"<evidence-id>#<index>\" and build_evidence_record REJECTS any statement with is_housing false, so a record entry can only cite a quote the extractor classified as housing - a pure governance quote routes to data/positions/other/ and is not citable at all. Nothing in pipeline/ writes a record array; propose.write_stance only PRESERVES one (propose.py:180), so record entries are curated on top of CLI-produced evidence. RUN LOG 2026-09-01. Rows 1-3 were run; rows 4-6 are NOT run pending a decision (they are governance, and the public-housing-cha cell now carries a mechanism so #90 protects its summary, but NOTHING in the pipeline guards a stance-LABEL inversion - see below). Row 1 was run TWICE because one run is not a measurement (CLAUDE.md): it returned 3 statements then 5, and BOTH runs returned mechanism null on every statement. Two samples is thin but it is a measurement, and it supports the finding that his forward-looking campaign talk names no instrument while his operational record does - the opposite of the usual pattern, where a policy interview rescues a candidate seeded from launch press. Run 2 also produced two weak statements ('we will be disruptive and bold', a metaphor about dropping a pin on a map) filed as affordable-housing-funding support, which is extraction noise the reviewer and human review should catch. Row 2 is the yield: 10 statements, 3 mechanisms - a 2026 budget allocation for security at Dearborn, adding an elevator to each Dearborn building with construction from 2027 at an estimated $40 million, and cancelling an RFP for property managers covering thousands of units until early next year. Brewer moves from 0 mechanisms to 3, all of them from operational reporting rather than from the campaign. ROW 3 WAS RUN AND ITS OUTPUT WAS REVERTED, and the reason is the most important finding here: both of its statements were filed under affordable-housing-funding with stance 'opposes' at confidence 1.0. What he opposes is HUD's anti-DEI grant CONDITIONS. Because both statements outranked the existing 0.95 CBS statement and the #90 guard is mechanism-only, write_stance flipped the public matrix cell to 'opposes affordable-housing-funding' - i.e. the site would have said this candidate opposes funding affordable housing. Nothing failed: schemas passed, citations resolved, the integrity tests stayed green, and review.py checks quote faithfulness and mechanism presence but not topic filing. The evidence file was deleted and the cell restored. Re-adding row 3 needs a decision, because re-running it reproduces the inversion. Note this is NOT the reporter-narration issue: 8 of row 2's 10 statements quote the reporter's 'Brewer said X' sentences rather than his verbatim speech, but so do already-merged rows (the giannoulias CBS and WTTW rows both do), so that is existing accepted behaviour caught by the reviewer plus human review, not a regression. It does bear on the record requirement: issue #57 asks a record entry to resolve to Brewer's OWN words, and the elevator and cancelled-RFP mechanisms both rest on reporter narration. Whether that clears the bar is the user's call and it decides the remaining eight candidates.",
+  "rows": [
+    {
+      "candidate_slug": "matthew-brewer",
+      "url": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/8a540d09-6ca3-408c-ae86-956e1bb2bda8/0624_Fran_Show_Matthew_Brewer_mixdown.mp3",
+      "type": "podcast",
+      "outlet": "The Fran Spielman Show",
+      "date": "2026-06-24",
+      "title": "Matthew Brewer"
+    },
+    {
+      "candidate_slug": "matthew-brewer",
+      "url": "https://chicago.suntimes.com/the-watchdogs/2025/11/15/cha-residents-frustrated-housing-agency-permanent-ceo",
+      "type": "article",
+      "outlet": "Chicago Sun-Times",
+      "date": "2025-11-15",
+      "title": "CHA residents grow frustrated as agency marks one year without permanent CEO"
+    },
+    {
+      "candidate_slug": "matthew-brewer",
+      "url": "https://chicago.suntimes.com/chicago/2025/10/16/chicago-housing-authority-sues-hud-over-new-anti-dei-grant-requirements",
+      "type": "article",
+      "outlet": "Chicago Sun-Times",
+      "date": "2025-10-16",
+      "title": "Chicago Housing Authority sues HUD over new anti-DEI grant requirements"
+    },
+    {
+      "candidate_slug": "matthew-brewer",
+      "url": "https://chicago.suntimes.com/city-hall/2026/04/01/mayor-johnson-oust-cha-board-chair-brewer-agency-vote-new-ceo",
+      "type": "article",
+      "outlet": "Chicago Sun-Times",
+      "date": "2026-04-01",
+      "title": "Mayor Johnson looks to oust CHA board chair after agency votes in new CEO"
+    },
+    {
+      "candidate_slug": "matthew-brewer",
+      "url": "https://chicago.suntimes.com/elections/2026/05/21/cha-matthew-brewer-possible-mayoral-run-brandon-johnson",
+      "type": "article",
+      "outlet": "Chicago Sun-Times",
+      "date": "2026-05-21",
+      "title": "CHA's Matthew Brewer weighs race for Chicago mayor amid power struggle with Brandon Johnson"
+    },
+    {
+      "candidate_slug": "matthew-brewer",
+      "url": "https://chicago.suntimes.com/city-hall/2026/07/14/city-council-blocks-mayor-brandon-johnson-proposed-cha-board-takeover",
+      "type": "article",
+      "outlet": "Chicago Sun-Times",
+      "date": "2026-07-14",
+      "title": "Emboldened City Council blocks Mayor Johnson's proposed CHA board takeover"
+    }
+  ]
+}

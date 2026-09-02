@@ -1,0 +1,132 @@
+{
+  "id": "2025-11-15-chicago-sun-times-cha-residents-grow-frustrated-as-agency-marks-one-year-without-permane",
+  "url": "https://chicago.suntimes.com/the-watchdogs/2025/11/15/cha-residents-frustrated-housing-agency-permanent-ceo",
+  "outlet": "Chicago Sun-Times",
+  "media_type": "article",
+  "title": "CHA residents grow frustrated as agency marks one year without permanent CEO",
+  "published_date": "2025-11-15",
+  "discovered_date": "2026-09-01",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Expects a permanent CEO to be appointed by the end of the year.",
+      "quote": "Matthew Brewer, the CHA board chair and temporary operating chairman, said he expects a permanent CEO to be appointed by the end of the year.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Says the board will consider other candidates for CEO.",
+      "quote": "Brewer said the board will consider other candidates and declined to comment on who is being considered.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Says additional funds for security will be allocated in the 2026 budget for Dearborn Homes.",
+      "quote": "Additional funds for security will be allocated in the 2026 budget, said Brewer, who recently visited Dearborn and met with property managers and residents.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "2026 budget allocation for security"
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Plans to add an elevator to each Dearborn building, with construction expected to start in 2027 at an estimated cost of $40 million.",
+      "quote": "Each Dearborn building has one elevator, but the CHA plans to add an elevator to each building, with construction expected to start in 2027, Brewer said. The agency estimates the cost to be $40 million.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "Add an elevator to each building, construction start 2027, cost $40 million"
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Says elevator maintenance will remain a priority.",
+      "quote": "Elevator maintenance will remain a priority, Brewer said.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Says the housing authority did work with residents to find a replacement property manager with a strong track record.",
+      "quote": "He said the housing authority did work with residents to find a replacement property manager with a \u201cstrong track record.\u201d",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Believes the CHA's engagement with residents has improved and that building trust doesn't happen overnight.",
+      "quote": "Overall, Brewer believes the CHA\u2019s engagement with residents has improved. \u201cBuilding trust doesn\u2019t happen overnight,\u201d said Brewer, who became a board member in 2013. \u201cWe have been proactive, especially over the last year.\u201d",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Says the agency will dig into resident survey results to address concerns.",
+      "quote": "The agency will be digging into the resident survey results in an effort to address their concerns, Brewer said.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Canceled a request for proposals for new property managers until early next year due to Trump's funding priorities and emerging needs, to save money.",
+      "quote": "The CHA recently scrapped a request for proposals for new property managers for thousands of units. Brewer cited President Donald Trump\u2019s funding priorities \u2014 to slash HUD\u2019s budget \u2014 and \u201csome emerging needs\u201d at properties as the reason for canceling the request until early next year. It will allow the agency to save some money next year, Brewer said.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "Cancel request for proposals until early next year"
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Says a silver lining has been the ability to assess strengths and weaknesses to build a more sustainable foundation.",
+      "quote": "The latest hurdle aside, Brewer said a \u201csilver lining\u201d for the CHA this year has been its ability to assess its strengths and weaknesses in a way that wouldn\u2019t have been possible if the agency had been focused on getting a new CEO up to speed. \u201cIt allowed us to really take a step back and look at the organization with an eye toward building a more sustainable foundation,\u201d Brewer said.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    }
+  ]
+}
