@@ -328,9 +328,9 @@ each rebuilding that candidate's housing positions *and* (for sitting officehold
 `record`. All output funnels through the `backfill` CLI, so it stays one PR per candidate with
 the quote-in-transcript guard and `review.yml` intact.
 
-**Progress: #52 giannoulias, #57 brewer and #56 cardenas are closed; #59 nee is in review as
-PR #107.** Five remain — running order, decided 2026-09-01: the thin ones (**#58 holberg,
-#60 brooks, #55 pappas**), then the real multi-office records (**#54 quigley, #53 mendoza**),
+**Progress: #52 giannoulias, #57 brewer, #56 cardenas, #59 nee and #58 holberg are closed and
+merged.** Five remain — running order, decided 2026-09-01: the rest of the thin ones (**#60
+brooks, #55 pappas**), then the real multi-office records (**#54 quigley, #53 mendoza**),
 then **#51 johnson last**. Johnson is four years of incumbency and the most consequential row on
 the site; prove the record path on small records first.
 
@@ -340,6 +340,12 @@ the site; prove the record path on small records first.
 - **A thin result is often the correct answer, and should be recorded as such.** Six of
   giannoulias's nine topics have no cell because no platform page, forum or questionnaire
   exists — coverage-limited, not un-run. Close the issue saying so rather than leaving it open.
+- **A mechanism usually lives in a follow-up question**, so a source class that never asks one —
+  announcement coverage, campaign social, a platform page — structurally can't produce one. All
+  three of holberg's came from one WBEZ hour, off "How and where would those new units be built?" (#58).
+- **Re-running a source under its existing evidence id is a trade, not an upgrade.** It is the right
+  way to avoid a second evidence file per URL (the row must restate date+outlet+title, since that is
+  the id), but the new run destroys whatever it doesn't return — measure first (#58: 0 of 4 runs).
 - **Zero mechanisms is a finding when the search is exhausted, a bug when it isn't.** Tell them
   apart: no platform page + podcast feeds grepped + the long interview run + the op-ed run
   several times = measured null (#59). Seeded-from-launch-press = wrong sources (#52).
@@ -379,8 +385,8 @@ cleanup, so its "next steps" are partly superseded.
   local too, close both.** Full eval: `docs/gemini-transcription-eval-log.md`.
 - **#41** — outlets that block datacenter IPs. The half that survives any cron-location decision:
   `review.yml` stays hosted by design, so a source it cannot re-fetch is a merged statement the
-  two-model design never checked. Current hard blocks are The Real Deal and Crain's — **not**
-  Block Club, which re-verified fine on #97. The discovery-throughput half parks with #43/#44.
+  two-model design never checked. Current hard blocks are The Real Deal and Crain's — **not** Block
+  Club (#97) and **not** WTTW, which 403'd locally yet re-verified hosted on #58. Rest parks with #43/#44.
 - **#45** — weekly scheduled-Claude discovery session. Never built, and its absence is exactly
   why a month of silent failure went unnoticed.
 - **#30** — live headless fetcher. The injected seam exists and is offline-tested; the real
@@ -422,6 +428,7 @@ Rules only. The narratives, measurements and rejected alternatives are in
   | 4 | A mis-filed HUD-conditions statement flipping a cell to `opposes` — the site said a candidate who supports affordable-housing funding **opposes** it (#57) | refuses inversion between the supporting labels and `opposes`; the citation is still unioned on (so the disagreeing evidence is visible) and its mechanism discarded. `supports` → `mixed` still lands |
   | 5 | A *vaguer* mechanism replacing a specific one — four hand corrections on one candidate (#56) | **none.** Two named mechanisms stay last-write-wins; ranking them is a judgment the code can't make |
   | 6 | `supports` → `no-position` when both sides are `mechanism: null` (#59) | **none**, and it's the mild one — #98's rendering *printed* it, so it's loud, and it loses information rather than asserting a falsehood. A guard in #90's shape is worth having eventually |
+  | 7 | Re-running a source under its existing id silently **re-pointed** a cell that run didn't re-propose: the citation's pinned index now named a different statement on a different topic, and still **resolved**, so CI stayed green (#58) | **none.** #72 supersedes within a source only for cells that source re-proposes; a dropped cell keeps a pinned index into a rewritten list |
 
   Two hazards no guard covers: a **same-polarity mis-file** still wins, and if it carries a
   mechanism the #90 guard then *protects* it — **a mis-filed mechanism is sticky**. And
@@ -450,7 +457,9 @@ Rules only. The narratives, measurements and rejected alternatives are in
   shape, and no header or headless-browser work fixes it (#30 unblocks JS-rendered pages and
   nothing else). But a later hosted run re-fetched that same URL fine. **The argument for the
   local path is determinism, not that CI can never fetch.** Don't write CI off after one 406,
-  and don't trust it either.
+  and don't trust it either. **It runs both ways (#58):** WTTW 403'd a *residential* IP across four
+  attempts and three header profiles, shipped via `--html-file` — then the hosted reviewer fetched
+  it fine. `--html-file` does not imply the reviewer is blind to that URL; check the verdict.
 
 - **YouTube via yt-dlp is bot-gated on CI runner IPs (#32), and it's IP-based, not
   length-based.** A 30-second clip and a 4-hour stream fail identically with `Sign in to confirm

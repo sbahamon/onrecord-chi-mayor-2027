@@ -53,8 +53,9 @@ Opus agents verifying quotes and attribution — but all output funnels through 
 `backfill` CLI, so it's still one PR per candidate with the quote-in-transcript guard and
 `review.yml` intact. The daily cron stays paused until every one of those PRs is merged.
 
-**Progress: #52 alexi-giannoulias, #57 matthew-brewer and #56 george-cardenas are closed (#97 merged);
-#59 lisa-nee is in review as PR #107.** Five remain: #51, #53–#55, #58, #60.
+**Progress: #52 alexi-giannoulias, #57 matthew-brewer, #56 george-cardenas, #59 lisa-nee (PR #107)
+and #58 joe-holberg (PR #108) are closed and merged.** Five remain: #60 brooks, #55 pappas, then the
+multi-office records #54 quigley and #53 mendoza, then #51 johnson last.
 
 > **The track was paused on 2026-09-02 to fix four pipeline problems cardenas surfaced, and all four
 > are now merged.** #98 — the PR body never showed what a stance cell changed FROM, and displayed a
@@ -65,7 +66,8 @@ Opus agents verifying quotes and attribution — but all output funnels through 
 > #60 brooks, #55 pappas), then the multi-office records (#54 quigley, #53 mendoza), then #51 johnson
 > last. **#59 nee has since run** (PR #107) and exercised #98's before/after rendering on live data for
 > the first time — it worked, and it caught a real downgrade the same run; see the nee block below.
-> Remaining in the thin batch: #58 holberg, #60 brooks, #55 pappas.
+> **#58 holberg has since run too** (PR #108) — the first backfill on this track to *add* mechanisms to
+> a candidate who had none. Remaining in the thin batch: #60 brooks, #55 pappas.
 
 Two lessons from running the first one, worth applying to the rest. **One:
 check the podcast feeds before accepting that a candidate has said nothing specific** — his
@@ -89,6 +91,54 @@ reason giannoulias was: a property-tax record is not a housing record). **3.** t
 multi-office records (#54 quigley, #53 mendoza, ~~#56 cardenas~~ — cardenas was pulled forward and
 run second, out of this order, because his Real Deal Q&A was already live). **4. #51 johnson**, by
 which point the record path has run eight times.
+
+**What #58 holberg settled (2026-09-02), the second of the thin batch.** Four sources run, three
+yielded; 15 raw statements cut to 9 by hand, 6 cells cut to 4, and **0 mechanisms → 3** — the first
+backfill on this track to move a candidate off zero. Five transferable findings.
+
+- **One long interview outranked everything else combined, and the question that produced it was the
+  host's, not the candidate's.** His platform page, two TV writeups and 95 Bluesky posts yielded not
+  one instrument between them. The WBEZ *In the Loop* hour yielded all three, and specifically the
+  follow-up: he says "my plan is to call for 100,000 new units of housing", the host asks **"How and
+  where would those new units be built?"**, and the answer is "the city itself owns 10,000 vacant
+  lots… four or six units onto each one of those lots" plus the arithmetic ("$3,000 average bill…
+  generating $300 million in additional property taxes"). This is #52's podcast rule holding a second
+  time, with a sharper edge: **the mechanism lives in the follow-up question, so a source class that
+  never asks one — announcement coverage, campaign social, a platform page — structurally cannot
+  produce mechanisms**, however much housing text it contains. Note also that all three mechanisms are
+  *one plan* seen from three topics; "3 of 9 statements name an instrument" is not three instruments.
+- **A SEVENTH way `write_stance` leaves a cell wrong: a superseded source silently re-points an
+  un-reproposed cell's citation, and CI stays green.** Re-running a source under the same evidence id
+  (done deliberately here, see below) supersedes citations only for the cells that run *proposes*. The
+  pre-existing `tenant-protections` cell cited `…our-vision-for-chicago#1`; after the re-run, index 1
+  was a different statement on a different topic. The citation still **resolved**, so
+  `test_data_integrity` passed and the PR was green while the cell pointed at a quote that no longer
+  supported it. #72 supersedes *within* a source only for cells that source re-proposes — a cell it
+  drops keeps a pinned index into a rewritten list. Nothing catches this but reading the file.
+- **Re-running a source under its existing evidence id is the right move, and it destroys whatever the
+  new run doesn't return.** The platform page's evidence was re-run with `outlet`/`title`/`date` set to
+  the exact values behind its committed id, because `make_evidence_id` is date+outlet+title and leaving
+  any of them to the page writes a *second* evidence file for the same URL — which `feed.astro` and
+  `buildCandidateProfile` would both render, publishing the platform page twice. The cost: the new
+  extraction prefers the page's "Key Ideas" bullets and no longer returns the intro sentence the
+  `tenant-protections` cell was built on. That was **measured, not assumed** — four runs (one live,
+  three into a scratch `--data-dir`), displacement sentence 0/4, bullets 4/4 — and the cell was deleted.
+  **Re-running a platform page is a trade, not an upgrade: budget a variance check for whatever the
+  old extraction had that the new one might drop.**
+- **Three of four statements from one source being wrong is a signal about the source, not the model.**
+  The WGN row returned a budget-mismanagement quote filed as `affordable-housing-funding: opposes`
+  (wrong topic *and* the #57 inversion, unguarded because it was a first cell), the **reporter's own
+  sentence** — "In an interview with WGN Political Editor Tahman, Holberg says housing and
+  affordability will be some of the top issues for his campaign" — extracted as his words with
+  `attribution_flag: false`, and the same quote split across two topics. The survivor was a diagnosis
+  ("People's rents are going up"), not a position. The whole file was deleted, per the nee precedent.
+  **One quote appearing under two topics is the reliable tell that the extractor is stretching a source
+  that has no position in it.**
+- **Autobiography inside an answer about something else is not a position on the topic it mentions.**
+  A `homelessness` cell was written off "…supporting the unhoused like I was, you know, in college when
+  I slept in my car" — where the *question* was "How do you identify yourself politically?". Same shape
+  as nee's CHA cell: a topic word appearing in an answer about ideology or governance. **Read the
+  transcript around a quote before accepting the cell, not just the quote.**
 
 **What #59 nee settled (2026-09-02), the first of the thin batch.** Four sources run, two yielded: 4
 statements, 3 cells, **0 mechanisms**. Short candidate, four transferable findings.
@@ -516,6 +566,16 @@ full Groq transcription).
   after one 406, and do not trust it either: the argument for the local path is
   **determinism**, not that CI can never fetch. It also means a hosted run can lose a row on
   Monday and succeed on Tuesday, which is a nastier failure mode than a consistent block.
+  **And it runs in BOTH directions — measured 2026-09-02 on #58.** `news.wttw.com` returned a
+  Cloudflare `403` interstitial to a *residential* IP across four `curl` attempts and three header
+  profiles (Chrome UA, Safari UA, full `Sec-Fetch-*` set), so the row shipped via `--html-file` with
+  the page saved from a real browser and the PR body predicted a hosted `unverifiable`. The hosted
+  `review.yml` run then re-fetched that same URL **without trouble** and confirmed the statement —
+  0 unverifiable. So "residential fetches what CI can't" is not a law either; the local path buys
+  determinism *for you today*, not a guarantee that CI is worse. Corollary worth acting on: when a
+  local fetch fails, `--html-file` is the right move, but do **not** also assume the hosted reviewer
+  is blind to that URL — check the verdict before writing the source off as never machine-checked
+  (#41).
   Extraction costs
   ~**$0.0006/row** (deepseek-v3.2 on a news article), so re-running a row to be sure is
   cheaper than the thinking required to avoid it. Note OpenRouter's `/api/v1/key` reports that
