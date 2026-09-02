@@ -318,8 +318,8 @@ Opus agents verifying quotes and attribution — but all output funnels through 
 `backfill` CLI, so it's still one PR per candidate with the quote-in-transcript guard and
 `review.yml` intact. The daily cron stays paused until every one of those PRs is merged.
 
-**Progress (2026-09-01): #52 alexi-giannoulias and #57 matthew-brewer are closed.** Eight remain:
-#51, #53–#60. Two lessons from running the first one, worth applying to the rest. **One:
+**Progress (2026-09-01): #52 alexi-giannoulias and #57 matthew-brewer are closed; #56 george-cardenas
+is in review as PR #97.** Seven remain: #51, #53–#55, #58–#60. Two lessons from running the first one, worth applying to the rest. **One:
 check the podcast feeds before accepting that a candidate has said nothing specific** — his
 matrix went from 0 mechanisms to 1 on a single Fran Spielman episode that press coverage of
 the same week did not contain. **Two: a thin result can be the correct answer and should be
@@ -338,8 +338,52 @@ cites `"<evidence-id>#<index>"` like any stance, so it needs a source where the 
 discusses the action **in his own words** — board minutes cannot cite it. **2.** the thin ones
 (#59 nee, #58 holberg, #60 brooks, #55 pappas — pappas likely thin on housing for the same
 reason giannoulias was: a property-tax record is not a housing record). **3.** the real
-multi-office records (#54 quigley, #53 mendoza, #56 cardenas). **4. #51 johnson**, by which
-point the record path has run eight times.
+multi-office records (#54 quigley, #53 mendoza, ~~#56 cardenas~~ — cardenas was pulled forward and
+run second, out of this order, because his Real Deal Q&A was already live). **4. #51 johnson**, by
+which point the record path has run eight times.
+
+**What #56 cardenas settled (2026-09-01), running out of running order.** He was taken third rather
+than in the "real multi-office records" batch because the Real Deal Q&A for him was already live and
+the record path had just run once on brewer. Seven rows, 22 statements, 5 cells → 6, 2 mechanisms → 4.
+
+- **Neither guard fired, and both near-misses were tie-breaks.** A transfer-tax `opposes` statement at
+  confidence 1.0 sat one `_rank` position away from taking the `affordable-housing-funding` cell — it
+  lost only because it named no mechanism, exactly as brewer's did. Two candidates running, the #57
+  polarity guard has been the thing that *would* have caught an inversion and not the thing that did.
+  Do not read its existence as evidence the hazard is handled.
+- **#90 does not guard specific-vs-vague when both sides name a mechanism**, and this run is the proof.
+  Two already-good cells were silently replaced with *vaguer* text by a newer source: `zoning-reform`
+  lost "as-of-right housing near CTA/Metra, bus corridors, and commercial districts" for bare
+  "as-of-right housing growth", and `tenant-protections` lost "legal aid, rental help, and preservation
+  funds" for "antidisplacement safeguards" — the latter lifted from a sentence that is really about
+  zoning. Both were restored by hand. This is the *fifth* distinct way `write_stance` has quietly
+  degraded a cell; assume a sixth.
+- **Prefer the candidate's own answer over the reporter's summary of it, when both name a mechanism.**
+  The Real Deal piece opens with the reporter describing his platform as "redirecting one of
+  developer's favorite tools: tax increment financing resources"; that sentence outranked his own
+  first-person answers and took the funding cell. The reviewer **confirmed** it — correctly, it is in
+  the transcript and it does describe his platform — so there was no two-model agreement to justify
+  deleting the statement the way brewer's #9 was deleted. The cell was pointed at his own words
+  instead and the statement left in evidence. The general rule: a confirmed statement can still be the
+  wrong statement to *summarise a cell with*, and no automated layer will say so.
+- **`enacted` needs wording discipline when the thing enacted is an approval.** His one record entry is
+  the Parkview Lofts zoning approval he pushed through in 2021 (Council 36–13). The project was never
+  built — financing never materialised and the developers listed the buildings for sale in 2023 — but
+  that collapse is reported by Crain's, which 403s from a residential IP and quotes a developer rather
+  than him. So no `failed` entry exists, and the `action` text says "the City Council approved the
+  redevelopment" rather than anything implying units. Same call as brewer's HUD litigation.
+- **A record entry's topic follows the *kind of action*, not the subject matter.** The Parkview entry is
+  filed under `permitting-reform`, not `affordable-housing-funding`, because it is an
+  aldermanic-prerogative call on a development — which is that topic's description — and the funding
+  for it was in fact denied.
+- **Op-eds and questionnaires the candidate wrote are the open definitional question.** His richest
+  mechanism source is a signed Sun-Times op-ed, and his second is a 2019 Sun-Times editorial-board
+  questionnaire. Both are first-person and on the record in real outlets, neither is something he
+  *said*. Flagged for a maintainer ruling in PR #97 — decide before quigley, mendoza and johnson, who
+  will all have more of this.
+- **Block Club got through a hosted re-fetch this time; The Real Deal 403'd every attempt.** Another
+  data point for the "the block is intermittent" note below — the case for running locally is
+  determinism, not that CI can never fetch.
 
 **What #57 brewer settled (2026-09-01), for the seven candidates after it.**
 
