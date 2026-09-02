@@ -330,18 +330,17 @@ Opus agents verifying quotes and attribution — but all output funnels through 
 **Progress: #52 alexi-giannoulias and #57 matthew-brewer are closed; #56 george-cardenas is in review
 as PR #97.** Six remain: #51, #53–#55, #58–#60.
 
-> **THE TRACK IS PAUSED (decided 2026-09-02) pending #98–#101.** Not for lack of sources — running
-> cardenas surfaced four pipeline problems that all get *more* expensive on the six remaining
-> candidates, every one of whom is an officeholder with a `record` to build. **#98** (the PR body never
-> shows what a stance cell changed FROM, and displays a quote the cell doesn't cite) is the priority:
-> `write_stance` has now degraded a cell in five distinct ways and every single one was caught by a
-> human diffing files by hand. **#99** (the extractor cannot see a candidate defending their own agency
-> against criticism — measured, three runs, zero of the two quotes that mattered) bites #55 pappas
-> hardest, since the report at issue is hers. **#100** (`ai-flagged` conflates unverifiable with
-> contradicted) is the #92 always-red-label lesson recurring. **#101** is papercuts: no `--html-file`
-> for outlets that 403 every IP, and `backfill` seeding the ledger against its own documented
-> convention. Fix these, then resume with the thin batch.
- Two lessons from running the first one, worth applying to the rest. **One:
+> **The track was paused on 2026-09-02 to fix four pipeline problems cardenas surfaced, and all four
+> are now merged.** #98 — the PR body never showed what a stance cell changed FROM, and displayed a
+> quote the cell doesn't cite. #99 — the extractor could not see a candidate defending their own agency
+> against criticism. #100 — `ai-flagged` conflated "unverifiable" with "contradicted". #101 — no
+> `--html-file` for outlets that 403 every IP, and `backfill` seeding the ledger against its own
+> documented convention. **The track is clear to resume:** the thin batch (#59 nee, #58 holberg,
+> #60 brooks, #55 pappas), then the multi-office records (#54 quigley, #53 mendoza), then #51 johnson
+> last. **Read the next candidate's PR body carefully** — it is the first to exercise #98's
+> before/after rendering and #99's prompt on live data, and neither has been seen outside a test.
+
+Two lessons from running the first one, worth applying to the rest. **One:
 check the podcast feeds before accepting that a candidate has said nothing specific** — his
 matrix went from 0 mechanisms to 1 on a single Fran Spielman episode that press coverage of
 the same week did not contain. **Two: a thin result can be the correct answer and should be
