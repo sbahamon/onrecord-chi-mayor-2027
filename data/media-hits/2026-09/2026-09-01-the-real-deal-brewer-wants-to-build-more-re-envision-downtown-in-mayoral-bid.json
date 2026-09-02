@@ -1,0 +1,84 @@
+{
+  "id": "2026-09-01-the-real-deal-brewer-wants-to-build-more-re-envision-downtown-in-mayoral-bid",
+  "url": "https://therealdeal.com/chicago/2026/09/01/brewer-wants-to-build-more-re-envision-downtown-in-mayoral-bid/",
+  "outlet": "The Real Deal",
+  "media_type": "article",
+  "title": "Brewer wants to build more, re-envision downtown in mayoral bid",
+  "published_date": "2026-09-01",
+  "discovered_date": "2026-09-01",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "matthew-brewer",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports leveraging federal resources and bringing private and nonprofit capital to address affordable housing shortage.",
+      "quote": "We need to preserve existing affordable housing, build more of it, better leverage federal resources, put vacant and publicly owned land back into productive use, and bring private and nonprofit capital to the table.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "affordable-housing-funding",
+      "stance": "opposes",
+      "summary": "Opposes reviving the previously rejected transfer-tax measure for high-value property purchases as the funding strategy.",
+      "quote": "But I would not simply revive the transfer-tax measure that Chicago voters rejected.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "zoning-reform",
+      "stance": "supports",
+      "summary": "Supports sensible zoning to make it easier to build housing and convert buildings.",
+      "quote": "That requires faster approvals, sensible zoning and building requirements and predictable timelines.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "permitting-reform",
+      "stance": "supports",
+      "summary": "Supports faster approvals and predictable timelines to speed up development.",
+      "quote": "That requires faster approvals, sensible zoning and building requirements and predictable timelines.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "homelessness",
+      "stance": "supports",
+      "summary": "Believes Chicago needs a reliable, long-term funding strategy to address homelessness.",
+      "quote": "I strongly believe Chicago needs a reliable, long-term funding strategy to expand affordable housing and address homelessness.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "property-taxes-tif",
+      "stance": "mixed",
+      "summary": "Acknowledges property assessments should reflect economic reality but opposes shifting tax burden between taxpayers.",
+      "quote": "Property assessments should reflect economic reality, and the economics of many downtown office buildings have fundamentally changed since the pandemic. But reducing the assessment on one property shifts that burden onto homeowners and other taxpayers. We can\u2019t solve Chicago\u2019s fiscal challenges by continually shifting a growing property-tax burden from one taxpayer to another.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    }
+  ]
+}
