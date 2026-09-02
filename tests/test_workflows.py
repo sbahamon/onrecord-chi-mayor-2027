@@ -227,3 +227,30 @@ def test_a_failed_row_still_fails_the_job(wf):
 
     pr_i = next(i for i, s in enumerate(steps) if "create-pull-request" in (s.get("uses") or ""))
     assert steps.index(gate) > pr_i, "fail the job only after the partial work is captured"
+
+
+REVIEW_WORKFLOW = REPO / ".github" / "workflows" / "review.yml"
+
+
+def test_review_fires_when_the_pipeline_label_is_added():
+    """`review.yml` must trigger on `labeled`, not just `opened`/`synchronize`.
+
+    The verify job is gated on the PR carrying the `pipeline` label, but the
+    `opened` event payload is built before a label applied at creation time lands
+    — so `gh pr create --label pipeline` opens a PR whose `opened` run sees an
+    empty label list and skips. Observed live on PR #96 (#57): tests ran, the
+    reviewer silently did nothing, and the PR sat with no verdict label at all.
+    That is the same silent-failure shape as a green cron that published nothing:
+    the workflow is "successful" precisely because it did no work.
+
+    `labeled` is also the *safer* trigger of the two, not a loosening — applying a
+    label requires write access on the repo, while opening a PR does not.
+    """
+    wf = yaml.safe_load(REVIEW_WORKFLOW.read_text())
+    on = wf.get("on") or wf.get(True)          # YAML 1.1 parses bare `on:` as True
+    types = on["pull_request"]["types"]
+    assert "labeled" in types, (
+        "a PR opened with --label pipeline would never be reviewed; "
+        f"types are {types}"
+    )
+    assert "synchronize" in types              # still re-review on every push

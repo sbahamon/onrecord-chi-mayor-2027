@@ -2,7 +2,12 @@ name: ai-review
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    # `labeled` matters: the verify job is gated on the `pipeline` label, and the
+    # `opened` payload is built before a label applied at creation time lands — so
+    # `gh pr create --label pipeline` opened PRs that were never reviewed (seen on
+    # #96). It is also the safer trigger: labelling needs write access, opening a
+    # PR does not.
+    types: [opened, synchronize, labeled]
 
 permissions:
   contents: read

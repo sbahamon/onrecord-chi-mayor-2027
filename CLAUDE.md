@@ -234,6 +234,11 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
   one 429'd URL (#41) would bin a whole candidate's paid extraction, and `--skip-ledger`
   means the re-run pays again. Contract pinned offline by `tests/test_workflows.py`.
 - `review.yml` — on pipeline PRs: re-ingest + verify → comment + `ai-verified`/`ai-flagged` label.
+  Triggers on `opened`, `synchronize` **and `labeled`**. The last one is load-bearing and was
+  added 2026-09-01 after PR #96 opened un-reviewed: the verify job is gated on the `pipeline`
+  label, but `gh pr create --label pipeline` attaches the label *after* the `opened` payload is
+  built, so the run saw no labels and skipped — green workflow, no verdict, no comment, the same
+  silent-success shape as a cron that publishes nothing. Pinned by `tests/test_workflows.py`.
   Updates its own last comment rather than appending, and a `concurrency` group cancels a
   superseded run — every push is a `synchronize`, and each run re-fetches every source, which
   aimed repeat traffic at the outlets that rate-limit runner IPs (#41).
