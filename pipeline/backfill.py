@@ -43,6 +43,8 @@ def _source_from_row(row: dict, *, today: str) -> dict:
         "media_type": row.get("type", "website"),
         "title": row.get("title"),  # None -> ingest fills from the page for HTML
         "published_date": row.get("date") or today,
+        # #101: a row may carry a saved page for an outlet that 403s every IP.
+        "html_file": row.get("html_file"),
     }
 
 

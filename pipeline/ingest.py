@@ -14,6 +14,7 @@ Defaults wire real implementations, imported lazily so unit tests need none.
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 from pipeline.transcribe import MEDIA_TMP_PREFIX, remove_media_tmp_dir
 
@@ -135,7 +136,16 @@ def ingest(source: dict, *, fetcher=None, downloader=None, transcriber=None,
         # the post text IS the content, so no fetch or download/transcribe.
         transcript = supplied_text
     elif media_type in TEXT_TYPES:
-        transcript, page_title = extract_article(fetcher(source["url"]))
+        # An operator-supplied page (#101). Some outlets 403 *every* IP available —
+        # Crain's returned 403 to a residential IP and to a datacenter one alike — so
+        # the only way in is a page saved from a browser. Everything downstream is
+        # unchanged: the quote-in-transcript guard, the schema check and the reviewer
+        # all still run against these bytes. Expect the reviewer to return
+        # `unverifiable` for this URL later (#69); that is correct, not a regression.
+        html_file = source.get("html_file")
+        html = Path(html_file).read_text(encoding="utf-8", errors="replace") \
+            if html_file else fetcher(source["url"])
+        transcript, page_title = extract_article(html)
         if headless_fetcher is not None and len(transcript.strip()) < MIN_ARTICLE_CHARS:
             # Plain fetch yielded little/no text — likely JS-rendered. Re-fetch
             # with a headless render so both ingest and the reviewer can read it.

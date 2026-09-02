@@ -57,11 +57,11 @@ implementations; tests pass fakes.
 | `bluesky.py` | `fetch_author_feed` — public `getAuthorFeed` (injected HTTP); a candidate's original text posts as items (skips reposts + media-only) |
 | `llm.py` | `OpenRouterLLM.complete_json` — OpenAI-compatible, injectable `post`, retries |
 | `extract.py` | LLM → statements; **quote-in-transcript**, housing/other routing; **drops** individual schema-invalid statements (keeps valid siblings); asks for a **`mechanism`** (the named instrument, or `null` — "supports affordable housing" is not a position) |
-| `propose.py` | Build evidence record + stance cells + PR body; write files. `propose_stance_updates` cites the **most specific** statement (`_rank`: mechanism first, then confidence). `write_stance` **preserves an existing `record`**, **unions citations across sources** (superseding within one, #70/#72), and **refuses to let a mechanism-less proposal overwrite a cell that names one** (#90) or **a proposal to invert a cell's polarity** between the supporting labels and `opposes` (#57) |
-| `review.py` | Deterministic quote check + model judgment on faithfulness, attribution, and whether a **claimed `mechanism` is actually in the transcript**; a source it cannot re-fetch degrades to **`unverifiable`** rather than aborting the run (#69); for **audio only**, a quote that isn't verbatim is **located** (`best_matching_passage`) and handed to the reviewer to judge as the same statement — verdict `quote_match: exact\|reconciled\|none` (#92); label + auto-merge gate |
+| `propose.py` | Build evidence record + stance cells + PR body; write files. `propose_stance_updates` cites the **most specific** statement (`_rank`: mechanism first, then confidence). `write_stance` **preserves an existing `record`**, **unions citations across sources** (superseding within one, #70/#72), and **refuses to let a mechanism-less proposal overwrite a cell that names one** (#90) or **a proposal to invert a cell's polarity** between the supporting labels and `opposes` (#57). `render_pr_body` shows **what each cell changed FROM** and flags a guard refusal, and quotes the statement the cell **cites** rather than the last one with that `(candidate, topic)` (#98); `read_stance` supplies the before |
+| `review.py` | Deterministic quote check + model judgment on faithfulness, attribution, and whether a **claimed `mechanism` is actually in the transcript**; a source it cannot re-fetch degrades to **`unverifiable`** rather than aborting the run (#69); for **audio only**, a quote that isn't verbatim is **located** (`best_matching_passage`) and handed to the reviewer to judge as the same statement — verdict `quote_match: exact\|reconciled\|none` (#92); **three labels** — `ai-verified` / `ai-flagged` (something was checked and is wrong) / `ai-unverifiable` (the source could not be re-fetched, nothing checked, #100) — plus the auto-merge gate, which still demands every verdict `confirmed` |
 | `config.py` | Load registries; `candidate_slugs`, `topic_slugs`, `discovery_feeds` (shared outlet RSS + per-candidate Google News [gated off by default] / YouTube / Bluesky) |
 | `run.py` | `process_source`: ingest→extract→propose; **retries extract** (`extract_attempts`) reusing the transcript; `ProcessResult.transcript_chars` (length only, for discovery logs) |
-| `__main__.py` | CLI: `ingest-url`, `discover` (routes by feed media-type; Bluesky via `bluesky.py`), `review`, `backfill` |
+| `__main__.py` | CLI: `ingest-url` (`--html-file` serves a saved page for an outlet that 403s every IP, #101), `discover` (routes by feed media-type; Bluesky via `bluesky.py`), `review`, `backfill` (does **not** seed the ledger by default; `--seed-ledger` opts in, #61/#101) |
 
 ## Data model (two layers)
 
@@ -184,6 +184,12 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
   **Podcast/YouTube rows need the `live` extra — it is NOT installed by default** and the
   failure is a bare `ModuleNotFoundError: yt_dlp` partway through a run:
   `.venv/bin/pip install -e '.[live]'` (plus `brew install ffmpeg`).
+  A backfill **no longer seeds `data/ledger.json`** (#101) — that was contrary to its own
+  documented convention (#61) and had to be reverted by hand on #97; pass `--seed-ledger` for a
+  dedicated seeding run. For an outlet that 403s every IP (Crain's does), save the page from a
+  browser and pass `--html-file` on `ingest-url`, or put `"html_file"` on the backfill row: the
+  quote-in-transcript guard, the schema check and the reviewer all still run against those bytes,
+  and the reviewer will later report that URL `unverifiable`, which is expected.
   Then branch, commit `data/`, and `gh pr create --label pipeline` — a PR you author yourself
   triggers `review.yml` without `PIPELINE_PAT` (that secret exists because *Actions*-created
   PRs don't fire workflows). To rehearse without touching the repo, copy `data/registry` into
