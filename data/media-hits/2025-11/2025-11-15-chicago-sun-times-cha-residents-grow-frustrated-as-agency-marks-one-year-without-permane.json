@@ -1,0 +1,120 @@
+{
+  "id": "2025-11-15-chicago-sun-times-cha-residents-grow-frustrated-as-agency-marks-one-year-without-permane",
+  "url": "https://chicago.suntimes.com/the-watchdogs/2025/11/15/cha-residents-frustrated-housing-agency-permanent-ceo",
+  "outlet": "Chicago Sun-Times",
+  "media_type": "article",
+  "title": "CHA residents grow frustrated as agency marks one year without permanent CEO",
+  "published_date": "2025-11-15",
+  "discovered_date": "2026-09-01",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Expects a permanent CEO to be appointed by the end of the year.",
+      "quote": "Matthew Brewer, the CHA board chair and temporary operating chairman, said he expects a permanent CEO to be appointed by the end of the year.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Says the board will consider other candidates for CEO.",
+      "quote": "Brewer said the board will consider other candidates and declined to comment on who is being considered.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Plans to add an elevator to each Dearborn building, with construction expected to start in 2027.",
+      "quote": "Each Dearborn building has one elevator, but the CHA plans to add an elevator to each building, with construction expected to start in 2027, Brewer said.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "add an elevator to each building"
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Says elevator maintenance will remain a priority.",
+      "quote": "Elevator maintenance will remain a priority, Brewer said.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Says the housing authority did work with residents to find a replacement property manager with a strong track record.",
+      "quote": "He said the housing authority did work with residents to find a replacement property manager with a “strong track record.”",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Believes the CHA's engagement with residents has improved.",
+      "quote": "Overall, Brewer believes the CHA’s engagement with residents has improved.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "The agency will be digging into the resident survey results to address concerns.",
+      "quote": "The agency will be digging into the resident survey results in an effort to address their concerns, Brewer said.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Additional funds for security will be allocated in the 2026 budget.",
+      "quote": "Additional funds for security will be allocated in the 2026 budget, said Brewer, who recently visited Dearborn and met with property managers and residents.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "allocate additional funds for security in the 2026 budget"
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Canceled a request for proposals for new property managers until early next year to save money, citing Trump's HUD budget priorities.",
+      "quote": "The CHA recently scrapped a request for proposals for new property managers for thousands of units. Brewer cited President Donald Trump’s funding priorities — to slash HUD’s budget — and “some emerging needs” at properties as the reason for canceling the request until early next year. It will allow the agency to save some money next year, Brewer said.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "cancel request for proposals for new property managers until early next year"
+    }
+  ]
+}

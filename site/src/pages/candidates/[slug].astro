@@ -48,7 +48,11 @@ const { candidate, positions, timeline } = profile;
         )}
         {p.stance.record && p.stance.record.length > 0 && (
           <div class="record">
-            <h4>In office</h4>
+            {/* Not "In office": the record covers appointed roles too, and the
+                first candidate to carry one (matthew-brewer, #57) chaired the CHA
+                by appointment and has never held elected office. A heading that
+                implies election would misstate that on the profile itself. */}
+            <h4>Record</h4>
             <ul>
               {p.stance.record.map((r) => {
                 const om = OUTCOME_META[r.outcome] || { label: r.outcome, tone: "none" };

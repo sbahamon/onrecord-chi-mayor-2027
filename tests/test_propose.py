@@ -388,3 +388,88 @@ def test_write_stance_lets_a_newer_mechanism_replace_an_older_one(tmp_path):
     written = json.loads(path.read_text())
     assert written["mechanism"] == "end single-family-only zoning"
     assert written["summary"] == "newer specific take"
+
+
+def _polarity_cell(stance, summary, citations, mechanism=None, topic="affordable-housing-funding"):
+    cell = {
+        "candidate": "example-candidate-a", "topic": topic,
+        "stance": stance, "summary": summary, "citations": citations,
+        "updated_date": "2026-09-01",
+    }
+    if mechanism is not None:
+        cell["mechanism"] = mechanism
+    return cell
+
+
+def test_write_stance_refuses_to_invert_a_cells_polarity(tmp_path):
+    # Found live backfilling matthew-brewer (#57). A Sun-Times piece about the CHA
+    # suing HUD over anti-DEI grant *conditions* extracted as
+    # topic=affordable-housing-funding, stance=opposes, confidence 1.0 — and since
+    # it outranked the existing 0.95 statement and carried no mechanism (so the #90
+    # guard did not apply), it took the cell. The public matrix then read
+    # "opposes affordable-housing-funding" for a candidate who supports it.
+    # Nothing failed: schemas passed, citations resolved, integrity stayed green.
+    propose.write_stance(_polarity_cell("supports", "supports funding", ["a#0"]), tmp_path)
+
+    path = propose.write_stance(
+        _polarity_cell("opposes", "opposes HUD's grant conditions", ["b#0"]), tmp_path)
+
+    written = json.loads(path.read_text())
+    assert written["stance"] == "supports"            # polarity preserved
+    assert written["summary"] == "supports funding"   # caption moves with it
+    assert written["citations"] == ["a#0", "b#0"]     # evidence still accumulates
+
+
+def test_write_stance_refuses_to_invert_from_opposes_to_supports(tmp_path):
+    # The guard is symmetric: manufacturing support is as bad as manufacturing
+    # opposition.
+    propose.write_stance(_polarity_cell("opposes", "opposes it", ["a#0"]), tmp_path)
+    path = propose.write_stance(_polarity_cell("supports", "supports it", ["b#0"]), tmp_path)
+    assert json.loads(path.read_text())["stance"] == "opposes"
+
+
+def test_write_stance_allows_a_first_write_of_any_polarity(tmp_path):
+    # No existing cell means nothing to invert — a genuine `opposes` must land.
+    path = propose.write_stance(_polarity_cell("opposes", "opposes it", ["a#0"]), tmp_path)
+    assert json.loads(path.read_text())["stance"] == "opposes"
+
+
+def test_write_stance_allows_softening_to_mixed(tmp_path):
+    # `mixed` and `no-position` are not the opposite pole; adding nuance is exactly
+    # what a second source should be able to do, and an existing test already pins
+    # supports -> mixed. Only a polarity flip is refused.
+    propose.write_stance(_polarity_cell("supports", "supports it", ["a#0"]), tmp_path)
+    path = propose.write_stance(_polarity_cell("mixed", "it is complicated", ["b#0"]), tmp_path)
+    written = json.loads(path.read_text())
+    assert written["stance"] == "mixed"
+    assert written["summary"] == "it is complicated"
+
+
+def test_write_stance_polarity_guard_keeps_an_existing_mechanism(tmp_path):
+    # The three position fields move as a unit, as they do for the #90 guard:
+    # keeping a mechanism while taking an inverted stance would caption a named
+    # instrument with the opposite position.
+    propose.write_stance(
+        _polarity_cell("supports", "supports a 3% rate", ["a#0"], mechanism="3% transfer tax"),
+        tmp_path)
+    path = propose.write_stance(_polarity_cell("opposes", "opposes conditions", ["b#0"]), tmp_path)
+    written = json.loads(path.read_text())
+    assert written["stance"] == "supports"
+    assert written["mechanism"] == "3% transfer tax"
+
+
+def test_write_stance_polarity_guard_drops_an_inverted_proposals_mechanism(tmp_path):
+    # If the refused proposal's mechanism survived, the cell would caption the
+    # preserved "supports" with an instrument the candidate named while opposing —
+    # the exact stance/mechanism mismatch the guard exists to prevent. And because
+    # the cell would then *have* a mechanism, the #90 guard would protect that
+    # mismatch against any better mechanism-less proposal.
+    propose.write_stance(_polarity_cell("supports", "supports funding", ["a#0"]), tmp_path)
+    path = propose.write_stance(
+        _polarity_cell("opposes", "opposes conditions", ["b#0"], mechanism="anti-DEI conditions"),
+        tmp_path)
+    written = json.loads(path.read_text())
+    assert written["stance"] == "supports"
+    # absent, not null: the existing cell was never assessed for a mechanism, and
+    # null would claim it was and found none.
+    assert "mechanism" not in written

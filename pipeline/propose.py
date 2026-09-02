@@ -130,6 +130,24 @@ def write_evidence(evidence: dict, data_dir) -> Path:
     return path
 
 
+# A stance label carries a polarity. Moving between the supporting labels and
+# `opposes` inverts a candidate's published position; moving to or from `mixed`
+# / `no-position` only adds or removes nuance.
+_STANCE_POLARITY = {
+    "supports": 1,
+    "supports-with-conditions": 1,
+    "opposes": -1,
+    "mixed": 0,
+    "no-position": 0,
+}
+
+
+def _inverts_polarity(existing_stance: str, new_stance: str) -> bool:
+    a = _STANCE_POLARITY.get(existing_stance, 0)
+    b = _STANCE_POLARITY.get(new_stance, 0)
+    return a != 0 and b != 0 and a != b
+
+
 def write_stance(stance: dict, data_dir) -> Path:
     """Write a stance cell, merging with what is already on disk.
 
@@ -161,10 +179,13 @@ def write_stance(stance: dict, data_dir) -> Path:
     one, and correcting that is a manual edit.
 
     ``stance`` + ``summary`` + ``mechanism`` — normally the newest proposal owns
-    the position, but a proposal naming **no** mechanism cannot overwrite a cell
-    that names one (#90). The three move as a unit because they describe a single
-    statement. See the comment on the guard below for why order alone made this
-    unsafe.
+    the position, but two guards apply, and the three move as a unit because they
+    describe a single statement. A proposal naming **no** mechanism cannot overwrite
+    a cell that names one (#90); and a proposal cannot **invert** the cell's polarity
+    — between the supporting labels and ``opposes`` — because the code cannot tell a
+    genuine reversal from a mis-filed statement (#57). Moving to or from ``mixed`` /
+    ``no-position`` is not an inversion and still lands. See the comments on each
+    guard below for the live failures that motivated them.
     """
     path = _safe_join(
         Path(data_dir) / "stances", stance["candidate"], f"{stance['topic']}.json"
@@ -179,6 +200,32 @@ def write_stance(stance: dict, data_dir) -> Path:
 
     if "record" not in stance and existing.get("record"):
         stance = {**stance, "record": existing["record"]}
+
+    # A proposal must not INVERT the cell's polarity (#57). Found backfilling
+    # matthew-brewer: a Sun-Times piece about the CHA suing HUD over anti-DEI grant
+    # *conditions* extracted as topic=affordable-housing-funding, stance=opposes at
+    # confidence 1.0. It outranked the existing 0.95 statement, named no mechanism so
+    # the #90 guard did not apply, and took the cell — the public matrix then said a
+    # candidate who supports affordable-housing funding opposes it. Nothing failed:
+    # schemas passed, citations resolved, integrity stayed green, and the reviewer
+    # checks quote faithfulness and mechanism presence, not topic filing.
+    #
+    # The code cannot tell "the candidate changed position" from "the extractor
+    # mis-filed a statement", and those need opposite responses. Publishing an
+    # inverted position about a real person is the worst failure this site has, so
+    # the flip is refused and left to the human edit that a genuine reversal
+    # deserves — the same standard `record` already gets. Narrow on purpose:
+    # supports -> mixed still lands, because adding nuance is what a second source
+    # should be able to do. The incoming citation is still unioned in below, so the
+    # disagreeing evidence is on the cell for a reviewer to see rather than dropped.
+    #
+    # The three fields move as a unit for the same reason as the #90 guard, and the
+    # incoming `mechanism` is dropped rather than kept: pairing a named instrument
+    # with the opposite position is exactly the mismatch this guard exists to stop.
+    if existing.get("stance") and _inverts_polarity(existing["stance"], stance.get("stance")):
+        stance = {k: v for k, v in stance.items() if k != "mechanism"}
+        stance.update({k: existing[k] for k in ("stance", "summary", "mechanism")
+                       if k in existing})
 
     # A proposal that names no mechanism must not overwrite one that does (#90).
     # `stance`/`summary`/`mechanism` used to come from whichever evidence file was

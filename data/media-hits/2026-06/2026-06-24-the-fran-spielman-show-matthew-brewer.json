@@ -1,0 +1,72 @@
+{
+  "id": "2026-06-24-the-fran-spielman-show-matthew-brewer",
+  "url": "https://dts.podtrac.com/redirect.mp3/dovetail.prxu.org/12963/8a540d09-6ca3-408c-ae86-956e1bb2bda8/0624_Fran_Show_Matthew_Brewer_mixdown.mp3",
+  "outlet": "The Fran Spielman Show",
+  "media_type": "podcast",
+  "title": "Matthew Brewer",
+  "published_date": "2026-06-24",
+  "discovered_date": "2026-09-01",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "matthew-brewer",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports investing in affordable housing as part of a comprehensive growth strategy.",
+      "quote": "We need to invest in growth, bringing more jobs to the city, bringing more businesses to the city and keeping them here, bringing more people to the city to live here. And at the same time, invest in the underlying infrastructure, transportation, our affordable housing, and also create pathways for people to participate in jobs of the future.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Advocates for appointing the best leader for the CHA to impact residents' lives.",
+      "quote": "We have 140,000 residents and predominantly black people and black and brown people. And if we're trying to do what's best for that community, the best thing we can do is appoint the best leader for that organization. Because leadership matters and it impacts real people's lives every single day.",
+      "locator": null,
+      "confidence": 0.95,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "public-housing-cha",
+      "stance": "supports",
+      "summary": "Sees vacant CHA parcels as a big opportunity for coordinated, multifaceted development including affordable housing.",
+      "quote": "The vacant parcels are a big opportunity and it's something that we certainly need to take advantage of. It requires coordination between city agencies, between the CHA and the city and other agencies. And there's, you know, it's not just the CHA. There's other vacant parcels that the city and other entities own. And there's a real opportunity for coordination to envision bigger, bolder, more multifaceted development that includes affordable housing, but also with an eye towards mixed communities that have infrastructure and services they need.",
+      "locator": null,
+      "confidence": 0.95,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Plans to be disruptive and bold with new ideas for affordable housing and economic mobility.",
+      "quote": "This is the part where I get particularly excited because we will be disruptive and bold and introduce some of our new ideas.",
+      "locator": null,
+      "confidence": 0.85,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "matthew-brewer",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Connects affordable housing to broader economic mobility and addressing the feeling of being stuck.",
+      "quote": "You know, this idea that Chicago is a city full of pockets. And, you know, if you dropped a pin on a map and told me where a particular person, if a person was from where that pin dropped on the map, I could tell you with some certainty that person's race, the income bracket that they grew up in, the schools they went to, where they're likely to end up absent some meaningful intervention. Chicago is that city and there's a real opportunity to intervene and change people's trajectories. This goes back to this point of people feeling stuck. Whether it be someone not being able to get out of their current economic circumstances, whether it being a small business not being able to get off the ground, there's this feeling of being stuck and not being able to get outside of your circumstances. And so it gets to economic mobility, it gets to affordable housing, it's impacted by public safety and transportation, but all on the other side of it, it needs to be fueled by economic growth.",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    }
+  ]
+}
