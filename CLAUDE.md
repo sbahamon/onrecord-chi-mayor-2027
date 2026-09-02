@@ -391,6 +391,16 @@ the record path had just run once on brewer. Seven rows, 22 statements, 5 cells 
   (one carrying the circuit breaker's exact dollar thresholds was excluded here on that basis), and an
   op-ed still has to be about **housing** — his mckinleypark.news piece on the city's property-tax levy
   was excluded for the same property-tax-is-not-housing reason that keeps pappas and nee thin.
+- **One year is not a measurement for DATA either — the same lesson as extraction, and it reversed a
+  conclusion here.** A single-year (2024) cut of the Board of Review appeal data showed commercial
+  classes taking ~3-15x the reduction residential got, which reads as damning. The full 2010-2025 series
+  says the opposite: the gap is zero or slightly pro-residential through 2018, opens in **tax year 2019**
+  — four years before Cardenas took office, and the year mean assessor value per appealed commercial
+  parcel jumped **23.9%** as Kaegi's first assessments landed — peaks in 2021 *before* him, and narrows
+  in every year of his tenure. The decisive cut: post-appeal value per appealed parcel, indexed to 2018,
+  rises **identically** for commercial and residential (+38% each by 2025). If the board were shielding
+  commercial, that line would be flat. Before publishing a pattern about a real person, plot the years
+  either side of their tenure.
 - **An institutional pattern is not a candidate's record, however real the pattern is — and this is the
   question #55 pappas will hit head-on.** Asked whether the Board of Review systematically cutting
   commercial assessments (shifting burden to homeowners) belongs on his record: the pattern is real and
@@ -402,8 +412,13 @@ the record path had just run once on brewer. Seven rows, 22 statements, 5 cells 
   decision to a commissioner** (`7pny-nedm` has result/values/appellant/attorney and no commissioner or
   vote; `pfs5-q57r` is boundary geography; the aggregate sets stop at 2010), because the board certifies
   as an institution; and attributing an institutional pattern to one of three commissioners is the #49
-  trap exactly. **The resolution generalises: find where the argument was already published and where
-  the candidate answered it.** Treasurer Pappas's report (WBEZ/Sun-Times 2025-05-05) makes the
+  trap exactly. **On that third reason, one correction:** the CHA-board analogy used here originally was
+  weak and the maintainer was right to push back. The Board of Review is *three* people with
+  quasi-judicial power over any property's valuation, and its Rule 26 refers to a "divided vote
+  decision" — so commissioners vote, can split, and he is decisive in any 2-1. That is far more
+  attributable than the #49 spokesperson shape; don't reach for the CHA comparison again. The citation
+  constraint stands regardless and is independent of attribution. **The resolution generalises: find
+  where the argument was already published and where the candidate answered it.** Treasurer Pappas's report (WBEZ/Sun-Times 2025-05-05) makes the
   burden-shift case, the Assessor's office says big businesses got outsized reductions *from the Board
   of Review*, and Cardenas denies it on the record — his denial is citable where a statistic is not.
   **Caution on the geography:** `pfs5-q57r` is the **2010-census** map and is stale — it places McKinley
