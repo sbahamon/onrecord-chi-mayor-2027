@@ -1,0 +1,36 @@
+{
+  "id": "2026-07-29-wttw-news-chicago-mayoral-candidate-lisa-nee-on-affordable-housing-fiscal-respon",
+  "url": "https://news.wttw.com/2026/07/29/chicago-mayoral-candidate-lisa-nee-affordable-housing-fiscal-responsibility-and-public",
+  "outlet": "WTTW News",
+  "media_type": "article",
+  "title": "Chicago Mayoral Candidate Lisa Nee on Affordable Housing, Fiscal Responsibility and Public Safety",
+  "published_date": "2026-07-29",
+  "discovered_date": "2026-09-02",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "lisa-nee",
+      "topic": "permitting-reform",
+      "stance": "supports",
+      "summary": "Supports expediting the permit process for housing development to prevent losing developers to other cities.",
+      "quote": "The permit process needs to be expedited. There\u2019s a lot of waste in there and I\u2019ve spoken to people who wanted to build housing and said, \u2018It took too long and I decided to go somewhere else.\u2019 We can\u2019t be losing those people to other cities that are growing while we are not growing.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "lisa-nee",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Proposes utilizing vacant properties to increase housing supply.",
+      "quote": "I think there\u2019s about 120,000 vacant places that we can start expediting. And how do we get that up to speed and fill those?",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    }
+  ]
+}

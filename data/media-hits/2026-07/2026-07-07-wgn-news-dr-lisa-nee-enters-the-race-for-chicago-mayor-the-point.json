@@ -1,0 +1,36 @@
+{
+  "id": "2026-07-07-wgn-news-dr-lisa-nee-enters-the-race-for-chicago-mayor-the-point",
+  "url": "https://www.youtube.com/watch?v=nGe_hphP9kI",
+  "outlet": "WGN News",
+  "media_type": "youtube",
+  "title": "Dr. Lisa Nee enters the race for Chicago mayor | The Point",
+  "published_date": "2026-07-07",
+  "discovered_date": "2026-09-02",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "lisa-nee",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports building additional affordable housing and retaining existing affordability.",
+      "quote": "So you retain the affordability to the housing that you have right now, but you also have to build additional affordable housing.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "lisa-nee",
+      "topic": "zoning-reform",
+      "stance": "supports",
+      "summary": "Supports building housing near CTA to utilize public transportation.",
+      "quote": "And then there's ways to build a housing like near CTA so that people can utilize public transportation.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    }
+  ]
+}
