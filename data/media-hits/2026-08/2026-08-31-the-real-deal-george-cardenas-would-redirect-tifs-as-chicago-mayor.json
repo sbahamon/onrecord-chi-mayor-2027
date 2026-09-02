@@ -1,0 +1,132 @@
+{
+  "id": "2026-08-31-the-real-deal-george-cardenas-would-redirect-tifs-as-chicago-mayor",
+  "url": "https://therealdeal.com/chicago/2026/08/31/george-cardenas-would-redirect-tifs-as-chicago-mayor/",
+  "outlet": "The Real Deal",
+  "media_type": "article",
+  "title": "George Cardenas would redirect TIFs as Chicago mayor",
+  "published_date": "2026-08-31",
+  "discovered_date": "2026-09-01",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "george-cardenas",
+      "topic": "permitting-reform",
+      "stance": "supports",
+      "summary": "Reduce regulatory delays in permitting and zoning to cut housing production costs.",
+      "quote": "reduce regulatory delays in permitting and zoning",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Redirect tax increment financing (TIF) resources.",
+      "quote": "redirecting one of developer\u2019s favorite tools: tax increment financing resources.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "tax increment financing (TIF) resources"
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "zoning-reform",
+      "stance": "supports",
+      "summary": "Implement as-of-right housing growth near transit and commercial corridors.",
+      "quote": "as-of-right housing growth near transit and commercial corridors",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "as-of-right housing growth"
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "tenant-protections",
+      "stance": "supports",
+      "summary": "Include anti-displacement safeguards with as-of-right housing growth.",
+      "quote": "as-of-right housing growth near transit and commercial corridors, with antidisplacement safeguards",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "antidisplacement safeguards"
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Use preservation financing and legal tools to protect naturally affordable housing stock.",
+      "quote": "preservation financing and legal tools to protect naturally affordable stock",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "preservation financing and legal tools"
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "permitting-reform",
+      "stance": "supports",
+      "summary": "Implement faster permit timelines and objective standards to reduce delay-driven cost inflation.",
+      "quote": "faster permit timelines and objective standards to reduce delay-driven cost inflation",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "faster permit timelines and objective standards"
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Set stronger production targets for deeply affordable units.",
+      "quote": "stronger production targets for deeply affordable units",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "production targets for deeply affordable units"
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Publish quarterly public affordability dashboards by neighborhood to measure progress.",
+      "quote": "quarterly public affordability dashboards by neighborhood so progress is measurable, not rhetorical.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "quarterly public affordability dashboards"
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "opposes",
+      "summary": "Would not revive the transfer tax proposal for high-value property purchases as rejected by voters.",
+      "quote": "I would not revive the transfer tax proposal in the form Chicago voters rejected.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Support a transparent, evidence-driven property assessment framework with stronger public disclosure.",
+      "quote": "I support a transparent, evidence-driven assessment framework with stronger public disclosure of assumptions, comparable-data logic and faster correction pathways when valuations are clearly out of step with market reality.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "transparent, evidence-driven assessment framework with stronger public disclosure"
+    }
+  ]
+}

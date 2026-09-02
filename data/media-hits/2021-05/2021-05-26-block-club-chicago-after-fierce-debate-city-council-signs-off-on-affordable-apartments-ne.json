@@ -1,0 +1,24 @@
+{
+  "id": "2021-05-26-block-club-chicago-after-fierce-debate-city-council-signs-off-on-affordable-apartments-ne",
+  "url": "https://blockclubchicago.org/2021/05/26/after-fierce-debate-city-council-signs-off-on-affordable-apartments-near-mckinley-park-asphalt-plant/",
+  "outlet": "Block Club Chicago",
+  "media_type": "article",
+  "title": "After Fierce Debate, City Council Signs Off On Affordable Apartments Near McKinley Park Asphalt Plant",
+  "published_date": "2021-05-26",
+  "discovered_date": "2026-09-01",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports the specific affordable housing development in McKinley Park, arguing voting against it would negate affordable housing for the area.",
+      "quote": "To vote against it would negate affordable housing and all different types of housing development for McKinley Park.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    }
+  ]
+}

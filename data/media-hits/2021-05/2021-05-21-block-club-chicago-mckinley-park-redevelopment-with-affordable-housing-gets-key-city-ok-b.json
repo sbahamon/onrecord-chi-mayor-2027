@@ -1,0 +1,24 @@
+{
+  "id": "2021-05-21-block-club-chicago-mckinley-park-redevelopment-with-affordable-housing-gets-key-city-ok-b",
+  "url": "https://blockclubchicago.org/2021/05/21/mckinley-park-redevelopment-with-affordable-housing-gets-key-city-ok-but-some-worry-about-nearby-asphalt-plant/",
+  "outlet": "Block Club Chicago",
+  "media_type": "article",
+  "title": "McKinley Park Redevelopment With Affordable Housing Gets Key City OK \u2014 But Some Worry About Nearby Asphalt Plant",
+  "published_date": "2021-05-21",
+  "discovered_date": "2026-09-01",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports approving an affordable housing development in McKinley Park, arguing it brings needed housing and that not approving it would harm families.",
+      "quote": "\u201cNot to approve this would be a slap in the face to many of the families that are looking to stay here,\u201d",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    }
+  ]
+}
