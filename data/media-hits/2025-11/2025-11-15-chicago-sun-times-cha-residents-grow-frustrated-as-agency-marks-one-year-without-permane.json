@@ -61,7 +61,7 @@
       "topic": "public-housing-cha",
       "stance": "supports",
       "summary": "Says the housing authority did work with residents to find a replacement property manager with a strong track record.",
-      "quote": "He said the housing authority did work with residents to find a replacement property manager with a \u201cstrong track record.\u201d",
+      "quote": "He said the housing authority did work with residents to find a replacement property manager with a “strong track record.”",
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
@@ -73,7 +73,7 @@
       "topic": "public-housing-cha",
       "stance": "supports",
       "summary": "Believes the CHA's engagement with residents has improved.",
-      "quote": "Overall, Brewer believes the CHA\u2019s engagement with residents has improved.",
+      "quote": "Overall, Brewer believes the CHA’s engagement with residents has improved.",
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
@@ -109,24 +109,12 @@
       "topic": "public-housing-cha",
       "stance": "supports",
       "summary": "Canceled a request for proposals for new property managers until early next year to save money, citing Trump's HUD budget priorities.",
-      "quote": "The CHA recently scrapped a request for proposals for new property managers for thousands of units. Brewer cited President Donald Trump\u2019s funding priorities \u2014 to slash HUD\u2019s budget \u2014 and \u201csome emerging needs\u201d at properties as the reason for canceling the request until early next year. It will allow the agency to save some money next year, Brewer said.",
+      "quote": "The CHA recently scrapped a request for proposals for new property managers for thousands of units. Brewer cited President Donald Trump’s funding priorities — to slash HUD’s budget — and “some emerging needs” at properties as the reason for canceling the request until early next year. It will allow the agency to save some money next year, Brewer said.",
       "locator": null,
       "confidence": 1.0,
       "is_housing": true,
       "attribution_flag": false,
       "mechanism": "cancel request for proposals for new property managers until early next year"
-    },
-    {
-      "candidate": "matthew-brewer",
-      "topic": "public-housing-cha",
-      "stance": "supports",
-      "summary": "Extended contracts of three property managers for another year.",
-      "quote": "In the meantime, the housing authority extended the contracts of three property managers \u2014 East Lake Management, Manage Chicago and Hispanic Housing Development Corp. \u2014 for another year on Sept. 1., records show.",
-      "locator": null,
-      "confidence": 1.0,
-      "is_housing": true,
-      "attribution_flag": false,
-      "mechanism": "extend contracts of three property managers for another year"
     }
   ]
 }
