@@ -391,6 +391,36 @@ the record path had just run once on brewer. Seven rows, 22 statements, 5 cells 
   (one carrying the circuit breaker's exact dollar thresholds was excluded here on that basis), and an
   op-ed still has to be about **housing** — his mckinleypark.news piece on the city's property-tax levy
   was excluded for the same property-tax-is-not-housing reason that keeps pappas and nee thin.
+- **An institutional pattern is not a candidate's record, however real the pattern is — and this is the
+  question #55 pappas will hit head-on.** Asked whether the Board of Review systematically cutting
+  commercial assessments (shifting burden to homeowners) belongs on his record: the pattern is real and
+  measurable — Cook County's `Board of Review Appeal Decision History` (`7pny-nedm`) shows tax year 2024
+  commercial classes taking far larger reductions than residential (class 593 −14.9%, 517 −8.5%, 590
+  −8.0% vs −0.8% to −4.8% residential) — and it still cannot be a `record` entry. Three independent
+  reasons, and the third survives fixing the other two: a record entry cites a **quote from a media
+  source**, not an analysis run here (Golden Rule 3); **no published county dataset attributes a
+  decision to a commissioner** (`7pny-nedm` has result/values/appellant/attorney and no commissioner or
+  vote; `pfs5-q57r` is boundary geography; the aggregate sets stop at 2010), because the board certifies
+  as an institution; and attributing an institutional pattern to one of three commissioners is the #49
+  trap exactly. **The resolution generalises: find where the argument was already published and where
+  the candidate answered it.** Treasurer Pappas's report (WBEZ/Sun-Times 2025-05-05) makes the
+  burden-shift case, the Assessor's office says big businesses got outsized reductions *from the Board
+  of Review*, and Cardenas denies it on the record — his denial is citable where a statistic is not.
+  **Caution on the geography:** `pfs5-q57r` is the **2010-census** map and is stale — it places McKinley
+  Park, which he lives in and represents, outside his District 1. Never scope anything to a commissioner
+  with it.
+- **The extractor reliably misses a candidate DEFENDING HIS OWN AGENCY against criticism.** Three real
+  runs on the WBEZ report returned only the reporter's TIF-and-assessments fragment (housing 2, 1, 2)
+  and never his two direct quotes — "It isn't the Board of Review, it's the system" and "The system is
+  stacked against the homeowner. Circuit breakers are a solution" — which were the entire value of the
+  source. The fragment it *did* return kept landing as `opposes` and hijacking the cell. Resolved with
+  CLAUDE.md's sanctioned **manual extraction**: the verbatim quotes went through a hand-authored
+  statements payload, so the quote-in-transcript guard, the schema check and the topic filter all still
+  ran, both passed, and the reviewer confirmed 2/2 independently. The prompt is tuned to policy
+  proposals; **defence-of-record is a shape the record work needs and daily discovery silently drops.**
+- **The #90 specific-vs-vague hole needed FOUR hand corrections on this one candidate** — `zoning-reform`
+  and `tenant-protections` on the first pass, then `property-taxes-tif` twice more (to bare "circuit
+  breaker", then to "government spending cutbacks"). It is not an edge case any more.
 - **Block Club got through a hosted re-fetch this time; The Real Deal 403'd every attempt.** Another
   data point for the "the block is intermittent" note below — the case for running locally is
   determinism, not that CI can never fetch.
