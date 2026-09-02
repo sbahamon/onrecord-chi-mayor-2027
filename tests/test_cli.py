@@ -47,3 +47,28 @@ def test_backfill_parses_options():
     assert args.out_dir == "bodies"
     assert args.skip_ledger is True
     assert callable(args.func)
+
+
+# --- #101: papercuts found running #56 ---
+
+def test_ingest_url_accepts_a_locally_saved_page():
+    """Some outlets 403 every IP available — Crain's returned 403 to a residential
+    IP and to Anthropic's infrastructure alike. #97 needed a bespoke inline script
+    injecting a fetcher lambda, twice."""
+    args = build_parser().parse_args(
+        ["ingest-url", "--url", "https://example.com/a", "--html-file", "/tmp/saved.html"]
+    )
+    assert args.html_file == "/tmp/saved.html"
+
+
+def test_backfill_does_not_seed_the_ledger_by_default():
+    """CLAUDE.md and backfill.yml both say backfill seeds no ledger entries (#61),
+    but the CLI marked it unless --skip-ledger was passed. #97 wrote 7 URLs that had
+    to be reverted by hand. Make the code agree with the convention."""
+    args = build_parser().parse_args(["backfill", "--input", "rows.json"])
+    assert args.seed_ledger is False
+
+
+def test_backfill_can_still_opt_in_to_seeding_the_ledger():
+    args = build_parser().parse_args(["backfill", "--input", "rows.json", "--seed-ledger"])
+    assert args.seed_ledger is True

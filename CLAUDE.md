@@ -57,11 +57,11 @@ implementations; tests pass fakes.
 | `bluesky.py` | `fetch_author_feed` — public `getAuthorFeed` (injected HTTP); a candidate's original text posts as items (skips reposts + media-only) |
 | `llm.py` | `OpenRouterLLM.complete_json` — OpenAI-compatible, injectable `post`, retries |
 | `extract.py` | LLM → statements; **quote-in-transcript**, housing/other routing; **drops** individual schema-invalid statements (keeps valid siblings); asks for a **`mechanism`** (the named instrument, or `null` — "supports affordable housing" is not a position) |
-| `propose.py` | Build evidence record + stance cells + PR body; write files. `propose_stance_updates` cites the **most specific** statement (`_rank`: mechanism first, then confidence). `write_stance` **preserves an existing `record`**, **unions citations across sources** (superseding within one, #70/#72), and **refuses to let a mechanism-less proposal overwrite a cell that names one** (#90) or **a proposal to invert a cell's polarity** between the supporting labels and `opposes` (#57) |
-| `review.py` | Deterministic quote check + model judgment on faithfulness, attribution, and whether a **claimed `mechanism` is actually in the transcript**; a source it cannot re-fetch degrades to **`unverifiable`** rather than aborting the run (#69); for **audio only**, a quote that isn't verbatim is **located** (`best_matching_passage`) and handed to the reviewer to judge as the same statement — verdict `quote_match: exact\|reconciled\|none` (#92); label + auto-merge gate |
+| `propose.py` | Build evidence record + stance cells + PR body; write files. `propose_stance_updates` cites the **most specific** statement (`_rank`: mechanism first, then confidence). `write_stance` **preserves an existing `record`**, **unions citations across sources** (superseding within one, #70/#72), and **refuses to let a mechanism-less proposal overwrite a cell that names one** (#90) or **a proposal to invert a cell's polarity** between the supporting labels and `opposes` (#57). `render_pr_body` shows **what each cell changed FROM** and flags a guard refusal, and quotes the statement the cell **cites** rather than the last one with that `(candidate, topic)` (#98); `read_stance` supplies the before |
+| `review.py` | Deterministic quote check + model judgment on faithfulness, attribution, and whether a **claimed `mechanism` is actually in the transcript**; a source it cannot re-fetch degrades to **`unverifiable`** rather than aborting the run (#69); for **audio only**, a quote that isn't verbatim is **located** (`best_matching_passage`) and handed to the reviewer to judge as the same statement — verdict `quote_match: exact\|reconciled\|none` (#92); **three labels** — `ai-verified` / `ai-flagged` (something was checked and is wrong) / `ai-unverifiable` (the source could not be re-fetched, nothing checked, #100) — plus the auto-merge gate, which still demands every verdict `confirmed` |
 | `config.py` | Load registries; `candidate_slugs`, `topic_slugs`, `discovery_feeds` (shared outlet RSS + per-candidate Google News [gated off by default] / YouTube / Bluesky) |
 | `run.py` | `process_source`: ingest→extract→propose; **retries extract** (`extract_attempts`) reusing the transcript; `ProcessResult.transcript_chars` (length only, for discovery logs) |
-| `__main__.py` | CLI: `ingest-url`, `discover` (routes by feed media-type; Bluesky via `bluesky.py`), `review`, `backfill` |
+| `__main__.py` | CLI: `ingest-url` (`--html-file` serves a saved page for an outlet that 403s every IP, #101), `discover` (routes by feed media-type; Bluesky via `bluesky.py`), `review`, `backfill` (does **not** seed the ledger by default; `--seed-ledger` opts in, #61/#101) |
 
 ## Data model (two layers)
 
@@ -187,6 +187,12 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
   **Podcast/YouTube rows need the `live` extra — it is NOT installed by default** and the
   failure is a bare `ModuleNotFoundError: yt_dlp` partway through a run:
   `.venv/bin/pip install -e '.[live]'` (plus `brew install ffmpeg`).
+  A backfill **no longer seeds `data/ledger.json`** (#101) — that was contrary to its own
+  documented convention (#61) and had to be reverted by hand on #97; pass `--seed-ledger` for a
+  dedicated seeding run. For an outlet that 403s every IP (Crain's does), save the page from a
+  browser and pass `--html-file` on `ingest-url`, or put `"html_file"` on the backfill row: the
+  quote-in-transcript guard, the schema check and the reviewer all still run against those bytes,
+  and the reviewer will later report that URL `unverifiable`, which is expected.
   Then branch, commit `data/`, and `gh pr create --label pipeline` — a PR you author yourself
   triggers `review.yml` without `PIPELINE_PAT` (that secret exists because *Actions*-created
   PRs don't fire workflows). To rehearse without touching the repo, copy `data/registry` into
@@ -792,6 +798,23 @@ full Groq transcription).
   URLs ever. `run_discovery` now takes `max_items_per_feed` (config `discovery.max_items_per_feed`)
   so podcasts/Bluesky are reached. Note: a triaged-*out* item still costs one triage call and
   is marked seen; only *ingested* items count toward the caps.
+- **The extractor could not see a candidate DEFENDING their own agency — fixed in the prompt, and
+  measured both ways (#99).** An officeholder rebutting a public criticism of the office they run is
+  stating a position, but `SYSTEM_PROMPT` was tuned to policy *proposals* and reliably missed it. On a
+  WBEZ story where a Board of Review commissioner answers the Assessor's charge that his board hands
+  business "outsized reductions", **three** runs returned only the reporter's narration fragment and
+  never his two direct quotes. Two prompt additions fixed most of it: defending/explaining/disputing
+  your own office counts as a position, and **when the transcript has both a reporter's summary and the
+  candidate's direct quotation on the same point, the returned quote must be the quotation.** That
+  second sentence did the real work — the first alone got the content into 2 of 3 runs as fragments;
+  adding it produced **both** key statements verbatim in **3 of 5** runs, against **0 of 3** before.
+  Still not reliable — that is nondeterminism, not a bug — so the sanctioned manual extraction below
+  remains the fallback. **The part worth copying is how the risk was checked.** Widening what counts as
+  a position could have loosened *whose words count*, so the same article that produced the #49 leak
+  (brewer's "records show" statement) was run three times under each prompt: **27 housing statements
+  and 3 institution-attributed leaks on the original, 27 and 1 on the new one.** Same volume, fewer
+  violations — the new wording is *stricter* on attribution, not looser. A prompt change is only
+  verified by a real run, and one that touches a safety line needs the old prompt measured beside it.
 - The extractor is a bit loose on attribution (it will tag a deputy's or opponent's words
   to the candidate). The reviewer catches this from the quote text — that's the whole point
   of the two-model, human-approved design. Don't "fix" it by trusting the extractor more.

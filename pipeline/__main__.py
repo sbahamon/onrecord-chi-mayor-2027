@@ -45,6 +45,7 @@ def cmd_ingest_url(args) -> int:
         "media_type": args.type,
         "title": args.title,  # None -> ingest fills from the page for articles
         "published_date": args.date or _today(),
+        "html_file": args.html_file,  # #101: operator-supplied page for a blocked outlet
     }
     result = run.process_source(
         source,
@@ -144,9 +145,9 @@ def cmd_backfill(args) -> int:
     if args.only:
         rows = [r for r in rows if r["candidate_slug"] == args.only]
 
-    # Per-candidate PRs each add their own URL; the ledger is seeded once by a
-    # dedicated run (without --skip-ledger) to keep those PRs conflict-free.
-    ledger = None if args.skip_ledger else discover.Ledger(data_dir / "ledger.json")
+    # Per-candidate PRs each add their own URL, so seeding here would make them
+    # conflict on main (#61). Off by default; --seed-ledger opts a dedicated run in.
+    ledger = discover.Ledger(data_dir / "ledger.json") if args.seed_ledger else None
 
     buckets = backfill_mod.run_backfill(
         rows, data_dir=data_dir, llm=llm,
@@ -222,6 +223,10 @@ def build_parser() -> argparse.ArgumentParser:
     iu.add_argument("--outlet")
     iu.add_argument("--title")
     iu.add_argument("--date")
+    iu.add_argument("--html-file",
+                    help="use this saved page instead of fetching (#101): for outlets "
+                         "that 403 every IP. The reviewer will still report the URL as "
+                         "unverifiable, which is expected.")
     iu.add_argument("--pr-body-out", default="pr_body.md")
     iu.set_defaults(func=cmd_ingest_url)
 
@@ -237,8 +242,15 @@ def build_parser() -> argparse.ArgumentParser:
     bf.add_argument("--out-dir", default=".", help="dir for per-candidate <slug>.md PR bodies")
     bf.add_argument("--pr-body-out", default="pr_body.md")
     bf.add_argument("--manifest-out", help="write per-candidate {branch, body_path, ...} JSON")
+    # Default is NOT to seed (#101). CLAUDE.md and backfill.yml both say a backfill
+    # seeds no ledger entries (#61 — the ledger on main only advances on merge, so a
+    # PR that seeds it creates conflicts), but the CLI used to mark unless you passed
+    # --skip-ledger, and the documented command did not pass it. Make the code agree.
+    bf.add_argument("--seed-ledger", action="store_true",
+                    help="mark processed URLs in data/ledger.json (off by default: a "
+                         "backfill PR that seeds the ledger conflicts with main, #61)")
     bf.add_argument("--skip-ledger", action="store_true",
-                    help="do not touch data/ledger.json (matrix jobs; seed it once separately)")
+                    help="deprecated no-op; not seeding is now the default")
     bf.set_defaults(func=cmd_backfill)
 
     rv = sub.add_parser("review", help="verify evidence files changed in a PR")

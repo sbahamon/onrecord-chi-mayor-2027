@@ -81,5 +81,14 @@ jobs:
           if [ -n "$LABEL" ]; then
             # Create the label on first use so add-label can't fail.
             gh label create "$LABEL" --color BFD4F2 2>/dev/null || true
+            # Clear the other verdict labels first. This step only ever ADDED one, so
+            # a PR that came back ai-flagged and later ai-unverifiable (#100) wore
+            # both, leaving a reviewer to work out which was current — the same defect
+            # `--edit-last` already fixes for the comment text. Removing a label the
+            # PR does not carry is not an error worth failing the run over.
+            for stale in ai-verified ai-flagged ai-unverifiable; do
+              [ "$stale" = "$LABEL" ] && continue
+              gh pr edit "$PR_NUMBER" --remove-label "$stale" 2>/dev/null || true
+            done
             gh pr edit "$PR_NUMBER" --add-label "$LABEL"
           fi

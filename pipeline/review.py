@@ -261,9 +261,30 @@ def review_evidence(evidence: dict, *, llm, model: str, ingest_fn) -> list[dict]
 
 
 def decide_label(verdicts: list[dict]) -> str:
-    if verdicts and all(v["verdict"] == "confirmed" for v in verdicts):
+    """Three outcomes, because ``unverifiable`` and ``flagged`` are different findings.
+
+    ``unverifiable`` (#69) means the source could not be re-fetched, so nothing was
+    checked. ``flagged`` means something was checked and is wrong — the quote is not
+    in the transcript, the attribution is off, or a claimed mechanism is absent. Only
+    the second is a problem with the evidence.
+
+    Collapsing them made the label useless in practice: PR #97 came back 18
+    unverifiable / 0 contradicted, purely because two outlets 403 the runner, and
+    still read ``ai-flagged``. This gets structurally worse, not better — backfills
+    now run locally *because* outlets block datacenter IPs, so every locally sourced
+    PR is guaranteed to come back partly unverifiable. An always-red label is one
+    nobody reads, which is the lesson #92 already paid for.
+
+    Note this changes only what humans are told. ``should_auto_merge`` is unchanged
+    and still requires every verdict to be ``confirmed``.
+    """
+    if not verdicts:
+        return "ai-flagged"
+    if all(v["verdict"] == "confirmed" for v in verdicts):
         return "ai-verified"
-    return "ai-flagged"
+    if any(v["verdict"] == "flagged" for v in verdicts):
+        return "ai-flagged"
+    return "ai-unverifiable"
 
 
 def should_auto_merge(verdicts: list[dict], config: dict) -> bool:
@@ -280,13 +301,25 @@ def should_auto_merge(verdicts: list[dict], config: dict) -> bool:
 
 def render_review_comment(verdicts: list[dict]) -> str:
     confirmed = sum(1 for v in verdicts if v["verdict"] == "confirmed")
+    unverifiable = sum(1 for v in verdicts if v["verdict"] == "unverifiable")
+    contradicted = sum(1 for v in verdicts if v["verdict"] == "flagged")
     lines = [
         "## 🤖 Automated verification",
         "",
-        f"{confirmed}/{len(verdicts)} statements confirmed. "
+        # Lead with the breakdown so the summary line answers "is there a problem?"
+        # without opening the comment. "13/31 confirmed" alone reads as alarming
+        # when the other 18 are just an outlet blocking the runner.
+        f"**{confirmed} confirmed · {unverifiable} unverifiable · "
+        f"{contradicted} contradicted** (of {len(verdicts)}). "
         "Human review still required — this is advisory.",
         "",
     ]
+    if unverifiable and not contradicted:
+        lines += [
+            "_Nothing was contradicted. The unverifiable statements are sources the "
+            "runner could not re-fetch (#69) — verify those by hand._",
+            "",
+        ]
     for v in verdicts:
         icon = "✅" if v["verdict"] == "confirmed" else "⚠️"
         if v["verdict"] == "unverifiable":

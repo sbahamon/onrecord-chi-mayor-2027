@@ -76,7 +76,72 @@ def propose_stance_updates(evidence: dict, *, today: str) -> list[dict]:
     return stances
 
 
-def render_pr_body(evidence: dict, stances: list[dict]) -> str:
+def _cited_statement(evidence: dict, stance: dict) -> dict:
+    """Return the statement the cell actually cites.
+
+    Keying on ``(candidate, topic)`` returns whichever statement came *last* for
+    that pair, not the cited one. Seen live in PR #97: a cell summarised from
+    statement #1 was printed above the quote from statement #8 — two different
+    statements presented as one, in the single place a human reviewer looks.
+    A citation pins ``"<evidence-id>#<index>"``, so use the index.
+    """
+    for citation in stance.get("citations", []):
+        ev_id, _, idx = citation.rpartition("#")
+        if ev_id != evidence["id"]:
+            continue
+        try:
+            return evidence["statements"][int(idx)]
+        except (ValueError, IndexError):
+            continue
+    return {}
+
+
+def _field_lines(proposed: dict, before: dict | None) -> list[str]:
+    """Render the cell's position, showing what it is replacing.
+
+    ``write_stance`` has silently degraded a cell in five distinct ways (``record``,
+    then ``citations``, then the position fields, then a polarity inversion, then
+    specific-to-vague), and every one was caught by a human diffing files by hand
+    rather than by any check. The guards each got narrower; the last one cannot be
+    fixed that way, because ranking two named mechanisms is a judgment the code
+    should not make. Showing the reviewer what is being overwritten costs nothing
+    and covers whatever the sixth failure turns out to be.
+    """
+    lines = [proposed["summary"]]
+    if not before:
+        if "mechanism" in proposed:
+            lines.append(f"**Mechanism:** {_mech(proposed['mechanism'])}")
+        return lines
+
+    lines = [f"**Now:** {proposed['summary']}"]
+    if before.get("summary") != proposed["summary"]:
+        lines.append(f"**Was:** {before['summary']}")
+    if before.get("stance") != proposed.get("stance"):
+        lines.append(f"**Stance:** {before.get('stance')} → **{proposed.get('stance')}**")
+    if "mechanism" in proposed and before.get("mechanism") != proposed["mechanism"]:
+        lines.append(
+            f"**Mechanism:** {_mech(before.get('mechanism'))} → "
+            f"{_mech(proposed['mechanism'])}"
+        )
+    return lines
+
+
+def _mech(value) -> str:
+    return f"`{value}`" if value else "_none_"
+
+
+def render_pr_body(evidence: dict, stances: list[dict], *,
+                   previous: dict | None = None,
+                   written: dict | None = None) -> str:
+    """Render the reviewable summary of one media hit.
+
+    ``previous`` maps ``(candidate, topic)`` to the cell as it stood *before* this
+    write, and ``written`` to what actually landed on disk. Both are optional so
+    every existing caller keeps working; supplying them is what makes a
+    downgrade — or a guard refusal — visible instead of silent.
+    """
+    previous = previous or {}
+    written = written or {}
     lines = [
         f"## New media hit: {evidence['title']}",
         "",
@@ -87,12 +152,31 @@ def render_pr_body(evidence: dict, stances: list[dict]) -> str:
         "### Proposed stance updates",
         "",
     ]
-    stmt_by_key = {(s["candidate"], s["topic"]): s for s in evidence["statements"]}
     for st in stances:
-        stmt = stmt_by_key.get((st["candidate"], st["topic"]), {})
+        key = (st["candidate"], st["topic"])
+        stmt = _cited_statement(evidence, st)
+        before = previous.get(key)
+        landed = written.get(key)
+
+        lines.append(f"#### {st['candidate']} — {st['topic']}: **{st['stance']}**")
+
+        # A guard (#57 polarity, #90 mechanism) can refuse a proposal outright. It
+        # keeps the citation so the disagreeing evidence stays visible, but says
+        # nothing — so a reviewer sees a cell that did not change and no reason why.
+        if landed and landed.get("summary") != st["summary"]:
+            lines += [
+                "",
+                "> ⚠️ **This proposal was refused by a guard — the cell kept its "
+                "existing position.** The citation is still recorded so the "
+                "disagreeing evidence is visible.",
+                "",
+                f"- **Proposed:** {st['stance']} — {st['summary']}",
+                f"- **Cell still says:** {landed.get('stance')} — {landed.get('summary')}",
+            ]
+        else:
+            lines += _field_lines(st, before)
+
         lines += [
-            f"#### {st['candidate']} — {st['topic']}: **{st['stance']}**",
-            f"{st['summary']}",
             "",
             f"> {stmt.get('quote', '')}",
             f"— {evidence['outlet']}, {evidence['published_date']}"
@@ -105,6 +189,18 @@ def render_pr_body(evidence: dict, stances: list[dict]) -> str:
         "Verify each quote against the source before merging._",
     ]
     return "\n".join(lines)
+
+
+def read_stance(candidate: str, topic: str, data_dir) -> dict | None:
+    """The cell as it stands on disk, or ``None``. Used to show a reviewer what a
+    proposal is about to replace."""
+    path = _safe_join(Path(data_dir) / "stances", candidate, f"{topic}.json")
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return None
 
 
 def _safe_join(base: Path, *parts: str) -> Path:
