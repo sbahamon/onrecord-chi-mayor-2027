@@ -329,8 +329,8 @@ Opus agents verifying quotes and attribution — but all output funnels through 
 `backfill` CLI, so it's still one PR per candidate with the quote-in-transcript guard and
 `review.yml` intact. The daily cron stays paused until every one of those PRs is merged.
 
-**Progress: #52 alexi-giannoulias and #57 matthew-brewer are closed; #56 george-cardenas is in review
-as PR #97.** Six remain: #51, #53–#55, #58–#60.
+**Progress: #52 alexi-giannoulias, #57 matthew-brewer and #56 george-cardenas are closed (#97 merged);
+#59 lisa-nee is in review as PR #107.** Five remain: #51, #53–#55, #58, #60.
 
 > **The track was paused on 2026-09-02 to fix four pipeline problems cardenas surfaced, and all four
 > are now merged.** #98 — the PR body never showed what a stance cell changed FROM, and displayed a
@@ -339,8 +339,9 @@ as PR #97.** Six remain: #51, #53–#55, #58–#60.
 > `--html-file` for outlets that 403 every IP, and `backfill` seeding the ledger against its own
 > documented convention. **The track is clear to resume:** the thin batch (#59 nee, #58 holberg,
 > #60 brooks, #55 pappas), then the multi-office records (#54 quigley, #53 mendoza), then #51 johnson
-> last. **Read the next candidate's PR body carefully** — it is the first to exercise #98's
-> before/after rendering and #99's prompt on live data, and neither has been seen outside a test.
+> last. **#59 nee has since run** (PR #107) and exercised #98's before/after rendering on live data for
+> the first time — it worked, and it caught a real downgrade the same run; see the nee block below.
+> Remaining in the thin batch: #58 holberg, #60 brooks, #55 pappas.
 
 Two lessons from running the first one, worth applying to the rest. **One:
 check the podcast feeds before accepting that a candidate has said nothing specific** — his
@@ -364,6 +365,37 @@ reason giannoulias was: a property-tax record is not a housing record). **3.** t
 multi-office records (#54 quigley, #53 mendoza, ~~#56 cardenas~~ — cardenas was pulled forward and
 run second, out of this order, because his Real Deal Q&A was already live). **4. #51 johnson**, by
 which point the record path has run eight times.
+
+**What #59 nee settled (2026-09-02), the first of the thin batch.** Four sources run, two yielded: 4
+statements, 3 cells, **0 mechanisms**. Short candidate, four transferable findings.
+
+- **"Uncited" is not "unpublished" — check the site before deciding a bad statement is harmless.**
+  Her Fran Spielman episode produced four statements, none actually about housing, two of which had
+  taken cells (one of them `property-taxes-tif: opposes`, off a quote about *pensions*). The tempting
+  fix is to delete the cells and leave the statements in evidence, uncited — the cardenas precedent for
+  a confirmed-but-wrong statement. **That is not inert here.** `site/src/pages/feed.astro` renders every
+  evidence file's housing-statement `topic`s as tags on the public feed, and `buildCandidateProfile`
+  puts every evidence file with a statement for the candidate on her profile timeline. Neither reads
+  `citations`. So an uncited statement still publishes "Property taxes / TIF" against her name. The
+  whole evidence file was deleted instead (the brewer row-3 precedent). **Before leaving a bad statement
+  in place, grep `site/src/lib/data.js` and the pages for what renders without a citation.**
+- **The #57 polarity guard protects an *existing* cell; a candidate's FIRST cell is unguarded.** That
+  `property-taxes-tif: opposes` is the same inversion #57 exists to prevent — on a housing matrix it
+  reads as opposing relief from property-tax burden — and no guard fired, because there was nothing to
+  invert. Every candidate still to run is a candidate with empty cells. **Read the first cell for each
+  topic by hand.**
+- **Zero mechanisms can be an exhausted search rather than a sourcing miss, and the two are
+  distinguishable.** #52's rule ("all-`null` for someone with a published platform means the wrong
+  sources were picked") needs its converse stated: she has **no** platform page (`/issues`, `/platform`,
+  `/housing` are all soft 404s on a `RUN!`-builder site), the three podcast feeds were grepped, the one
+  hour-long interview ran, and her own op-ed ran **four times** and returned 0 housing every time. That
+  is a measured null, and it ships. Note "expedite the permit process" is the borderline rule's own
+  example of a `null`, and "120,000 vacant places" counts the problem rather than naming an instrument.
+- **A candidate's own press page is not the list of their sources — their social feed is.** Her
+  `/Updates` page lists eight launch-week hits, all of them mechanism-free press-release coverage. The
+  two sources that actually produced something (a WGN interview) or were worth ruling out with real
+  runs (her signed Tribune op-ed, and the Fran episode) appear **only** on Bluesky, which itself
+  contains no housing sentence. Read the feed for its links, not its text.
 
 **What #56 cardenas settled (2026-09-01), running out of running order.** He was taken third rather
 than in the "real multi-office records" batch because the Real Deal Q&A for him was already live and
@@ -671,6 +703,19 @@ full Groq transcription).
   sticky.** That cell was corrected by hand. The generalisable point: `_rank` treats "names a
   mechanism" as strictly better, which is right within a topic and wrong across a mis-filed
   one, and re-running a source can silently move a statement's topic *and* its index.
+
+  **A sixth instance exists and it is the mild one — recorded so nobody re-discovers it, not because
+  it needs fixing (seen 2026-09-02, #59).** A proposal can move a cell from `supports` to
+  `no-position` when both sides have `mechanism: null`: #57 guards only the supporting labels against
+  `opposes`, #90 only a named mechanism against a mechanism-less proposal, and neither covers this.
+  Seen live on nee — a tangential "grow the tax base" statement overwrote "build additional affordable
+  housing", and staging the strongest source last is what restored it. **Do not read this as another
+  #57.** The first five were dangerous because they were *silent*; this one is loud — #98's before/after
+  rendering printed `**Stance:** supports → no-position` in the PR body, which is how it was caught at
+  all. It also loses information rather than asserting a falsehood, and the root cause in the one
+  observed case was upstream: the offending statement should never have been classified `is_housing`.
+  Worth a guard eventually, in the same shape as #90 (refuse a `no-position` proposal over a cell that
+  states one); worth reading the rendered before/after in every PR body, now.
 
 - **A verified quote can fail its own verification, and it is the *encoder*, not the model
   (found + fixed 2026-09-01, #92).** Every podcast row was landing `ai-flagged` with "quote NOT
