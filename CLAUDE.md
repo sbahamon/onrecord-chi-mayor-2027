@@ -173,7 +173,10 @@ before changing: `curl https://openrouter.ai/api/v1/models` or test a `response_
   1/1 on a new row with a real instrument. **Grep the podcast feeds in `sources.json` for the
   candidate before settling for press**: `curl -sL <feed> | grep -i <name>`. An hour of
   first-person answers beats any amount of announcement coverage. Prefer platform pages,
-  policy interviews, forums and questionnaires over announcement coverage. Never a URL you
+  policy interviews, forums and questionnaires over announcement coverage. **Op-eds and
+  questionnaires the candidate authored count** (ruled 2026-09-02 on #97) — search for them by
+  name plus the outlet's opinion section; they were the two best sources in the cardenas run.
+  A press release republished by an outlet does not count. Never a URL you
   have not fetched and read.
 
 - **Run a backfill locally (required for outlets that block datacenter IPs):**
@@ -376,11 +379,18 @@ the record path had just run once on brewer. Seven rows, 22 statements, 5 cells 
   filed under `permitting-reform`, not `affordable-housing-funding`, because it is an
   aldermanic-prerogative call on a development — which is that topic's description — and the funding
   for it was in fact denied.
-- **Op-eds and questionnaires the candidate wrote are the open definitional question.** His richest
-  mechanism source is a signed Sun-Times op-ed, and his second is a 2019 Sun-Times editorial-board
-  questionnaire. Both are first-person and on the record in real outlets, neither is something he
-  *said*. Flagged for a maintainer ruling in PR #97 — decide before quigley, mendoza and johnson, who
-  will all have more of this.
+- **Op-eds and questionnaires the candidate AUTHORED are in scope — ruled 2026-09-02, and it applies to
+  every candidate.** This was raised as an open question on PR #97 and the maintainer closed it: they
+  are first-person and on the record in a real outlet, and that is what the sourcing rule is protecting.
+  It matters more than it sounds, because for cardenas they were the two best sources in the run — a
+  signed Sun-Times op-ed produced his only Board of Review-era mechanism (an income-indexed property-tax
+  circuit breaker extended to renters) and a 2019 Sun-Times editorial-board questionnaire produced two
+  more. **Search for this class deliberately in every remaining issue**; it sits alongside the Real Deal
+  Q&A series as the questionnaire-shaped sourcing the track was under-using. Two limits that are NOT
+  affected by the ruling: a **press release republished** by an outlet is still not a media appearance
+  (one carrying the circuit breaker's exact dollar thresholds was excluded here on that basis), and an
+  op-ed still has to be about **housing** — his mckinleypark.news piece on the city's property-tax levy
+  was excluded for the same property-tax-is-not-housing reason that keeps pappas and nee thin.
 - **Block Club got through a hosted re-fetch this time; The Real Deal 403'd every attempt.** Another
   data point for the "the block is intermittent" note below — the case for running locally is
   determinism, not that CI can never fetch.
