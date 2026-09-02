@@ -158,3 +158,39 @@ def test_write_other_refuses_path_traversal(tmp_path):
     with pytest.raises(ValueError):
         run._write_other(doc, [], tmp_path)
     assert not (tmp_path / "ledger.json").exists()
+
+
+def test_process_source_body_shows_what_a_cell_changed_from(tmp_path):
+    """#98 end-to-end: a second source that lowers specificity must be visible in
+    the PR body, not only findable by diffing the stance directory by hand."""
+    import json as _json
+    from pipeline import propose
+
+    cell = tmp_path / "stances" / "cand-a" / "zoning-reform.json"
+    cell.parent.mkdir(parents=True)
+    cell.write_text(_json.dumps({
+        "candidate": "cand-a", "topic": "zoning-reform", "stance": "supports",
+        "summary": "An older, more specific line.", "citations": ["older#0"],
+        "updated_date": "2026-01-01",
+        "mechanism": "upzoning within a half mile of every CTA station",
+    }))
+
+    evidence = {
+        "id": "2026-09-02-o-t", "url": "https://example.com/a", "outlet": "O",
+        "media_type": "article", "title": "T", "published_date": "2026-09-02",
+        "discovered_date": "2026-09-02", "transcript_ref": None,
+        "statements": [{
+            "candidate": "cand-a", "topic": "zoning-reform", "stance": "supports",
+            "summary": "A vaguer line.", "quote": "We should build more.",
+            "confidence": 1.0, "is_housing": True, "attribution_flag": False,
+            "mechanism": "building more",
+        }],
+    }
+    stances = propose.propose_stance_updates(evidence, today="2026-09-02")
+    previous = {("cand-a", "zoning-reform"): propose.read_stance("cand-a", "zoning-reform", tmp_path)}
+    propose.write_stance(stances[0], tmp_path)
+    written = {("cand-a", "zoning-reform"): propose.read_stance("cand-a", "zoning-reform", tmp_path)}
+    body = propose.render_pr_body(evidence, stances, previous=previous, written=written)
+
+    assert "An older, more specific line." in body
+    assert "upzoning within a half mile of every CTA station" in body

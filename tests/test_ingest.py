@@ -353,3 +353,25 @@ def test_a_directory_we_did_not_create_is_never_deleted(tmp_path):
 
     assert user_dir.exists(), "deleted a directory the pipeline did not create"
     assert audio.exists()
+
+
+def test_ingest_reads_a_locally_saved_page_instead_of_fetching(tmp_path):
+    """#101: the operator can supply bytes for an outlet that blocks every IP.
+    Everything downstream is unchanged — the transcript is the page's real text."""
+    page = tmp_path / "saved.html"
+    page.write_text(
+        "<html><body><article><p>" + ("Cardenas said the system is broken. " * 40)
+        + "</p></article></body></html>",
+        encoding="utf-8",
+    )
+
+    def exploding_fetcher(url):
+        raise AssertionError("must not touch the network when html_file is supplied")
+
+    doc = ingest.ingest(
+        {"url": "https://blocked.example.com/a", "media_type": "article",
+         "outlet": "Blocked Outlet", "title": "T", "published_date": "2026-09-02",
+         "html_file": str(page)},
+        fetcher=exploding_fetcher,
+    )
+    assert "the system is broken" in doc["transcript"]

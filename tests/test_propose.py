@@ -473,3 +473,86 @@ def test_write_stance_polarity_guard_drops_an_inverted_proposals_mechanism(tmp_p
     # absent, not null: the existing cell was never assessed for a mechanism, and
     # null would claim it was and found none.
     assert "mechanism" not in written
+
+
+# --- #98: the PR body must show what a cell changed FROM, and the right quote ---
+
+_TWO_ON_ONE_KEY = {
+    "id": "2026-09-02-outlet-two-statements",
+    "url": "https://example.com/x",
+    "outlet": "Outlet",
+    "media_type": "article",
+    "title": "Two statements, one cell",
+    "published_date": "2026-09-02",
+    "discovered_date": "2026-09-02",
+    "transcript_ref": None,
+    "statements": [
+        {"candidate": "cand-a", "topic": "zoning-reform", "stance": "supports",
+         "summary": "Names an instrument.", "quote": "Legalize fourplexes citywide.",
+         "confidence": 1.0, "is_housing": True, "attribution_flag": False,
+         "mechanism": "fourplexes citywide"},
+        {"candidate": "cand-a", "topic": "zoning-reform", "stance": "supports",
+         "summary": "Vaguer take.", "quote": "We must build more housing.",
+         "confidence": 1.0, "is_housing": True, "attribution_flag": False,
+         "mechanism": None},
+    ],
+}
+
+
+def test_pr_body_quotes_the_statement_the_cell_actually_cites():
+    """Keying the lookup on (candidate, topic) shows whichever statement came LAST.
+
+    Seen live in PR #97: a cell summarised from statement #1 was printed above the
+    quote from statement #8 — two different statements presented as one, in the one
+    place a human reviewer looks.
+    """
+    stances = propose.propose_stance_updates(_TWO_ON_ONE_KEY, today="2026-09-02")
+    assert stances[0]["citations"] == ["2026-09-02-outlet-two-statements#0"]
+    body = propose.render_pr_body(_TWO_ON_ONE_KEY, stances)
+    assert "Legalize fourplexes citywide." in body      # the cited statement
+    assert "We must build more housing." not in body    # the last one, not cited
+
+
+def test_pr_body_shows_what_an_overwritten_cell_said_before():
+    """Five distinct write_stance regressions were all caught by a human diffing
+    files by hand, because the body renders only the new state."""
+    stances = propose.propose_stance_updates(_TWO_ON_ONE_KEY, today="2026-09-02")
+    previous = {
+        ("cand-a", "zoning-reform"): {
+            "candidate": "cand-a", "topic": "zoning-reform", "stance": "supports",
+            "summary": "An older, more specific line.",
+            "citations": ["older#0"], "updated_date": "2026-01-01",
+            "mechanism": "upzoning within a half mile of every CTA station",
+        }
+    }
+    body = propose.render_pr_body(_TWO_ON_ONE_KEY, stances, previous=previous)
+    assert "An older, more specific line." in body
+    assert "upzoning within a half mile of every CTA station" in body
+    assert "Names an instrument." in body
+
+
+def test_pr_body_has_no_before_section_for_a_brand_new_cell():
+    stances = propose.propose_stance_updates(_TWO_ON_ONE_KEY, today="2026-09-02")
+    body = propose.render_pr_body(_TWO_ON_ONE_KEY, stances, previous={})
+    assert "Was:" not in body
+
+
+def test_pr_body_flags_a_proposal_a_guard_refused():
+    """#90/#57 refuse a proposal silently. A reviewer should see that happened."""
+    stances = propose.propose_stance_updates(_TWO_ON_ONE_KEY, today="2026-09-02")
+    previous = {
+        ("cand-a", "zoning-reform"): {
+            "candidate": "cand-a", "topic": "zoning-reform", "stance": "opposes",
+            "summary": "Opposes it.", "citations": ["older#0"],
+            "updated_date": "2026-01-01", "mechanism": None,
+        }
+    }
+    written = {  # what the polarity guard actually left on disk
+        ("cand-a", "zoning-reform"): {
+            "candidate": "cand-a", "topic": "zoning-reform", "stance": "opposes",
+            "summary": "Opposes it.", "citations": ["older#0", "2026-09-02-outlet-two-statements#0"],
+            "updated_date": "2026-09-02", "mechanism": None,
+        }
+    }
+    body = propose.render_pr_body(_TWO_ON_ONE_KEY, stances, previous=previous, written=written)
+    assert "refused" in body.lower()

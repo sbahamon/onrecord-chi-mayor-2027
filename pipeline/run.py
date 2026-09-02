@@ -105,6 +105,17 @@ def process_source(source: dict, *, data_dir, llm, extractor_model: str, today: 
     stances = propose.propose_stance_updates(evidence, today=today)
 
     result.evidence_path = propose.write_evidence(evidence, data_dir)
+
+    # Capture each cell before and after the write so the PR body can show what a
+    # proposal replaced, and whether a guard refused it (#98). `write_stance` has
+    # silently degraded a cell in five distinct ways and every one was caught by a
+    # human diffing files by hand; this is what makes the sixth visible.
+    keys = [(s["candidate"], s["topic"]) for s in stances]
+    previous = {k: propose.read_stance(*k, data_dir) for k in keys}
     result.stance_paths = [propose.write_stance(s, data_dir) for s in stances]
-    result.pr_body = propose.render_pr_body(evidence, stances)
+    written = {k: propose.read_stance(*k, data_dir) for k in keys}
+
+    result.pr_body = propose.render_pr_body(
+        evidence, stances, previous=previous, written=written
+    )
     return result

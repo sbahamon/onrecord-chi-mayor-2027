@@ -254,3 +254,17 @@ def test_review_fires_when_the_pipeline_label_is_added():
         f"types are {types}"
     )
     assert "synchronize" in types              # still re-review on every push
+
+
+def test_review_clears_stale_verdict_labels_before_adding_the_new_one():
+    """A PR re-reviewed after a push must not carry two contradictory verdicts.
+
+    `review.yml` only ever *added* a label, so a PR that went `ai-flagged` and then
+    came back `ai-unverifiable` (#100) would wear both — the same
+    which-one-is-current defect the comment `--edit-last` already fixes for the
+    verdict text.
+    """
+    body = REVIEW_WORKFLOW.read_text()
+    assert "--remove-label" in body
+    for stale in ("ai-verified", "ai-flagged", "ai-unverifiable"):
+        assert stale in body, f"{stale} must be cleared or set by the label step"

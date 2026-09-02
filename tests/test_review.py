@@ -148,12 +148,16 @@ def test_unverifiable_when_source_cannot_be_reingested():
 
 
 def test_unverifiable_never_verifies_and_never_auto_merges():
+    """The label moved from `ai-flagged` to `ai-unverifiable` (#100) — nothing was
+    contradicted, the source just could not be re-fetched. What must not change is
+    that it never reads as verified and never ships."""
     verdicts = review.review_evidence(
         EVIDENCE, llm=good_model(), model="m", ingest_fn=raising_ingest
     )
     cfg = {"auto_merge_enabled": True, "auto_merge_min_confidence": 0.5}
 
-    assert review.decide_label(verdicts) == "ai-flagged"
+    assert review.decide_label(verdicts) != "ai-verified"
+    assert review.decide_label(verdicts) == "ai-unverifiable"
     assert review.should_auto_merge(verdicts, cfg) is False
 
 
@@ -411,3 +415,51 @@ def test_the_passage_is_padded_so_it_is_not_clipped_mid_thought():
     _, passage = review.best_matching_passage(STORED_QUOTE, SPOKEN)
     assert "could choose to get" in passage, "the end of the sentence survives"
     assert "Let's reduce" in passage
+
+
+# --- #100: "unverifiable" is not "contradicted" ---
+
+def _v(verdict, **kw):
+    return {"verdict": verdict, "candidate": "c", "topic": "t",
+            "confidence": 0.95, **kw}
+
+
+def test_label_separates_unfetchable_sources_from_a_real_problem():
+    """PR #97 came back 18 unverifiable / 0 contradicted — purely because two
+    outlets 403 the runner — and still carried `ai-flagged`. An always-red label
+    stops carrying information (the #92 lesson)."""
+    verdicts = [_v("confirmed"), _v("unverifiable"), _v("unverifiable")]
+    assert review.decide_label(verdicts) == "ai-unverifiable"
+
+
+def test_label_is_unverifiable_when_nothing_could_be_fetched_at_all():
+    assert review.decide_label([_v("unverifiable")]) == "ai-unverifiable"
+
+
+def test_label_still_flags_one_contradiction_among_many_unverifiables():
+    verdicts = [_v("unverifiable")] * 10 + [_v("flagged")]
+    assert review.decide_label(verdicts) == "ai-flagged"
+
+
+def test_label_unchanged_when_everything_confirms():
+    assert review.decide_label([_v("confirmed"), _v("confirmed")]) == "ai-verified"
+
+
+def test_no_verdicts_is_still_flagged():
+    assert review.decide_label([]) == "ai-flagged"
+
+
+def test_auto_merge_stays_off_for_unverifiable_however_it_is_labelled():
+    """The label changes what humans are told, never what ships."""
+    cfg = {"auto_merge_enabled": True, "auto_merge_min_confidence": 0.5}
+    assert review.should_auto_merge([_v("confirmed"), _v("unverifiable")], cfg) is False
+
+
+def test_review_comment_leads_with_a_verdict_breakdown():
+    """The summary line should answer 'is there a problem?' without opening it."""
+    body = review.render_review_comment(
+        [_v("confirmed"), _v("unverifiable"), _v("unverifiable")]
+    )
+    assert "1 confirmed" in body
+    assert "2 unverifiable" in body
+    assert "0 contradicted" in body
