@@ -1,0 +1,60 @@
+{
+  "id": "2026-08-31-wbez-in-the-loop-with-sasha-ann-simons-ask-the-mayoral-candidate-joe-holberg",
+  "url": "https://dovetail.prxu.org/18276/55e9cf87-8170-4cdb-bcad-3b9a1a5c6c94/BC-JOE-HOLBERG.mp3",
+  "outlet": "WBEZ — In the Loop with Sasha-Ann Simons",
+  "media_type": "podcast",
+  "title": "Ask the Mayoral Candidate: Joe Holberg",
+  "published_date": "2026-08-31",
+  "discovered_date": "2026-09-02",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "joe-holberg",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Calls for building 100,000 new housing units to create jobs and expand the tax base.",
+      "quote": "my plan is to call for 100,000 new units of housing, not only to create jobs in partnership with the private sector as well as unions, but also to deliver on the thing that costs people the most.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "100,000 new units of housing"
+    },
+    {
+      "candidate": "joe-holberg",
+      "topic": "zoning-reform",
+      "stance": "supports",
+      "summary": "Proposes building housing on city-owned vacant lots, implying zoning changes to allow 4-6 units per lot.",
+      "quote": "the city itself owns 10,000 vacant lots. On top of that, if you're thinking about getting four or six units onto each one of those lots, not only are you creating jobs and opportunities for people across the city, especially in communities that are desperate for housing and jobs",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "building four or six units on each of 10,000 city-owned vacant lots"
+    },
+    {
+      "candidate": "joe-holberg",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Argues that building 100,000 housing units will generate $300 million in new property tax revenue, allowing taxes to be lowered.",
+      "quote": "if you look at that and say the average tax bill is about $3,000, you're generating $300 million in additional property taxes just by building the houses themselves.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "generating $300 million in additional property taxes from 100,000 new units"
+    },
+    {
+      "candidate": "joe-holberg",
+      "topic": "property-taxes-tif",
+      "stance": "opposes",
+      "summary": "Criticizes current high property taxes as extractive and pushing people out, especially on the south and west sides.",
+      "quote": "You look at people on the south and the west side they getting gouged on property taxes And when they get those bills they are putting for sale signs in their front yard And I want to do the exact opposite. I want to bring people here, not push them out.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    }
+  ]
+}

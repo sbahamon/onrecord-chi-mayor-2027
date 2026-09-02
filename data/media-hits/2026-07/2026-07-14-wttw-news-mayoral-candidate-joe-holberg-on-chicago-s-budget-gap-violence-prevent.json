@@ -1,0 +1,24 @@
+{
+  "id": "2026-07-14-wttw-news-mayoral-candidate-joe-holberg-on-chicago-s-budget-gap-violence-prevent",
+  "url": "https://news.wttw.com/2026/07/14/mayoral-candidate-joe-holberg-chicago-s-budget-gap-violence-prevention-and-future-cps",
+  "outlet": "WTTW News",
+  "media_type": "article",
+  "title": "Mayoral Candidate Joe Holberg on Chicago's Budget Gap, Violence Prevention and the Future of CPS",
+  "published_date": "2026-07-14",
+  "discovered_date": "2026-09-02",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "joe-holberg",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports building more housing as a city priority.",
+      "quote": "Across the city, no matter what neighborhood you\u2019re in, we need more housing",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    }
+  ]
+}
