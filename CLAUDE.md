@@ -680,6 +680,23 @@ full Groq transcription).
   URLs ever. `run_discovery` now takes `max_items_per_feed` (config `discovery.max_items_per_feed`)
   so podcasts/Bluesky are reached. Note: a triaged-*out* item still costs one triage call and
   is marked seen; only *ingested* items count toward the caps.
+- **The extractor could not see a candidate DEFENDING their own agency — fixed in the prompt, and
+  measured both ways (#99).** An officeholder rebutting a public criticism of the office they run is
+  stating a position, but `SYSTEM_PROMPT` was tuned to policy *proposals* and reliably missed it. On a
+  WBEZ story where a Board of Review commissioner answers the Assessor's charge that his board hands
+  business "outsized reductions", **three** runs returned only the reporter's narration fragment and
+  never his two direct quotes. Two prompt additions fixed most of it: defending/explaining/disputing
+  your own office counts as a position, and **when the transcript has both a reporter's summary and the
+  candidate's direct quotation on the same point, the returned quote must be the quotation.** That
+  second sentence did the real work — the first alone got the content into 2 of 3 runs as fragments;
+  adding it produced **both** key statements verbatim in **3 of 5** runs, against **0 of 3** before.
+  Still not reliable — that is nondeterminism, not a bug — so the sanctioned manual extraction below
+  remains the fallback. **The part worth copying is how the risk was checked.** Widening what counts as
+  a position could have loosened *whose words count*, so the same article that produced the #49 leak
+  (brewer's "records show" statement) was run three times under each prompt: **27 housing statements
+  and 3 institution-attributed leaks on the original, 27 and 1 on the new one.** Same volume, fewer
+  violations — the new wording is *stricter* on attribution, not looser. A prompt change is only
+  verified by a real run, and one that touches a safety line needs the old prompt measured beside it.
 - The extractor is a bit loose on attribution (it will tag a deputy's or opponent's words
   to the candidate). The reviewer catches this from the quote text — that's the whole point
   of the two-model, human-approved design. Don't "fix" it by trusting the extractor more.
