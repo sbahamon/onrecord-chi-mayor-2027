@@ -1,0 +1,36 @@
+{
+  "id": "2024-08-06-chicago-sun-times-circuit-breakers-would-ease-burden-of-soaring-cook-county-property-tax",
+  "url": "https://chicago.suntimes.com/other-views/2024/08/06/circuit-breakers-property-tax-relief-cook-county-property-taxes-low-income-people-george-cardenas",
+  "outlet": "Chicago Sun-Times",
+  "media_type": "article",
+  "title": "'Circuit breakers' would ease burden of soaring Cook County property taxes",
+  "published_date": "2024-08-06",
+  "discovered_date": "2026-09-01",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "george-cardenas",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Supports implementing property tax circuit breaker programs to provide targeted relief based on income, making property taxes more fair and promoting housing affordability.",
+      "quote": "Implementing property tax circuit breakers is a practical and effective solution to protect families from financial hardship and promote housing stability.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "property tax circuit breaker program"
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Advocates for circuit breaker programs that include renters, recognizing property taxes are passed on to them.",
+      "quote": "Therefore, extending circuit breaker benefits to renters as Michigan, Minnesota and Wisconsin do (or focusing benefits on them as Oregon does) is crucial, especially for people of color who are more likely to rent due to historical and ongoing discrimination.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "extending circuit breaker benefits to renters"
+    }
+  ]
+}

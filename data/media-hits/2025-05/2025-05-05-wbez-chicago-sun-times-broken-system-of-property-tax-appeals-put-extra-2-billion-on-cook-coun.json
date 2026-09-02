@@ -1,0 +1,36 @@
+{
+  "id": "2025-05-05-wbez-chicago-sun-times-broken-system-of-property-tax-appeals-put-extra-2-billion-on-cook-coun",
+  "url": "https://www.wbez.org/politics/2025/05/05/cook-county-treasurer-maria-pappas-report-property-tax-appeals",
+  "outlet": "WBEZ / Chicago Sun-Times",
+  "media_type": "article",
+  "title": "'Broken system' of property tax appeals put extra $2 billion on Cook County homeowners, treasurer says",
+  "published_date": "2025-05-05",
+  "discovered_date": "2026-09-02",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "george-cardenas",
+      "topic": "property-taxes-tif",
+      "stance": "opposes",
+      "summary": "Rejects the claim that the Board of Review's business reductions shifted the tax burden onto homeowners, blaming inaccurate initial assessments instead.",
+      "quote": "\u201cIt isn\u2019t the Board of Review, it\u2019s the system,\u201d Cardenas said Saturday. \u201cIt\u2019s the perfect storm. ... People should be appealing more.\u201d",
+      "confidence": 0.95,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null,
+      "locator": null
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "property-taxes-tif",
+      "stance": "supports",
+      "summary": "Says the property tax system is stacked against homeowners and names circuit breakers as the solution.",
+      "quote": "\u201cThe system is stacked against the homeowner,\u201d Cardenas said. \u201cCircuit breakers are a solution.\u201d",
+      "confidence": 0.95,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "property tax circuit breaker",
+      "locator": null
+    }
+  ]
+}

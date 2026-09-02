@@ -1,0 +1,48 @@
+{
+  "id": "2020-08-28-chicago-sun-times-city-rejects-affordable-housing-funding-for-mckinley-park-citing-nearb",
+  "url": "https://chicago.suntimes.com/2020/8/28/21404996/affordable-housing-mckinley-park-mat-asphalt-pershing-road",
+  "outlet": "Chicago Sun-Times",
+  "media_type": "article",
+  "title": "City rejects affordable housing funding for McKinley Park, citing nearby asphalt plant",
+  "published_date": "2020-08-28",
+  "discovered_date": "2026-09-01",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports the affordable housing project in McKinley Park and seeks to find city funding for it, possibly from tax increment financing.",
+      "quote": "Ald. George Cardenas, who championed MAT Asphalt\u2019s opening in McKinley Park and supports the apartment project, said he hopes to help find city dollars for the housing elsewhere, possibly from tax increment financing.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "tax increment financing"
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "zoning-reform",
+      "stance": "no-position",
+      "summary": "Implies the asphalt plant is a fixed part of the neighborhood and not subject to relocation, but does not state a position on zoning changes.",
+      "quote": "\u201cThe asphalt plant is there. It\u2019s built,\u201d he said. \u201cHow do you tell them, \u2018Hello, can you please go away?\u2019\u201d",
+      "locator": null,
+      "confidence": 0.9,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Seeks a compromise that allows both the asphalt plant and the new housing to coexist.",
+      "quote": "Cardenas said he hoped to find \u201ccommon ground\u201d that allows the asphalt plant to operate next to the new housing.",
+      "locator": null,
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "id": "2019-01-27-chicago-sun-times-12th-ward-alderman-election-george-cardenas-background-priorities-and",
+  "url": "https://chicago.suntimes.com/politics/12th-ward-candidate-alderman-office-george-cardenas-2019-mayoral-election/",
+  "outlet": "Chicago Sun-Times",
+  "media_type": "article",
+  "title": "12th Ward alderman election: George Cardenas' background, priorities and positions",
+  "published_date": "2019-01-27",
+  "discovered_date": "2026-09-01",
+  "transcript_ref": null,
+  "statements": [
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports using TIF dollars for neighborhoods in need, not wealthy areas, and calls for transparency and oversight.",
+      "quote": "TIF dollars were authorized to aid \u201cblighted\u201d areas, not projects located in the city\u2019s wealthiest communities like we are seeing far too often. Pensions and our public schools remain underfunded, and too many of our neighborhoods continue to struggle. TIFs are continuously generating so much revenue that the city is declaring hundreds of millions of dollars of surplus, it\u2019s well past time to cut back on the program. All new TIFs in Chicago show require proof that tax-increment financing is truly needed to spur development. Also all proposed porting should require approval by at least two-thirds of aldermen. And all ll expenditures and receipt of TIF revenue must be transparent, available on the web and subject to oversight.",
+      "locator": "TIFs section",
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "reform TIF program to require proof of need for new TIFs, two-thirds aldermanic approval for porting, and full transparency/oversight of expenditures and receipts"
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Supports a real estate transfer tax increase as a revenue source.",
+      "quote": "I support a Chicago casino, legalized and taxed recreational marijuana, a LaSalle Street tax, a commuter tax, a municipal sales tax increase, a real estate transfer tax increase, video gambling",
+      "locator": "Revenue section",
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "real estate transfer tax increase"
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "zoning-reform",
+      "stance": "supports",
+      "summary": "Supports reforming aldermanic prerogative to make zoning and land use more transparent and inclusive to determine affordable housing development.",
+      "quote": "By adopting a more transparent and inclusive form of governing as it relates to zoning, and land use, we can determine the appropriate development of affordable housing across our city. I believe that any proposed affordable housing project should receive a City Council committee hearing. It is time to end the practices that continue to segregate our city.",
+      "locator": "Aldermanic power section",
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": "City Council committee hearing for any proposed affordable housing project"
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "Prioritizes building, preserving, and renovating affordable homes to keep families in the ward.",
+      "quote": "Build, preserve, and renovate homes that are affordable to keep families in the 12th Ward",
+      "locator": "Top priorities - Housing and Community Development",
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    },
+    {
+      "candidate": "george-cardenas",
+      "topic": "affordable-housing-funding",
+      "stance": "supports",
+      "summary": "States there is not enough affordable housing in the ward and is working to bring it to McKinley Park.",
+      "quote": "No, but I am working to bring affordable housing in McKinley Park. We have to make sure that downtown developers are also helping rebuild, revitalize and reinvigorate our communities that have suffered from housing loss and gentrification.",
+      "locator": "Affordable housing section",
+      "confidence": 1.0,
+      "is_housing": true,
+      "attribution_flag": false,
+      "mechanism": null
+    }
+  ]
+}
