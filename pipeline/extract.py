@@ -37,6 +37,15 @@ SYSTEM_PROMPT = (
     "phrasing counts ONLY if the quote names what would change: 'streamline "
     "permitting' is null, 'cut permit review to 30 days' is a mechanism. "
     "When in doubt use null; never invent specificity the quote does not contain. "
+    "A position is not only a proposal. A candidate DEFENDING, EXPLAINING or "
+    "DISPUTING the conduct of an office or agency they lead or serve on is stating a "
+    "position — extract it, with mechanism null unless they name an instrument. "
+    "When the transcript contains BOTH a reporter's summary of what the candidate "
+    "thinks AND their direct quotation on the same point, the quote you return MUST "
+    "be the candidate's directly quoted words, not the surrounding narration. "
+    "This widens what counts as a position, never whose words count: do NOT extract a "
+    "sentence whose actor is the institution rather than the candidate — 'records show "
+    "the agency did X' is not the candidate speaking, however relevant it is. "
     "Quote candidates exactly; never paraphrase inside quote."
 )
 

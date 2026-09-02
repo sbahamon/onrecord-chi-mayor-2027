@@ -8,6 +8,7 @@ the model's attribution flag.
 """
 import pytest
 
+from pipeline import extract as extract_mod
 from pipeline.extract import extract, ExtractionError
 
 TRANSCRIPT = """
@@ -200,3 +201,32 @@ def test_the_prompt_tells_the_model_what_counts_as_a_mechanism():
     assert "mechanism" in system
     for word in ("program", "funding source", "deadline", "null"):
         assert word in system, f"prompt must define a mechanism in terms of {word!r}"
+
+
+# --- #99: a candidate defending their own agency is stating a position ---
+
+def test_prompt_treats_defending_your_own_office_as_a_position():
+    """Measured on a real page before this change: three extraction runs returned
+    only the reporter's narration fragment (housing counts 2, 1, 2) and never the
+    candidate's two direct quotes, which were the whole value of the source.
+
+    The prompt is tuned to policy *proposals*. An officeholder rebutting a public
+    criticism of the office they run is stating a position too, and #50's remaining
+    candidates are all officeholders — #55 pappas most acutely, since the report at
+    issue in that story is her own.
+    """
+    prompt = extract_mod.SYSTEM_PROMPT.lower()
+    assert "defend" in prompt or "disput" in prompt
+    assert "agency" in prompt or "office" in prompt
+
+
+def test_prompt_still_draws_the_attribution_line_at_the_institution():
+    """This must widen what counts as a position, never whose words count.
+
+    The #49 trap is a sentence whose actor is the institution ('records show the
+    agency did X'), not the candidate. Brewer's statement #9 was removed for exactly
+    that and both reviewers flagged it independently.
+    """
+    prompt = extract_mod.SYSTEM_PROMPT.lower()
+    assert "institution" in prompt
+    assert "records show" in prompt or "not the candidate speaking" in prompt
