@@ -2,12 +2,46 @@
   "candidate": "matthew-brewer",
   "topic": "public-housing-cha",
   "stance": "supports",
-  "summary": "Says additional funds for security will be allocated in the 2026 budget for Dearborn Homes.",
+  "summary": "Plans to add an elevator to each Dearborn building, with construction expected to start in 2027.",
   "citations": [
     "2026-06-25-cbs-news-chicago-matt-brewer-former-chair-of-chicago-housing-authority-running-for-chicago-mayor#1",
-    "2025-11-15-chicago-sun-times-cha-residents-grow-frustrated-as-agency-marks-one-year-without-permane#2",
-    "2026-06-24-the-fran-spielman-show-matthew-brewer#1"
+    "2026-06-24-the-fran-spielman-show-matthew-brewer#1",
+    "2025-11-15-chicago-sun-times-cha-residents-grow-frustrated-as-agency-marks-one-year-without-permane#2"
   ],
   "updated_date": "2026-09-01",
-  "mechanism": "2026 budget allocation for security"
+  "mechanism": "add an elevator to each building",
+  "record": [
+    {
+      "action": "As CHA board chair, backed adding a second elevator to each Dearborn Homes building — the agency estimated the work at $40 million with construction expected to begin in 2027",
+      "outcome": "pending",
+      "date": null,
+      "citations": [
+        "2025-11-15-chicago-sun-times-cha-residents-grow-frustrated-as-agency-marks-one-year-without-permane#2"
+      ]
+    },
+    {
+      "action": "Cancelled the CHA's request for proposals for new property managers covering thousands of units, citing federal HUD budget cuts and emerging needs at properties; the agency deferred the solicitation to early the following year",
+      "outcome": "withdrawn",
+      "date": null,
+      "citations": [
+        "2025-11-15-chicago-sun-times-cha-residents-grow-frustrated-as-agency-marks-one-year-without-permane#8"
+      ]
+    },
+    {
+      "action": "Committed additional security funding for Dearborn Homes in the CHA's 2026 budget after visiting the property and meeting property managers and residents",
+      "outcome": "pending",
+      "date": null,
+      "citations": [
+        "2025-11-15-chicago-sun-times-cha-residents-grow-frustrated-as-agency-marks-one-year-without-permane#7"
+      ]
+    },
+    {
+      "action": "Worked with residents to select a replacement property manager the agency described as having a strong track record",
+      "outcome": "enacted",
+      "date": null,
+      "citations": [
+        "2025-11-15-chicago-sun-times-cha-residents-grow-frustrated-as-agency-marks-one-year-without-permane#4"
+      ]
+    }
+  ]
 }
